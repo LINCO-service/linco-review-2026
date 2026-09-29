@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>百鮮 2026 年度檢討・週會工作台</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --ink:#1E2B3A; --paper:#FFFFFF; --mist:#F2F4F6; --line:#D9DEE3; --muted:#5E6B78;
+  --saffron:#C98F0A; --saffron-soft:#FBF1D6;
+  --gA:#2F6FB2; --gB:#2E8B6A; --gC:#7A55B0; --gX:#1E2B3A;
+  --field:#FFFFFF; --danger:#B3261E;
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --serif:"Noto Serif TC","PMingLiU",Georgia,serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#E7ECF1; --paper:#141A21; --mist:#1C242D; --line:#2E3945; --muted:#9AA7B4;
+    --saffron:#E9B43A; --saffron-soft:#3A2F14; --field:#10151B;
+    --gA:#6FA3DD; --gB:#5CBF99; --gC:#AE8BDB; --gX:#E7ECF1;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E7ECF1; --paper:#141A21; --mist:#1C242D; --line:#2E3945; --muted:#9AA7B4;
+  --saffron:#E9B43A; --saffron-soft:#3A2F14; --field:#10151B;
+  --gA:#6FA3DD; --gB:#5CBF99; --gC:#AE8BDB; --gX:#E7ECF1;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6}
+button,select,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--saffron);outline-offset:2px}
+
+.wrap{max-width:1280px;margin:0 auto;padding:20px 20px 60px}
+header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.brand h1{font-family:var(--serif);font-weight:900;font-size:clamp(24px,3.2vw,34px);margin:0;line-height:1.2;letter-spacing:.02em}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:7px 14px;font-size:14px}
+.btn:hover{background:var(--mist)}
+.btn.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9}
+.status{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.status i{width:8px;height:8px;border-radius:50%;background:var(--gB);display:inline-block}
+.status.busy i{background:var(--saffron)}
+.status.local i{background:var(--muted)}
+
+/* timeline */
+.timeline{display:flex;gap:0;overflow-x:auto;margin:22px 0 26px;padding-bottom:4px}
+.tl-item{flex:1 0 118px;border:none;background:none;text-align:left;padding:10px 12px 12px;border-top:3px solid var(--line);position:relative}
+.tl-item .d{font-family:var(--serif);font-size:20px;font-weight:900;line-height:1.1}
+.tl-item .n{font-size:12px;color:var(--muted);margin-top:2px}
+.tl-item .s{font-size:13px;margin-top:6px;line-height:1.35}
+.tl-item:hover{background:var(--mist)}
+.tl-item.past{opacity:.62}
+.tl-item.today .n::after{content:"今天";white-space:nowrap;display:inline-block;margin-left:6px;background:var(--saffron);color:#fff;padding:0 6px;border-radius:4px;font-size:11px}
+.tl-item.active{border-top-color:var(--saffron);background:var(--saffron-soft);opacity:1}
+.tl-item.later{cursor:default}
+.tl-item.later .d{font-size:16px}
+
+/* meeting layout */
+.meeting{display:grid;grid-template-columns:330px minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:900px){.meeting{grid-template-columns:1fr}}
+.agenda h2{font-family:var(--serif);font-weight:900;font-size:24px;margin:0;line-height:1.25}
+.agenda .when{color:var(--muted);margin:4px 0 16px;font-size:14px}
+.agenda ol{list-style:none;margin:0;padding:0;counter-reset:ag}
+.agenda li{counter-increment:ag;display:grid;grid-template-columns:28px 1fr auto;gap:4px 8px;padding:10px 0;border-top:1px solid var(--line)}
+.agenda li::before{content:counter(ag);font-family:var(--serif);font-weight:900;color:var(--saffron);font-size:18px;line-height:1.4}
+.agenda li .t{font-weight:700}
+.agenda li .sub{grid-column:2/4;font-size:13px;color:var(--muted);line-height:1.5}
+.agenda li .min{font-size:12px;color:var(--muted);white-space:nowrap;padding-top:3px}
+.agenda li .jump{grid-column:2/4;display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.agenda li .jump button{border:none;background:var(--mist);border-radius:6px;font-size:12px;padding:2px 8px}
+.agenda li .jump button:hover{background:var(--saffron-soft)}
+.next{margin-top:14px;padding:12px 14px;background:var(--mist);border-radius:10px;font-size:14px}
+.next b{display:block;font-size:12px;color:var(--muted);font-weight:500}
+.present{width:100%;margin-top:16px;padding:12px;font-size:15px}
+
+/* forms */
+.formtabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.formtab{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:6px 14px;font-size:14px}
+.formtab[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.formhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+.formhead h3{margin:0;font-size:19px;font-weight:700}
+.formhead p{margin:2px 0 0;color:var(--muted);font-size:14px;max-width:62ch}
+.groupsel{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-shrink:0}
+.groupsel button{border:none;background:var(--paper);padding:7px 14px;font-size:14px;display:flex;align-items:center;gap:6px}
+.groupsel button+button{border-left:1px solid var(--line)}
+.groupsel button .dot{width:9px;height:9px;border-radius:50%}
+.groupsel button[aria-pressed="true"]{background:var(--mist);font-weight:700}
+.groupsel .fill{font-size:11px;color:var(--muted);font-weight:400}
+.members{font-size:13px;color:var(--muted);margin:0 0 12px}
+.members b{color:var(--ink);font-weight:500}
+
+.hints{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 12px;font-size:13px}
+.hints span.lbl{color:var(--muted)}
+.hints span.chip{background:var(--saffron-soft);border-radius:6px;padding:2px 8px}
+details.example{margin:0 0 14px;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-size:14px}
+details.example summary{cursor:pointer;color:var(--muted)}
+details.example table{margin-top:8px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table.sheet{border-collapse:collapse;width:100%;min-width:560px}
+table.sheet th,table.sheet td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top;text-align:left}
+table.sheet tr>*:last-child{border-right:none}
+table.sheet tbody tr:last-child>*{border-bottom:none}
+table.sheet thead th{background:var(--mist);font-size:13px;font-weight:700;padding:8px 10px}
+table.sheet th.rowh{background:var(--mist);font-size:14px;font-weight:500;padding:10px;white-space:nowrap;width:1%}
+table.sheet th.grouph{background:var(--saffron-soft);font-size:13px;font-weight:700;padding:10px 8px;width:1%;writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.1em;text-align:center}
+table.sheet td{padding:0;min-width:150px}
+table.sheet textarea{display:block;width:100%;min-height:62px;border:none;background:var(--field);padding:8px 10px;resize:vertical;line-height:1.5;font-size:14px}
+table.sheet textarea:focus{outline:2px solid var(--saffron);outline-offset:-2px}
+table.sheet input.colname{width:100%;border:1px dashed var(--line);background:var(--field);border-radius:6px;padding:3px 6px;font-weight:700;font-size:13px}
+table.wide{min-width:1500px}
+table.wide td{min-width:120px}
+.readonly textarea{pointer-events:none}
+.cellro{padding:8px 10px;white-space:pre-wrap;font-size:14px;min-height:40px}
+
+.topfields{display:grid;gap:10px;margin-bottom:12px}
+.topfields label{display:grid;grid-template-columns:90px 1fr;gap:10px;align-items:start;font-weight:700;font-size:14px}
+.topfields textarea{width:100%;min-height:52px;border:1px solid var(--line);border-radius:8px;background:var(--field);padding:8px 10px;resize:vertical}
+
+/* S/W items */
+.swsec{margin-bottom:18px}
+.swsec h4{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:8px}
+.swsec h4 .tag{font-family:var(--serif);font-weight:900;background:var(--ink);color:var(--paper);border-radius:6px;padding:0 8px}
+.item{display:grid;grid-template-columns:1fr auto auto auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.item textarea{width:100%;min-height:40px;border:1px solid var(--line);border-radius:8px;background:var(--field);padding:6px 10px;resize:vertical}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13px}
+.seg span{padding:0 8px;color:var(--muted);align-self:center;font-size:12px}
+.seg button{border:none;background:var(--paper);padding:5px 9px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.del{border:none;background:none;color:var(--muted);font-size:18px;line-height:1;padding:4px 8px}
+.del:hover{color:var(--danger)}
+.add{border:1px dashed var(--line);background:none;border-radius:8px;padding:7px 14px;margin-top:6px;font-size:14px;color:var(--muted)}
+.add:hover{color:var(--ink);border-color:var(--ink)}
+@media (max-width:640px){.item{grid-template-columns:1fr auto}.item textarea{grid-column:1/3}}
+
+/* roles */
+.leader{display:flex;gap:10px;align-items:center;margin-bottom:12px;font-weight:700}
+select{border:1px solid var(--line);border-radius:8px;background:var(--field);padding:6px 10px;min-width:130px}
+table.sheet td.sel{padding:6px 10px}
+
+/* roster overlay */
+.dialog{position:fixed;inset:0;background:rgba(10,15,20,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}
+.dialog.open{display:flex}
+.dialog .card{background:var(--paper);border-radius:14px;max-width:960px;width:100%;max-height:90%;overflow:auto;padding:22px}
+.dialog h2{margin:0 0 14px;font-family:var(--serif);font-weight:900}
+.roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.roster h3{margin:0 0 6px;display:flex;align-items:center;gap:8px}
+.roster ul{list-style:none;margin:0;padding:0;font-size:14px}
+.roster li{padding:5px 0;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:8px}
+.roster li small{color:var(--muted)}
+.roster .lead{color:var(--saffron);font-weight:700;font-size:12px}
+
+/* ===== presentation ===== */
+.deck{position:fixed;inset:0;background:#16202B;color:#F3F5F7;display:none;z-index:50;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.deck.open{display:flex}
+.deck .stage{flex:1;display:flex;align-items:center;justify-content:center;padding:3vh 4vw;overflow:hidden}
+.slide{width:100%;height:100%;max-width:1400px;display:flex;flex-direction:column;justify-content:center;overflow:auto}
+.deck .bar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;font-size:14px;color:#9FB0C0}
+.deck .bar button{background:none;border:1px solid #3A4A5A;color:#E7ECF1;border-radius:8px;padding:6px 14px}
+.deck .bar button:hover{background:#23303D}
+.slide .kicker{color:#E9B43A;font-size:clamp(14px,1.6vw,22px);margin-bottom:1vh}
+.slide h1{font-family:var(--serif);font-weight:900;font-size:clamp(34px,6vw,86px);line-height:1.15;margin:0}
+.slide h2{font-family:var(--serif);font-weight:900;font-size:clamp(28px,3.8vw,56px);line-height:1.2;margin:0 0 3vh}
+.slide p.lead{font-size:clamp(16px,2vw,28px);color:#C6D1DC;margin:2vh 0 0;max-width:40em}
+.slide ol.flow{list-style:none;padding:0;margin:0;counter-reset:f;font-size:clamp(18px,2.4vw,34px)}
+.slide ol.flow li{counter-increment:f;display:flex;gap:1.2em;padding:.5em 0;border-top:1px solid #2E3D4C;align-items:baseline}
+.slide ol.flow li::before{content:counter(f);color:#E9B43A;font-family:var(--serif);font-weight:900;min-width:1.2em}
+.slide ol.flow li small{color:#9FB0C0;font-size:.6em;margin-left:auto;white-space:nowrap}
+.slide .timer{font-family:var(--serif);font-weight:900;font-size:clamp(90px,20vw,280px);line-height:1;color:#E9B43A;font-variant-numeric:tabular-nums;margin:2vh 0}
+.slide .timer.over{color:#FF7A6B}
+.slide .tctl{display:flex;gap:10px;flex-wrap:wrap}
+.slide .tctl button{background:#23303D;border:1px solid #3A4A5A;color:#F3F5F7;border-radius:10px;padding:10px 20px;font-size:clamp(14px,1.5vw,20px)}
+.slide .tctl button.go{background:#E9B43A;color:#16202B;border-color:#E9B43A;font-weight:700}
+.slide .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:3vh}
+.slide .chips span{border:1px solid #3A4A5A;border-radius:8px;padding:6px 14px;font-size:clamp(14px,1.6vw,22px)}
+.slide .road{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2vh 1.5vw}
+.slide .road div{border-top:3px solid #3A4A5A;padding-top:10px}
+.slide .road div.hl{border-top-color:#E9B43A}
+.slide .road b{display:block;font-family:var(--serif);font-size:clamp(18px,2vw,28px)}
+.slide .road span{color:#C6D1DC;font-size:clamp(13px,1.3vw,18px)}
+.slide .rgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw;font-size:clamp(14px,1.5vw,20px)}
+.slide .rgrid h3{margin:0 0 1vh;font-size:1.3em}
+.slide .rgrid div div{padding:4px 0;border-top:1px solid #2E3D4C}
+.slide .rep-tabs{display:flex;gap:8px;margin-bottom:2vh;flex-wrap:wrap}
+.slide .rep-tabs button{background:#23303D;border:1px solid #3A4A5A;color:#F3F5F7;border-radius:999px;padding:6px 18px;font-size:clamp(14px,1.4vw,19px)}
+.slide .rep-tabs button[aria-pressed="true"]{background:#E9B43A;color:#16202B;border-color:#E9B43A;font-weight:700}
+.slide .rep{overflow:auto;max-height:66vh;background:#F7F8FA;color:#1E2B3A;border-radius:10px}
+.slide .rep table.sheet{font-size:clamp(13px,1.2vw,17px)}
+.slide .rep table.sheet thead th,.slide .rep table.sheet th.rowh{background:#E6EAEE}
+.slide .rep table.sheet th.grouph{background:#FBF1D6}
+.slide .rep .swro{padding:12px 16px}
+.slide .rep .swro h4{margin:6px 0}
+.slide .rep .swro div{padding:4px 0;border-top:1px solid #D9DEE3;display:flex;justify-content:space-between;gap:12px}
+.slide .rep .swro small{color:#5E6B78;white-space:nowrap}
+.slide .rep .cellro{color:#1E2B3A}
+@media (prefers-reduced-motion:no-preference){.slide{animation:in .25s ease-out}@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}
+
+.slide .rolesall{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw;font-size:clamp(14px,1.4vw,19px)}
+.slide .rolesall h3{margin:0 0 1vh;font-size:1.3em}
+.slide .rrow{display:grid;grid-template-columns:4.2em 1fr 1fr;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #2E3D4C}
+.slide .rrow.hd{color:#9FB0C0;border-top:none}
+.slide .rlead{display:grid;grid-template-columns:4.2em 1fr;gap:8px;align-items:center;margin-bottom:6px;font-weight:700}
+.slide select{background:#23303D;color:#F3F5F7;border:1px solid #3A4A5A;min-width:0;width:100%;font-size:inherit;padding:6px 8px}
+.slide .rolehead{display:flex;justify-content:space-between;align-items:flex-start;gap:3vw;margin-bottom:2vh}
+.slide .qr{display:flex;gap:14px;align-items:center;font-size:clamp(12px,1.1vw,15px);color:#C6D1DC;max-width:24em}
+.slide .qr .code{background:#fff;padding:8px;border-radius:8px;line-height:0}
+.slide .draw{margin-top:3vh;padding:2vh 2vw;border:1px dashed #3A4A5A;border-radius:12px;display:flex;flex-wrap:wrap;gap:2vw;align-items:center;font-size:clamp(16px,1.8vw,26px)}
+.slide .draw .who{display:flex;gap:2vw;flex-wrap:wrap}
+.slide .draw .who span b{color:#E9B43A;margin-left:.4em;font-family:var(--serif)}
+.slide .drawn{color:#E9B43A}
+.slide .smallbtn{align-self:flex-start;background:none;border:1px solid #3A4A5A;color:#9FB0C0;border-radius:8px;padding:4px 12px;font-size:13px;margin-top:2vh}
+.slide .ex{background:#F7F8FA;color:#1E2B3A;border-radius:10px;overflow:auto;max-height:46vh;margin-top:3vh}
+.slide .ex table.sheet{font-size:clamp(12px,1.1vw,16px);min-width:0}
+.slide .ex table.sheet thead th,.slide .ex table.sheet th.rowh{background:#E6EAEE}
+.slide .ex .cap{padding:8px 12px;font-size:13px;color:#5E6B78}
+@media (max-width:800px){.slide .rolesall{grid-template-columns:1fr}}
+.empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:8px;font-size:14px;display:none;z-index:60}
+
+/* ===== v3 additions ===== */
+.agenda li.dayhead{display:block;border-top:none;padding:16px 0 4px;font-family:var(--serif);font-weight:900;color:var(--saffron);font-size:16px}
+.agenda li.dayhead::before{content:none}
+.agenda ol{counter-reset:ag}
+.agenda li.dayhead+li{counter-reset:none}
+.checkbar{margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px;padding:10px 14px;border:1px solid var(--line);border-radius:10px}
+.checkbar b{font-size:18px;font-family:var(--serif)}
+
+/* participant view */
+.pwrap{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+.phead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.phead .org{font-size:13px;color:var(--muted)}
+.phead h1{font-family:var(--serif);font-weight:900;font-size:clamp(22px,5vw,30px);margin:2px 0 0;line-height:1.25}
+.phead .dt{color:var(--muted);font-size:14px}
+.meCard{margin:14px 0;padding:14px 16px;border-radius:12px;background:var(--mist);display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.meCard .who{font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.meCard .ok{color:var(--gB);font-weight:700}
+.meCard .linkbtn{border:none;background:none;color:var(--muted);text-decoration:underline;font-size:13px;padding:0}
+.pick h2{font-size:18px;margin:18px 0 6px}
+.pick .gl{margin:12px 0 4px;font-weight:700;display:flex;align-items:center;gap:6px}
+.pick .names{display:flex;flex-wrap:wrap;gap:8px}
+.pick .names button{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 16px;font-size:16px;min-width:88px}
+.pick .names button:hover{border-color:var(--ink)}
+.pick .names button.done{background:var(--mist);color:var(--muted)}
+.pfoot{margin-top:40px;text-align:center}
+.pfoot .status{justify-content:center}
+.pfoot button{border:none;background:none;color:var(--muted);font-size:13px;text-decoration:underline}
+.bigbtn{background:var(--saffron);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-size:16px;font-weight:700}
+
+/* sw item with dimension */
+.item{grid-template-columns:1fr 140px auto auto auto}
+.item select{min-width:0;width:100%}
+@media (max-width:760px){.item{grid-template-columns:1fr 1fr}.item textarea{grid-column:1/3}.item select{grid-column:1/3}}
+.sumtitle{margin:22px 0 8px;font-size:16px;font-weight:700}
+.mk{font-size:12px;color:var(--saffron);margin-left:4px;white-space:nowrap}
+ul.cellist{margin:0;padding:8px 10px 8px 26px;font-size:14px}
+ul.cellist li{margin:2px 0}
+
+/* simple list (traits) */
+.addrow{display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap}
+.addrow input{flex:1 1 220px;border:1px solid var(--line);border-radius:8px;background:var(--field);padding:8px 10px}
+.tlist{display:flex;flex-wrap:wrap;gap:8px}
+.tchip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:4px 6px 4px 12px;background:var(--paper);font-size:15px}
+.tchip button{border:none;background:none;color:var(--muted);font-size:15px;padding:0 4px;line-height:1}
+.gdots{display:inline-flex;gap:2px;margin-left:4px}
+.gdots i{width:7px;height:7px;border-radius:50%;display:inline-block}
+
+/* traits8 */
+.t8{display:grid;gap:10px}
+.t8row{border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:2em minmax(140px,220px) 1fr auto;gap:10px;align-items:center}
+.t8row .no{font-family:var(--serif);font-weight:900;color:var(--saffron);font-size:18px}
+.t8row input.tt{border:1px solid var(--line);border-radius:8px;background:var(--field);padding:6px 10px;font-weight:700;font-size:16px;width:100%}
+.t8row .noms{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.t8row .nom{background:var(--saffron-soft);border-radius:999px;padding:2px 4px 2px 10px;font-size:14px;display:inline-flex;align-items:center;gap:2px}
+.t8row .nom b{font-size:12px;color:var(--saffron);margin-left:2px}
+.t8row .nom button{border:none;background:none;color:var(--muted);padding:0 4px}
+.t8row .nomadd{display:flex;gap:4px}
+.t8row .nomadd select{min-width:110px;padding:4px 6px}
+.t8row .nomadd button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:4px 10px;font-size:13px}
+.t8row .ro{font-weight:700;font-size:17px}
+@media (max-width:700px){.t8row{grid-template-columns:2em 1fr auto}.t8row .noms{grid-column:1/4}}
+.refbox{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px}
+.refbox .cap{font-size:13px;color:var(--muted);margin-bottom:6px}
+
+/* SO/WT board */
+.pool{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;background:var(--mist)}
+.pool .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;align-items:center}
+.pool .filters button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:3px 10px;font-size:13px;display:inline-flex;align-items:center;gap:5px}
+.pool .filters button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.pool .tags{display:flex;flex-wrap:wrap;gap:6px;max-height:210px;overflow:auto;padding:2px}
+.tag{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:4px 8px;font-size:13px;line-height:1.35;cursor:grab;text-align:left;max-width:100%}
+.tag .cd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.tag small{color:var(--muted);font-size:11px}
+.tag.sel{outline:2px solid var(--saffron);background:var(--saffron-soft)}
+.tag.used{opacity:.6}
+.tag .star{border:none;background:none;padding:0 2px;font-size:14px;color:var(--muted);line-height:1}
+.tag .star.on{color:var(--saffron)}
+.tag .x{border:none;background:none;padding:0 2px;color:var(--muted);line-height:1}
+.tag.star-on{border-color:var(--saffron);font-weight:700}
+.pool .hintline{font-size:12px;color:var(--muted);margin-top:6px}
+table.board td{min-width:130px;padding:6px;vertical-align:top}
+table.board td .drop{min-height:56px;display:flex;flex-direction:column;gap:4px;border-radius:6px;padding:2px}
+table.board td.hot .drop{background:var(--saffron-soft);outline:1px dashed var(--saffron)}
+table.board td.armed{cursor:copy}
+table.board td.armed:hover .drop{background:var(--saffron-soft)}
+.board-legend{font-size:13px;color:var(--muted);margin:6px 0 10px}
+
+/* slides extra */
+.slide .qrbig{display:flex;gap:4vw;align-items:center;flex-wrap:wrap}
+.slide .qrbig .code{background:#fff;padding:12px;border-radius:12px;line-height:0}
+.slide .ckgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5vw;font-size:clamp(13px,1.3vw,18px);margin-top:3vh}
+.slide .ckgrid h3{margin:0 0 .6vh;font-size:1.15em}
+.slide .ckgrid div div{padding:2px 0;color:#6D7E8F}
+.slide .ckgrid div div.in{color:#F3F5F7}
+.slide .ckgrid div div.in::before{content:"✓ ";color:#7FD1AE}
+.slide .count{font-family:var(--serif);font-weight:900;font-size:clamp(48px,8vw,120px);color:#E9B43A;line-height:1}
+.slide .light{background:#F7F8FA;color:#1E2B3A;border-radius:12px;padding:14px 16px;overflow:auto;max-height:70vh}
+.slide .light .t8row{background:#fff;border-color:#D9DEE3}
+.slide .daybig{font-family:var(--serif);font-weight:900;font-size:clamp(40px,7vw,100px);color:#E9B43A;line-height:1.1}
+.slide .twocol{display:grid;grid-template-columns:1fr 1fr;gap:4vw}
+.slide .twocol h3{color:#E9B43A;margin:0 0 1vh;font-size:clamp(18px,2vw,28px)}
+.slide .twocol ol.flow{font-size:clamp(15px,1.8vw,26px)}
+.slide .bl{list-style:none;padding:0;margin:3vh 0 0;font-size:clamp(16px,2vw,28px)}
+.slide .bl li{padding:.5em 0;border-top:1px solid #2E3D4C}
+.slide .bl li b{color:#E9B43A;margin-right:.6em}
+.slide .rep table.board td{min-width:110px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="dialog" id="rosterDlg" role="dialog" aria-modal="true" aria-labelledby="rosterTitle">
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <h2 id="rosterTitle">分組名單</h2>
+      <button class="btn" data-close>關閉</button>
+    </div>
+    <div class="roster" id="rosterBody"></div>
+  </div>
+</div>
+<div class="deck" id="deck" role="dialog" aria-modal="true" aria-label="會議簡報">
+  <div class="stage"><div class="slide" id="slide"></div></div>
+  <div class="bar">
+    <button id="dPrev">← 上一頁</button>
+    <span id="dCount"></span>
+    <span style="display:flex;gap:8px"><button id="dNext">下一頁 →</button><button id="dClose">結束簡報</button></span>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+/* ================= 設定 ================= */
+// 放到 GitHub Pages 等外部網站時：填入 Google Apps Script 網頁應用程式網址（見部署說明）
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbwqJ-_I9GS0yUf3j1EBn3aanJkO2DFb_KcjXsQ41WMhZVL4VGByTvEW4uexQZ9PM8M7/exec";
+const ARTIFACT_URL = "https://claude.ai/artifact/BQVTzja7PmnxVJvGa8Exnc";
+
+/* ================= 資料定義 ================= */
+const GROUPS = {
+  A:{name:"A 組",color:"var(--gA)",members:[["廖鴻文","業務部"],["張菱玲","業務部"],["黃世婷","廠務部"],["藍培達","廠務部"],["胡雅欣","研發技術部"],["洪瑋慈","品質部"],["曾珮瑜","管理部"]]},
+  B:{name:"B 組",color:"var(--gB)",members:[["廖韋智","業務部"],["何翊菁","業務部"],["李德盟","廠務部"],["藍姸雅","研發技術部"],["洪褕庭","品質部"],["汪靜榆","管理部"],["羅心伶","管理部"]]},
+  C:{name:"C 組",color:"var(--gC)",members:[["陳岳峰","業務部"],["許詠鈞","業務部"],["賴意雱","業務部"],["王俊毅","廠務部"],["林思廷","研發技術部"],["林皇龍","品質部"],["陳育仙","管理部"],["李怡徵","管理部"]]},
+  X:{name:"全公司",color:"var(--gX)",members:[]}
+};
+const GM = [["林奕君","總經理室"],["林裕閔","總經理室"],["林奕瀧","總經理室"]];
+const DARK_GC = {A:"#8DB8E8",B:"#7FD1AE",C:"#C4A6EA"};
+const ALL_PEOPLE = ["A","B","C"].flatMap(g=>GROUPS[g].members).concat(GM);
+const DIM7 = ["市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力"];
+const FUNCS7 = ["市場/品牌","產品/研發","供應鏈管理","生產/品質","通路/銷售","財務/管理/資訊","人力資源"];
+const COMP10 = ["損益：收入/利潤；產品/區域","總體策略","市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力","核心競爭力"];
+const PESTC_ROWS = ["P 政策","E 經濟","S 社會","T 技術","C 競爭者"];
+const SWOT_EXT = ["P 政策","E 經濟","S 社會","T 技術","C 產業（競爭者）"];
+const SWOT_IN = ["財務（營運目標）","市場（外部機會）","組織（人/渠道）","系統/設備"];
+const ROLE_MEETINGS = [["m1","10/6"],["m2","10/13"],["m3","10/20"],["m4","10/27"],["m5","11/3"]];
+const STRAT_COLS = ["傳統盤","專案代工","後勤行政","生產製造","設備管理","庫存管理","研發技術部","品質部","財務","採購","資訊/HR"];
+const DEPT_UNITS = {"業務部":[0,1,2],"廠務部":[3,4,5],"研發技術部":[6],"品質部":[7],"管理部":[8,9,10]};
+const CATS = {S:["強勢 S","#2E8B6A"],W:["弱勢 W","#C0392B"],O:["機會 O","#2F6FB2"],T:["威脅 T","#C98F0A"],K:["百鮮競爭力","#7A55B0"],R:["競爭者","#6B7A89"],U:["自訂","#34495E"]};
+
+const FORMS = {
+  roles:{title:"分組角色分工",short:"角色分工",type:"roles",desc:"決定組長，並排定每次會議的記錄人與報告人。"},
+  sw:{title:"內部能力分析",short:"內部能力分析",type:"sw",
+    desc:"先列出百鮮的強勢（S）與弱勢（W），再把每一項歸到七大面向，並標記重要性與急迫性。",
+    seed:{S:[["在代工市場上有一定知名度","市場/品牌"],["可少量接單（彈性較大）","生產"]],W:[["連鎖餐飲領域尚未發展","通路/銷售"],["產能不足，交貨期長","生產"]]},
+    example:{name:"康師傅",S:["品牌信賴度高","茶市場份額擴大，持續運用產品細分化及差異化策略","生產基地分佈廣貼近市場，具規模生產優勢，有成本競爭力","全面通路精耕，市場分級管理，布點廣","各功能組織架構完整，執行力強","集團財務健全，信譽高，融資額度取得較容易","人力資源投入持續加大，學習環境良好"],
+      W:["產品外觀有待精進","城郊／外埠／直營通路的經營仍不足","產銷協調不精準，物流管理系統尚未完善","研發資源投入相對主要競爭者不足","配套群供貨品質不穩定，交期長，影響生產品質及效率","組織急速擴充，幹部培育速度趕不上發展","基層幹部管理能力不足"]},
+    example7:[["品牌信賴度高；茶市場份額擴大","產品外觀有待精進"],["持續運用產品細分化及差異化策略","研發資源投入相對主要競爭者不足"],["生產基地分佈廣、貼近市場","配套群供貨品質不穩定，交期長"],["具規模生產優勢，有成本競爭力","配套供貨不穩，影響生產品質及效率"],["全面通路精耕，市場分級管理，布點廣","城郊／外埠／直營通路的經營仍不足"],["集團財務健全，信譽高，融資額度取得較容易","產銷協調不精準，物流管理系統尚未完善"],["組織架構完整、執行力強；人力資源投入持續加大","組織急速擴充，幹部培育趕不上發展；基層幹部管理能力不足"]]},
+  self10:{title:"百鮮的競爭力分析",short:"百鮮競爭力",type:"grid",desc:"用與競爭者相同的十個構面，先把百鮮自己看清楚。",rows:COMP10,cols:["百鮮企業有限公司"],example:"xmf"},
+  pick:{title:"競爭者選擇",short:"競爭者選擇",type:"grid",desc:"Who is 競爭者？各組列出 3 個競爭者：傳統盤、專案代工、未來目標各一。",rows:["傳統盤","專案代工","未來目標"],cols:["競爭者名稱","選擇理由"]},
+  compare:{title:"競爭者分析比較",short:"競爭者分析",type:"grid",desc:"選兩家競爭者與百鮮並列比較，表頭的競爭者名稱可直接修改。10/20 各組上台報告 10 分鐘。",rows:COMP10,cols:["競爭者1","競爭者2","百鮮企業有限公司"],editableCols:[0,1],example:"xmf"},
+  pestc:{title:"外部環境發展趨勢（PESTC）",short:"外部環境",type:"grid",desc:"從政策、經濟、社會、技術、競爭者五個面向，分別列出未來的機會與威脅。每一點換一行，之後會變成 SO／WT 的標籤。",
+    rows:PESTC_ROWS,cols:["未來發展趨勢（機會）","未來發展趨勢（威脅）"],hints:["自動化設備","FSSC 認證","原物料取得成本增加","新創品牌增加","傳統產業難請人","混料分裝技術門檻低"]},
+  traits:{title:"想和什麼樣的人一起共事？",short:"共事特質",type:"list",desc:"每組列出希望一起共事的人具備哪些特質，一項一個。",
+    examples:["主動積極","負責任","樂於分享","溝通順暢","團隊合作","誠信正直","解決問題","持續學習","細心嚴謹","正向樂觀"]},
+  traits8:{title:"共事特質彙整與代表人物",short:"特質與代表人物",type:"traits8",scope:"company",desc:"把各組特質整合為 8–10 大特質（每項 8 字內），再由大家主動提名代表人物。"},
+  swot_so:{title:"SO 分析：核心能力建構",short:"SO 分析",type:"board",board:"SO",desc:"利用內部最大的優勢，來面對外部的機會（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
+    rowGroups:[{label:"O 機會",rows:SWOT_EXT},{label:"S 優勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["S","O"]},
+  swot_wt:{title:"WT 分析：核心能力建構",short:"WT 分析",type:"board",board:"WT",desc:"克服內部的弱勢，並同時降低外部的威脅（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
+    rowGroups:[{label:"T 威脅",rows:SWOT_EXT},{label:"W 弱勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["W","T"]},
+  strategy:{title:"百鮮企業有限公司 2027 年度策略展開",short:"2027 策略展開",type:"grid",wide:true,scope:"company",
+    desc:"全公司一份：先定營運目標與策略重點，再展開到各部門的專案與 KPI。",
+    topFields:[["goal","營運目標"],["focus","策略重點"]],
+    colGroups:[["業務部",3],["廠務部",3],["研發技術部",1],["品質部",1],["管理部",3]],cols:STRAT_COLS,rows:["策略展開（專案）","KPI 指標"]}
+};
+
+const XMF = ["12 億；台灣（2015 市佔率 40%）、大陸、日本、美國、加拿大",
+  "水平整合：家用市場約 2 萬個零售通路、外食市場約 5 萬家餐飲、加工廠約 8 千個商品、擴及海外。垂直整合：源頭管理自辦進口、自主研發、直接銷售、開發新產品",
+  "小磨坊、廟口小吃、Tomax 國際、味什麼","西式香料、辛香料、風味油、炸粉/醃製粉、調味醬料、香鬆、椰香椰奶",
+  "大陸、東南亞、印度等國進口原料；透過國內貿易商、同行採購","零下 196℃ 冷凍研磨設備、反應濃縮生產線",
+  "南北雜貨、量販、餐飲加工、官網、國軍、海外分公司","ISO 22000/HACCP、食品雲、綠盾標章農藥檢驗站",
+  "南投一廠、南投二廠、斗六廠、台北總部、台中/高雄分公司、廈門子公司","冷凍研磨設備；養生食材水解液製備專利；品牌行銷力"];
+
+const MEETINGS = [
+ {id:"m0",no:"第 0 次會議",date:"2026-09-29",time:"16:30",theme:"分組與分工",pforms:["roles"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"討論主題說明",sub:"本期年度檢討的目的、每週進行方式與整體時程",roadmap:true},
+   {t:"分組討論・決定組長",min:5,sub:"每組 5 分鐘報告",members:true,forms:["roles"]},
+   {t:"決定每次記錄人、報告人",forms:["roles"]},
+   {t:"下次議題說明：內部能力分析",preview:["sw"]}],
+  next:{topic:"內部能力分析",when:"10/6（二）16:00"}},
+ {id:"m1",no:"第一次會議",date:"2026-10-06",time:"16:00",theme:"內部能力分析",pforms:["sw"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"討論主題說明：內部能力分析",sub:"先列出強勢／弱勢，再歸到七大面向",topic:["sw"]},
+   {t:"分組討論",min:10,sub:"掃碼進入分組頁面填寫",forms:["sw"]},
+   {t:"分組報告",sub:"每組 5 分鐘",report:["sw"],repMin:5},
+   {t:"下次議題說明：百鮮競爭力分析、競爭者選擇",preview:["self10","pick"]}],
+  next:{topic:"百鮮競爭力分析、競爭者選擇",when:"10/13（二）16:00"}},
+ {id:"m2",no:"第二次會議",date:"2026-10-13",time:"16:00",theme:"百鮮競爭力・競爭者選擇",pforms:["self10","pick","compare"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"競爭者分析範例：小磨坊",sub:"以小磨坊為例說明十個分析構面",example:"xmf"},
+   {t:"分組討論：百鮮的競爭力分析",min:10,forms:["self10"]},
+   {t:"分組報告",sub:"每組 5 分鐘",report:["self10"],repMin:5},
+   {t:"分組討論：競爭者選擇",min:10,sub:"傳統盤、專案代工、未來目標各選一家",forms:["pick"]},
+   {t:"分組報告",sub:"每組 5 分鐘",report:["pick"],repMin:5},
+   {t:"下次議題說明：競爭者分析",sub:"10/20 前各組完成兩家競爭者與百鮮的比較，當天直接上台報告",preview:["compare"]}],
+  next:{topic:"競爭者分析（各組報告）",when:"10/20（二）16:00"}},
+ {id:"m3",no:"第三次會議",date:"2026-10-20",time:"16:00",theme:"競爭者分析・共事特質",pforms:["compare","traits"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"分組報告：競爭者分析",sub:"各組 10 分鐘",report:["compare"],repMin:10},
+   {t:"分組討論：想和什麼樣的人一起共事？",min:5,forms:["traits"]},
+   {t:"下次議題說明：外部環境發展趨勢",preview:["pestc"]}],
+  next:{topic:"外部環境發展趨勢",when:"10/27（二）16:00"}},
+ {id:"m4",no:"第四次會議",date:"2026-10-27",time:"16:00",theme:"外部環境・共事特質",pforms:["pestc","traits8"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"分組討論：外部環境發展趨勢",min:10,forms:["pestc"]},
+   {t:"分組報告",sub:"每組 5 分鐘",report:["pestc"],repMin:5},
+   {t:"共事特質彙整・代表人物提名",sub:"整合上週各組特質為 8–10 大特質（8 字內），不分組，由大家主動提名代表人物",live:["traits8"]},
+   {t:"下次議題說明：SWOT 分析＆策略擬定",preview:["swot_so"]}],
+  next:{topic:"SWOT 分析＆策略擬定",when:"11/3（二）16:00"}},
+ {id:"m5",no:"第五次會議",date:"2026-11-03",time:"16:00",theme:"SWOT 分析＆策略擬定",pforms:["swot_so","swot_wt"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"SO／WT 分析說明",sub:"內部能力與外部環境的每個要素都已變成標籤，拖進 SO／WT 表格並標記重要",topic:["swot_so","swot_wt"]},
+   {t:"分組討論：SO／WT 分析",min:10,forms:["swot_so","swot_wt"]},
+   {t:"分組報告",sub:"每組 5 分鐘",report:["swot_so","swot_wt"],repMin:5},
+   {t:"未來行程安排說明",roadmap:true}],
+  next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
+ {id:"m6",no:"11/4 管理月會",date:"2026-11-04",time:"全天",theme:"管理月會＆年度策略展開",pforms:["strategy"],
+  agenda:[
+   {t:"掃碼報到",checkin:true},
+   {t:"上午：管理月會"},
+   {t:"上午：2026 檢討及成果",sub:"各部門報告"},
+   {t:"下午：SO／WT 成果回顧",report:["swot_so","swot_wt"]},
+   {t:"下午：2027 策略展開",sub:"營運目標、策略重點，展開到各部門專案與 KPI",forms:["strategy"],report:["strategy"]}],
+  next:{topic:"年度計劃工作坊",when:"11/20（五）–11/21（六）"}},
+ {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",dateEnd:"2026-11-21",time:"兩天",theme:"年度計劃工作坊",pforms:["strategy"],
+  agenda:[
+   {day:"第一天・11/20（五）",date:"2026-11-20"},
+   {t:"掃碼報到",checkin:true,date:"2026-11-20"},
+   {t:"開場：2027 營運目標與策略重點",report:["strategy"]},
+   {t:"業務部年度計劃報告",sub:"傳統盤／專案代工／後勤行政",dept:"業務部",min:40},
+   {t:"廠務部年度計劃報告",sub:"生產製造／設備管理／庫存管理",dept:"廠務部",min:40},
+   {t:"研發技術部年度計劃報告",dept:"研發技術部",min:30},
+   {t:"第一天總結與回饋"},
+   {day:"第二天・11/21（六）",date:"2026-11-21"},
+   {t:"掃碼報到",checkin:true,date:"2026-11-21"},
+   {t:"品質部年度計劃報告",dept:"品質部",min:30},
+   {t:"管理部年度計劃報告",sub:"財務／採購／資訊・HR",dept:"管理部",min:40},
+   {t:"Q1 沙盤推演",sand:"Q1",min:60},
+   {t:"Q2 沙盤推演",sand:"Q2",min:60},
+   {t:"總結：2027 年度計劃確認"}],
+  next:null}
+];
+
+/* ================= 儲存層 ================= */
+const LS_KEY="linco-review-2026";
+const nonEmpty=o=>o&&Object.keys(o).length>0;
+const Store={
+  mode:"init",db:null,server:{},overlay:{},pending:{},inflight:{},timers:{},subs:new Set(),
+  body(id){const s=this.server[id]||{};const o=this.overlay[id]||{};return {cells:Object.assign({},s.cells||{},o.cells||{}),items:Object.assign({},s.items||{},o.items||{})}},
+  cell(id,k){return this.body(id).cells[k]||""},
+  items(id){return Object.entries(this.body(id).items).filter(([k,v])=>v)},
+  notify(){this.subs.forEach(f=>{try{f()}catch(e){console.error(e)}})},
+  statusText:"",statusKind:"local",
+  setStatus(kind,text){this.statusKind=kind;this.statusText=text;document.querySelectorAll(".status").forEach(el=>{el.className="status "+kind;el.lastElementChild.textContent=text})},
+  async init(){
+    let db=null;
+    try{ if(window.claude&&claude.use) db=await claude.use("db"); }catch(e){db=null}
+    if(db){
+      this.db=db;this.mode="db";this.setStatus("","已同步");
+      db.collection("sheets").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});this.server=n;this.notify()},
+        err=>{console.warn(err);this.setStatus("local","同步中斷，請重新整理")});
+      return;
+    }
+    if(BACKEND_URL){
+      this.mode="remote";this.setStatus("busy","連線中…");
+      await this.poll(true); setInterval(()=>this.poll(),3000); return;
+    }
+    this.mode="local";try{this.server=JSON.parse(localStorage.getItem(LS_KEY)||"{}")||{}}catch(e){this.server={}}
+    this.setStatus("local","僅存在這台裝置");this.notify();
+  },
+  async poll(force){
+    if(!force&&document.hidden) return;
+    try{const r=await fetch(BACKEND_URL+(BACKEND_URL.includes("?")?"&":"?")+"t="+Date.now());const j=await r.json();
+      if(j.ok){this.server=j.docs||{};if(!nonEmpty(this.pending))this.setStatus("","已同步");this.notify()}}
+    catch(e){this.setStatus("local","連線中斷，自動重試中")}
+  },
+  write(id,field,key,val){
+    (this.overlay[id]=this.overlay[id]||{cells:{},items:{}})[field][key]=val;
+    (this.pending[id]=this.pending[id]||{cells:{},items:{}})[field][key]=val;
+    if(this.mode==="local"||this.mode==="init"){
+      const s=this.server[id]=this.server[id]||{cells:{},items:{}};s.cells=s.cells||{};s.items=s.items||{};s[field][key]=val;
+      delete this.pending[id];delete this.overlay[id];try{localStorage.setItem(LS_KEY,JSON.stringify(this.server))}catch(e){}
+      this.notify();return;
+    }
+    this.setStatus("busy","儲存中…");this.notify();
+    clearTimeout(this.timers[id]);this.timers[id]=setTimeout(()=>this.flush(id),600);
+  },
+  async send(id,p){
+    const stamp=new Date().toISOString();
+    if(this.mode==="db"){
+      const ref=this.db.doc("sheets/"+id);
+      if(this.server[id]){const patch={updatedAt:stamp};if(nonEmpty(p.cells))patch.cells=p.cells;if(nonEmpty(p.items))patch.items=p.items;await ref.update(patch)}
+      else{const b=this.body(id);await ref.set({cells:b.cells,items:b.items,updatedAt:stamp})}
+    }else{
+      const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({writes:[{id,patch:p}]})});
+      const j=await r.json();if(!j.ok)throw new Error(j.error||"寫入失敗");
+      const s=this.server[id]=this.server[id]||{cells:{},items:{}};s.cells=Object.assign({},s.cells||{},p.cells);s.items=s.items||{};
+      for(const [k,v] of Object.entries(p.items))s.items[k]=v===null?null:Object.assign({},s.items[k]||{},v);
+    }
+  },
+  async flush(id){
+    if(this.inflight[id])return;const p=this.pending[id];if(!p)return;
+    delete this.pending[id];this.inflight[id]=true;
+    try{await this.send(id,p)}
+    catch(e){try{await new Promise(r=>setTimeout(r,500+Math.random()*700));await this.send(id,p)}
+      catch(e2){console.warn(e2);this.inflight[id]=false;
+        const q=this.pending[id]=this.pending[id]||{cells:{},items:{}};Object.assign(q.cells,Object.assign({},p.cells,q.cells));Object.assign(q.items,Object.assign({},p.items,q.items));
+        this.setStatus("local","有內容尚未存到雲端，重試中");setTimeout(()=>this.flush(id),4000);return}}
+    const o=this.overlay[id];
+    if(o)["cells","items"].forEach(f=>Object.keys(p[f]).forEach(k=>{if(!(this.pending[id]&&k in this.pending[id][f]))delete o[f][k]}));
+    this.inflight[id]=false;
+    if(this.pending[id])this.flush(id);else if(!nonEmpty(this.pending))this.setStatus("","已同步");
+    this.notify();
+  }
+};
+const docId=(form,g)=>form+"__"+g;
+const DRAW_ID="draw__X";
+const gmGroup=n=>Store.cell(DRAW_ID,n);
+function members(g){return GROUPS[g].members.concat(GM.filter(([n])=>gmGroup(n)===g))}
+function undrawn(){return GM.filter(([n])=>!["A","B","C"].includes(gmGroup(n)))}
+function doDraw(){const gs=["A","B","C"];for(let i=2;i>0;i--){const j=Math.floor(Math.random()*(i+1));[gs[i],gs[j]]=[gs[j],gs[i]]}GM.forEach(([n],i)=>Store.write(DRAW_ID,"cells",n,gs[i]))}
+function groupOf(name){for(const g of ["A","B","C"])if(GROUPS[g].members.some(x=>x[0]===name))return g;const d=gmGroup(name);return ["A","B","C"].includes(d)?d:null}
+const uid=()=>"i"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s);
+function h(tag,attrs,...kids){
+  const el=document.createElement(tag);
+  if(attrs)for(const [k,v] of Object.entries(attrs)){
+    if(v==null||v===false)continue;
+    if(k==="class")el.className=v;else if(k.startsWith("on"))el.addEventListener(k.slice(2),v);
+    else el.setAttribute(k,v===true?"":v);
+  }
+  kids.flat(Infinity).forEach(c=>{if(c==null||c===false)return;el.append(c.nodeType?c:document.createTextNode(c))});
+  return el;
+}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.style.display="block";clearTimeout(t._t);t._t=setTimeout(()=>t.style.display="none",2200)}
+function todayStr(){return new Date(Date.now()+8*3600*1000).toISOString().slice(0,10)}
+const WD="日一二三四五六";
+function fmtDate(s){const [y,mo,d]=s.split("-").map(Number);return mo+"/"+d+"（"+WD[new Date(Date.UTC(y,mo-1,d)).getUTCDay()]+"）"}
+const md=s=>{const [,mo,d]=s.split("-").map(Number);return mo+"/"+d};
+function mDateLabel(m){return m.dateEnd?md(m.date)+"–"+md(m.dateEnd).split("/")[1]:md(m.date)}
+function mWhen(m){return m.dateEnd?fmtDate(m.date)+"–"+fmtDate(m.dateEnd):fmtDate(m.date)+"　"+m.time}
+function gridRows(f){
+  if(f.rowGroups){const out=[];f.rowGroups.forEach((g,gi)=>g.rows.forEach((r,ri)=>out.push({label:r,group:gi,first:ri===0,span:g.rows.length,glabel:g.label})));return out}
+  return f.rows.map(r=>({label:r}));
+}
+const groupsFor=fid=>FORMS[fid].scope==="company"?["X"]:["A","B","C"];
+const splitLines=t=>String(t||"").split(/\n|；|;/).map(x=>x.replace(/^[\s・•\-\d.、)）]+/,"").trim()).filter(Boolean);
+function meetingDates(m){return m.dateEnd?[m.date,m.dateEnd]:[m.date]}
+function currentMeeting(){const t=todayStr();return MEETINGS.find(m=>meetingDates(m).includes(t))||MEETINGS.find(m=>m.date>t)||MEETINGS[MEETINGS.length-1]}
+function isMeetingDay(m){return meetingDates(m).includes(todayStr())}
+function checkinDateFor(m){const t=todayStr();return meetingDates(m).includes(t)?t:m.date}
+const ckId=d=>"checkin__"+d.replace(/-/g,"");
+function checkedIn(d){return Store.body(ckId(d)).cells}
+function allForms(m){const s=[];const add=f=>{if(f&&!s.includes(f))s.push(f)};m.agenda.forEach(a=>{(a.forms||[]).forEach(add);(a.topic||[]).forEach(add);(a.live||[]).forEach(add);(a.report||[]).forEach(add)});(m.pforms||[]).forEach(add);return s}
+function fillCount(fid,g){
+  const f=FORMS[fid];const id=docId(fid,g);const b=Store.body(id);
+  if(["sw","list","traits8","board"].includes(f.type))return Store.items(id).length+" 項";
+  if(f.type==="roles"){let n=0;if(b.cells.leader)n++;ROLE_MEETINGS.forEach(([m])=>{if(b.cells["rec_"+m])n++;if(b.cells["rep_"+m])n++});return n+"/"+(1+ROLE_MEETINGS.length*2)}
+  const rows=gridRows(f).length,cols=f.cols.length;let n=0;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if((b.cells["r"+r+"c"+c]||"").trim())n++;
+  (f.topFields||[]).forEach(([k])=>{if((b.cells[k]||"").trim())n++});
+  return n+"/"+(rows*cols+(f.topFields||[]).length);
+}
+const minLabel=(a,short)=>a.min?a.min+(short?" 分":" 分鐘"):a.repMin?"每組 "+a.repMin+(short?" 分":" 分鐘"):"";
+function live(el,draw){el.setAttribute("data-live","");el._draw=()=>{el.innerHTML="";draw(el)};draw(el);return el}
+
+/* ================= 狀態 ================= */
+const state={mode:"participant",meeting:currentMeeting().id,form:null,group:"A",pMeeting:null,pForm:null,selTag:null,poolCat:{}};
+try{state.mode=localStorage.getItem("linco-mode")||"participant"}catch(e){}
+const getMe=()=>{try{return localStorage.getItem("linco-me")||""}catch(e){return ""}};
+const setMe=n=>{try{n?localStorage.setItem("linco-me",n):localStorage.removeItem("linco-me")}catch(e){}};
+function setMode(m){state.mode=m;try{localStorage.setItem("linco-mode",m)}catch(e){}render();window.scrollTo(0,0)}
+
+/* ================= 表格元件 ================= */
+function buildForm(fid,g,ro,opts){
+  const f=FORMS[fid];
+  if(f.type==="grid")return buildGrid(fid,g,ro);
+  if(f.type==="sw")return buildSW(fid,g,ro);
+  if(f.type==="roles")return buildRoles(fid,g,ro,opts&&opts.compact);
+  if(f.type==="list")return buildList(fid,g,ro);
+  if(f.type==="traits8")return buildTraits8(ro);
+  if(f.type==="board")return buildBoard(fid,g,ro);
+}
+function cellArea(id,key,ro,ph){
+  if(ro)return h("div",{class:"cellro"},Store.cell(id,key));
+  const ta=h("textarea",{"data-doc":id,"data-key":key,placeholder:ph||"","aria-label":ph||key});
+  ta.value=Store.cell(id,key);ta.addEventListener("input",()=>Store.write(id,"cells",key,ta.value));return ta;
+}
+function buildGrid(fid,g,ro){
+  const f=FORMS[fid],id=docId(fid,g),rows=gridRows(f);
+  const frag=h("div");
+  if(f.topFields)frag.append(h("div",{class:"topfields"},f.topFields.map(([k,l])=>ro?h("div",null,h("b",null,l+"："),h("span",{style:"white-space:pre-wrap"},Store.cell(id,k)||"—")):h("label",null,l,cellArea(id,k,false,l)))));
+  const head=[];
+  if(f.colGroups){
+    head.push(h("tr",null,h("th",{rowspan:2},"部門"),f.colGroups.map(([l,n])=>n===1?h("th",{rowspan:2,style:"text-align:center;vertical-align:middle"},l):h("th",{colspan:n,style:"text-align:center"},l))));
+    head.push(h("tr",null,f.cols.filter(c=>!f.colGroups.some(x=>x[1]===1&&x[0]===c)).map(c=>h("th",null,c))));
+  }else{
+    head.push(h("tr",null,h("th",{colspan:f.rowGroups?2:1},f.rowGroups?"":"項目"),f.cols.map((c,ci)=>{
+      if(f.editableCols&&f.editableCols.includes(ci)){
+        const key="col"+ci,v=Store.cell(id,key);if(ro)return h("th",null,v||c);
+        const inp=h("input",{class:"colname","data-doc":id,"data-key":key,placeholder:c+"（輸入公司名稱）","aria-label":c+"名稱"});inp.value=v;
+        inp.addEventListener("input",()=>Store.write(id,"cells",key,inp.value));return h("th",null,inp);
+      }return h("th",null,c)})));
+  }
+  const body=rows.map((r,ri)=>h("tr",null,(f.rowGroups&&r.first)?h("th",{class:"grouph",rowspan:r.span},r.glabel):null,h("th",{class:"rowh"},r.label),
+    f.cols.map((c,ci)=>h("td",null,cellArea(id,"r"+ri+"c"+ci,ro)))));
+  frag.append(h("div",{class:"tablewrap"},h("table",{class:"sheet"+(f.wide?" wide":"")},h("thead",null,head),h("tbody",null,body))));
+  return frag;
+}
+const byT=(a,b)=>(a[1].t||0)-(b[1].t||0);
+function swMarks(v){const m=[];if(v.imp==="重要")m.push("重要");if(v.urg==="急需")m.push("急需");return m.length?h("span",{class:"mk"},"（"+m.join("・")+"）"):null}
+function sw7Table(g,itemsOverride){
+  const list=itemsOverride||Store.items(docId("sw",g)).sort(byT);
+  const cell=(dim,side)=>{const xs=list.filter(([k,v])=>v.side===side&&(v.dim||"")===dim&&(v.text||"").trim());return xs.length?h("ul",{class:"cellist"},xs.map(([k,v])=>h("li",null,v.text,swMarks(v)))):h("div",{class:"cellro"},"")};
+  const rows=DIM7.slice();if(list.some(([k,v])=>!v.dim&&(v.text||"").trim()))rows.push("");
+  return h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("thead",null,h("tr",null,h("th",null,"七大面向"),h("th",null,"內部能力（優勢）"),h("th",null,"內部能力（劣勢）"))),
+    h("tbody",null,rows.map(d=>h("tr",null,h("th",{class:"rowh"},d||"尚未分類"),h("td",null,cell(d,"S")),h("td",null,cell(d,"W")))))));
+}
+function buildSW(fid,g,ro){
+  const f=FORMS[fid],id=docId(fid,g);
+  if(ro)return live(h("div"),el=>el.append(sw7Table(g)));
+  const wrap=h("div");
+  const listBox=live(h("div"),el=>{
+    const all=Store.items(id).sort(byT);
+    [["S","強勢"],["W","弱勢"]].forEach(([side,label])=>{
+      const list=all.filter(([k,v])=>v.side===side);
+      const sec=h("div",{class:"swsec"},h("h4",null,h("span",{style:"font-family:var(--serif);font-weight:900;background:var(--ink);color:var(--paper);border-radius:6px;padding:0 8px"},side),label+"（"+side+"）"));
+      list.forEach(([k,v])=>sec.append(swRow(id,k,v)));
+      const addItem=(text,dim)=>{const k=uid();Store.write(id,"items",k,{side,text:text||"",dim:dim||"",imp:"",urg:"",t:Date.now()});setTimeout(()=>{const ta=wrap.querySelector('[data-item="'+k+'"] textarea');if(ta&&!text)ta.focus()},30)};
+      sec.append(h("button",{class:"add",onclick:()=>addItem()},"＋ 新增"+label+"要項"));
+      const unused=f.seed[side].filter(([x])=>!list.some(([k,v])=>v.text===x));
+      if(unused.length)sec.append(h("div",{class:"hints",style:"margin-top:8px"},h("span",{class:"lbl"},"百鮮起手例（點選帶入）："),unused.map(([x,d])=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>addItem(x,d)},x))));
+      el.append(sec);
+    });
+  });
+  wrap.append(listBox,h("div",{class:"sumtitle"},"依七大面向彙整（報告時使用）"),live(h("div"),el=>el.append(sw7Table(g))));
+  return wrap;
+}
+function swRow(id,k,v){
+  const cur=()=>Object.assign({},Store.body(id).items[k]||v);
+  const ta=h("textarea",{"aria-label":"要項內容",placeholder:"輸入要項…"});ta.value=v.text||"";
+  ta.addEventListener("input",()=>Store.write(id,"items",k,Object.assign(cur(),{text:ta.value})));
+  const dim=h("select",{"aria-label":"七大面向"},h("option",{value:""},"歸到哪個面向？"),DIM7.map(d=>h("option",{value:d},d)));dim.value=v.dim||"";
+  dim.addEventListener("change",()=>Store.write(id,"items",k,Object.assign(cur(),{dim:dim.value})));
+  const seg=(label,field,opts)=>h("div",{class:"seg",role:"group","aria-label":label},h("span",null,label),opts.map(o=>h("button",{"aria-pressed":String(v[field]===o),onclick:()=>{const nv=cur()[field]===o?"":o;Store.write(id,"items",k,Object.assign(cur(),{[field]:nv}))}},o)));
+  return h("div",{class:"item","data-item":k},ta,dim,seg("重要性","imp",["重要","普通"]),seg("急迫性","urg",["急需","普通"]),
+    h("button",{class:"del","aria-label":"刪除這一項",title:"刪除",onclick:()=>Store.write(id,"items",k,null)},"×"));
+}
+function buildRoles(fid,g,ro,compact){
+  const id=docId(fid,g),names=members(g).map(x=>x[0]);
+  const sel=key=>{const v=Store.cell(id,key);if(ro)return h("span",null,v||"—");
+    const s=h("select",{"data-doc":id,"data-key":key,"aria-label":GROUPS[g].name+key},h("option",{value:""},compact?"—":"— 請選擇 —"),names.map(n=>h("option",{value:n},n)));
+    if(v&&!names.includes(v))s.append(h("option",{value:v},v));s.value=v;s.addEventListener("change",()=>Store.write(id,"cells",key,s.value));return s};
+  if(compact)return h("div",null,h("div",{class:"rlead"},"組長",sel("leader")),h("div",{class:"rrow hd"},h("span",null,"會議"),h("span",null,"記錄人"),h("span",null,"報告人")),
+    ROLE_MEETINGS.map(([m,d])=>h("div",{class:"rrow"},h("span",null,d),sel("rec_"+m),sel("rep_"+m))));
+  return h("div",null,h("div",{class:"leader"},"組長",sel("leader")),h("div",{class:"tablewrap"},h("table",{class:"sheet",style:"min-width:420px"},
+    h("thead",null,h("tr",null,h("th",null,"會議"),h("th",null,"記錄人"),h("th",null,"報告人"))),
+    h("tbody",null,ROLE_MEETINGS.map(([m,d])=>h("tr",null,h("th",{class:"rowh"},d),h("td",{class:"sel"},sel("rec_"+m)),h("td",{class:"sel"},sel("rep_"+m))))))));
+}
+function buildList(fid,g,ro){
+  const f=FORMS[fid],id=docId(fid,g);
+  const wrap=h("div");
+  if(!ro){
+    const inp=h("input",{placeholder:"輸入一項特質，按 Enter 加入","aria-label":"特質"});
+    const add=t=>{t=(t||"").trim();if(!t)return;if(Store.items(id).some(([k,v])=>v.text===t)){toast("已經有這一項");return}Store.write(id,"items",uid(),{text:t,t:Date.now()})};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing){add(inp.value);inp.value=""}});
+    wrap.append(h("div",{class:"addrow"},inp,h("button",{class:"btn primary",onclick:()=>{add(inp.value);inp.value="";inp.focus()}},"加入")),
+      h("div",{class:"hints"},h("span",{class:"lbl"},"例如（點選帶入）："),f.examples.map(x=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>add(x)},x))));
+  }
+  wrap.append(live(h("div",{class:"tlist"}),el=>{const xs=Store.items(id).sort(byT);
+    if(!xs.length){el.append(h("span",{style:"color:var(--muted);font-size:14px"},"尚未填寫"));return}
+    xs.forEach(([k,v])=>el.append(h("span",{class:"tchip"},v.text,ro?null:h("button",{"aria-label":"刪除 "+v.text,onclick:()=>Store.write(id,"items",k,null)},"×"))))}));
+  return wrap;
+}
+function mergedTraits(){const map=new Map();["A","B","C"].forEach(g=>Store.items(docId("traits",g)).forEach(([k,v])=>{const t=(v.text||"").trim();if(!t)return;if(!map.has(t))map.set(t,new Set());map.get(t).add(g)}));return map}
+function buildTraits8(ro){
+  const id=docId("traits8","X");const wrap=h("div");
+  wrap.append(live(h("div",{class:"refbox"}),el=>{const m=mergedTraits();el.append(h("div",{class:"cap"},"上週各組列出的特質（共 "+m.size+" 項，圓點表示哪幾組提到）"),
+    m.size?h("div",{class:"tlist"},[...m.entries()].sort((a,b)=>b[1].size-a[1].size).map(([t,gs])=>h("span",{class:"tchip",style:"padding-right:12px"},t,h("span",{class:"gdots"},[...gs].map(g=>h("i",{style:"background:"+GROUPS[g].color})))))):h("span",{style:"color:var(--muted);font-size:14px"},"各組尚未填寫"))}));
+  wrap.append(live(h("div",{class:"t8"}),el=>{
+    const all=Store.items(id);const traits=all.filter(([k,v])=>v.kind==="trait").sort(byT);const noms=all.filter(([k,v])=>v.kind==="nom");
+    traits.forEach(([k,v],i)=>{
+      const mine=noms.filter(([nk,nv])=>nv.trait===k);const agg=new Map();mine.forEach(([nk,nv])=>{if(!agg.has(nv.name))agg.set(nv.name,[]);agg.get(nv.name).push(nk)});
+      let title;
+      if(ro)title=h("div",{class:"ro"},v.text||"—");
+      else{title=h("input",{class:"tt",maxlength:8,placeholder:"特質（8 字內）","aria-label":"特質名稱"});title.value=v.text||"";
+        title.addEventListener("input",()=>Store.write(id,"items",k,Object.assign({},Store.body(id).items[k]||v,{text:title.value.slice(0,8)})))}
+      const nomSel=h("select",{"aria-label":"提名代表人物"},h("option",{value:""},"提名…"),ALL_PEOPLE.map(([n])=>h("option",{value:n},n)));
+      const nomBtn=h("button",{onclick:()=>{if(!nomSel.value)return;Store.write(id,"items",uid(),{kind:"nom",trait:k,name:nomSel.value,by:getMe(),t:Date.now()});nomSel.value=""}},"提名");
+      el.append(h("div",{class:"t8row"},h("span",{class:"no"},i+1),title,
+        h("div",{class:"noms"},[...agg.entries()].sort((a,b)=>b[1].length-a[1].length).map(([n,ks])=>h("span",{class:"nom"},n,ks.length>1?h("b",null,"×"+ks.length):null,ro?null:h("button",{"aria-label":"收回一票",title:"收回一票",onclick:()=>Store.write(id,"items",ks[ks.length-1],null)},"×"))),
+          h("span",{class:"nomadd"},nomSel,nomBtn)),
+        ro?h("span"):h("button",{class:"del","aria-label":"刪除特質",onclick:()=>{Store.write(id,"items",k,null);mine.forEach(([nk])=>Store.write(id,"items",nk,null))}},"×")));
+    });
+    if(!ro){const n=traits.length;el.append(h("div",{style:"display:flex;align-items:center;gap:12px"},
+      h("button",{class:"add",disabled:n>=10?true:null,onclick:()=>Store.write(id,"items",uid(),{kind:"trait",text:"",t:Date.now()})},"＋ 新增特質"),
+      h("span",{style:"font-size:13px;color:var(--muted)"},"目前 "+n+" 項（目標 8–10 項）")))}
+    else if(!traits.length)el.append(h("div",{class:"cellro"},"尚未彙整"));
+  }));
+  return wrap;
+}
+
+/* ---- SO/WT 標籤池 ---- */
+function tagPool(){
+  const map=new Map();
+  const put=(cat,text,sub,g)=>{text=(text||"").trim();if(!text)return;const key=cat+"|"+text;if(!map.has(key))map.set(key,{key,cat,text,sub,groups:new Set()});if(g&&g!=="X")map.get(key).groups.add(g)};
+  ["A","B","C"].forEach(g=>{
+    Store.items(docId("sw",g)).sort(byT).forEach(([k,v])=>put(v.side==="W"?"W":"S",v.text,v.dim,g));
+    const pe=Store.body(docId("pestc",g)).cells;PESTC_ROWS.forEach((r,ri)=>{splitLines(pe["r"+ri+"c0"]).forEach(t=>put("O",t,r,g));splitLines(pe["r"+ri+"c1"]).forEach(t=>put("T",t,r,g))});
+    const se=Store.body(docId("self10",g)).cells;COMP10.forEach((r,ri)=>splitLines(se["r"+ri+"c0"]).forEach(t=>put("K",t,r,g)));
+    const cp=Store.body(docId("compare",g)).cells;[0,1].forEach(ci=>{const nm=cp["col"+ci]||("競爭者"+(ci+1));COMP10.forEach((r,ri)=>splitLines(cp["r"+ri+"c"+ci]).forEach(t=>put("R",t,nm+"・"+r,g)))});
+  });
+  Store.items(docId("tags","X")).sort(byT).forEach(([k,v])=>put("U",v.text,"",null));
+  return [...map.values()];
+}
+function buildBoard(fid,g,ro){
+  const f=FORMS[fid],id=docId(fid,g),rows=gridRows(f);
+  const wrap=h("div");
+  const place=(tag,cell)=>{Store.write(id,"items",uid(),{key:tag.key,cat:tag.cat,text:tag.text,cell,star:false,t:Date.now()})};
+  if(!ro){
+    if(!state.poolCat[fid])state.poolCat[fid]=f.defaultCats.slice();
+    wrap.append(live(h("div",{class:"pool"}),el=>{
+      const pool=tagPool();const placed=Store.items(id);const used=new Set(placed.map(([k,v])=>v.key));
+      const cats=state.poolCat[fid];
+      el.append(h("div",{class:"filters"},h("span",{style:"font-size:13px;color:var(--muted)"},"標籤來源："),Object.entries(CATS).map(([c,[nm,col]])=>{
+        const n=pool.filter(t=>t.cat===c).length;
+        return h("button",{"aria-pressed":String(cats.includes(c)),onclick:()=>{const i=cats.indexOf(c);i>=0?cats.splice(i,1):cats.push(c);el._draw()}},h("i",{class:"cd",style:"width:8px;height:8px;border-radius:50%;background:"+col}),nm+" "+n)})));
+      const shown=pool.filter(t=>cats.includes(t.cat));
+      el.append(h("div",{class:"tags"},shown.length?shown.map(t=>{
+        const chip=h("button",{class:"tag"+(state.selTag&&state.selTag.key===t.key?" sel":"")+(used.has(t.key)?" used":""),draggable:"true",title:t.sub||"",
+          onclick:()=>{state.selTag=state.selTag&&state.selTag.key===t.key?null:t;el._draw();armCells()}},
+          h("i",{class:"cd",style:"background:"+CATS[t.cat][1]}),t.text,t.sub?h("small",null,t.sub):null,h("span",{class:"gdots"},[...t.groups].map(x=>h("i",{style:"background:"+GROUPS[x].color}))));
+        chip.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",JSON.stringify({tag:t}));e.dataTransfer.effectAllowed="copy"});
+        return chip}):h("span",{style:"font-size:13px;color:var(--muted)"},"這個來源目前沒有內容")));
+      const inp=h("input",{placeholder:"新增自訂標籤（全公司共用）",style:"flex:1 1 200px;border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:var(--field)","aria-label":"自訂標籤"});
+      const addU=()=>{const t=inp.value.trim();if(!t)return;Store.write(docId("tags","X"),"items",uid(),{text:t,t:Date.now()});inp.value="";if(!cats.includes("U"))cats.push("U")};
+      inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)addU()});
+      el.append(h("div",{class:"addrow",style:"margin:8px 0 0"},inp,h("button",{class:"btn",onclick:addU},"新增")),
+        h("div",{class:"hintline"},state.selTag?"已選取「"+state.selTag.text+"」，點下方任一格放入":"電腦：直接把標籤拖進格子｜手機：先點標籤，再點格子"));
+    }));
+  }
+  const table=h("table",{class:"sheet board wide"});
+  const armCells=()=>table.querySelectorAll("td[data-cell]").forEach(td=>td.classList.toggle("armed",!!state.selTag));
+  table.append(h("thead",null,h("tr",null,h("th",{colspan:2},f.board),f.cols.map(c=>h("th",null,c)))));
+  const tb=h("tbody");
+  rows.forEach((r,ri)=>{
+    const tr=h("tr",null,r.first?h("th",{class:"grouph",rowspan:r.span},r.glabel):null,h("th",{class:"rowh"},r.label));
+    f.cols.forEach((c,ci)=>{
+      const cell="r"+ri+"c"+ci;
+      const drop=live(h("div",{class:"drop"}),el=>{
+        Store.items(id).filter(([k,v])=>v.cell===cell).sort(byT).forEach(([k,v])=>{
+          const chip=h("span",{class:"tag"+(v.star?" star-on":""),draggable:ro?null:"true"},h("i",{class:"cd",style:"background:"+(CATS[v.cat]||CATS.U)[1]}),v.text,
+            ro?(v.star?h("span",{class:"star on"},"★"):null):h("button",{class:"star"+(v.star?" on":""),"aria-label":"標記重要",title:"標記重要",onclick:e=>{e.stopPropagation();Store.write(id,"items",k,Object.assign({},v,{star:!v.star}))}},v.star?"★":"☆"),
+            ro?null:h("button",{class:"x","aria-label":"移除",title:"移除",onclick:e=>{e.stopPropagation();Store.write(id,"items",k,null)}},"×"));
+          if(!ro)chip.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",JSON.stringify({move:k}));e.dataTransfer.effectAllowed="move"});
+          el.append(chip);
+        });
+      });
+      const td=h("td",{"data-cell":cell},drop);
+      if(!ro){
+        td.addEventListener("dragover",e=>{e.preventDefault();td.classList.add("hot")});
+        td.addEventListener("dragleave",()=>td.classList.remove("hot"));
+        td.addEventListener("drop",e=>{e.preventDefault();td.classList.remove("hot");let d;try{d=JSON.parse(e.dataTransfer.getData("text/plain"))}catch(x){return}
+          if(d.tag)place(d.tag,cell);else if(d.move){const v=Store.body(id).items[d.move];if(v)Store.write(id,"items",d.move,Object.assign({},v,{cell}))}});
+        td.addEventListener("click",()=>{if(state.selTag){place(state.selTag,cell);state.selTag=null;armCells();const p=wrap.querySelector(".pool");if(p&&p._draw)p._draw()}});
+      }
+      tr.append(td);
+    });
+    tb.append(tr);
+  });
+  table.append(tb);
+  wrap.append(h("div",{class:"tablewrap"},table));
+  setTimeout(armCells,0);
+  return wrap;
+}
+
+/* ================= 範例 ================= */
+function example7Table(){return h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("thead",null,h("tr",null,h("th",null,"七大面向"),h("th",null,"內部能力（優勢）"),h("th",null,"內部能力（劣勢）"))),
+  h("tbody",null,DIM7.map((r,i)=>h("tr",null,h("th",{class:"rowh"},r),FORMS.sw.example7[i].map(v=>h("td",null,h("div",{class:"cellro"},v))))))))}
+function xmfTable(){return h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("tbody",null,COMP10.map((r,i)=>h("tr",null,h("th",{class:"rowh"},r),h("td",null,h("div",{class:"cellro"},XMF[i])))))))}
+function examplesFor(fid){
+  const f=FORMS[fid];const out=[];
+  if(f.type==="sw")out.push(h("details",{class:"example"},h("summary",null,"參考案例：康師傅（依七大面向整理）"),example7Table()));
+  if(f.example==="xmf")out.push(h("details",{class:"example"},h("summary",null,"參考範例：小磨坊國際貿易股份有限公司"),xmfTable()));
+  if(f.hints)out.push(h("div",{class:"hints"},h("span",{class:"lbl"},"討論提示："),f.hints.map(x=>h("span",{class:"chip"},x))));
+  return out;
+}
+
+/* ================= 主持人頁 ================= */
+function statusEl(){return h("span",{class:"status "+Store.statusKind},h("i"),h("span",null,Store.statusText||"連線中…"))}
+function render(){state.mode==="host"?renderHost():renderParticipant()}
+function renderHost(){
+  const root=$("#app");root.innerHTML="";
+  const m=MEETINGS.find(x=>x.id===state.meeting);
+  const wrap=h("div",{class:"wrap"});
+  const exportBtn=h("button",{class:"btn",onclick:exportCSV},"匯出 CSV");
+  wrap.append(h("header",{class:"top"},h("div",{class:"brand"},h("h1",null,"百鮮 2026 年度檢討・週會工作台"),h("p",null,"主持人畫面｜會議流程、簡報與各組表格")),
+    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"))));
+  const t=todayStr();
+  wrap.append(h("nav",{class:"timeline","aria-label":"會議時程"},MEETINGS.map(x=>{
+    const cls=["tl-item"];const last=x.dateEnd||x.date;if(last<t)cls.push("past");if(meetingDates(x).includes(t))cls.push("today");if(x.id===m.id)cls.push("active");
+    return h("button",{class:cls.join(" "),"aria-current":x.id===m.id?"true":null,onclick:()=>{state.meeting=x.id;state.form=null;render()}},
+      h("div",{class:"d"},mDateLabel(x)),h("div",{class:"n"},x.no),h("div",{class:"s"},x.theme))})));
+  const forms=allForms(m);
+  if(!state.form||!forms.includes(state.form))state.form=forms[0]||null;
+  const ckDates=m.agenda.filter(a=>a.checkin).map(a=>a.date||m.date);
+  const ag=h("aside",{class:"agenda"},h("h2",null,"2026 年度檢討　"+m.no),h("div",{class:"when"},mWhen(m)),
+    h("ol",null,m.agenda.map(a=>a.day?h("li",{class:"dayhead"},a.day):h("li",null,h("span",{class:"t"},a.t),h("span",{class:"min"},minLabel(a)),a.sub?h("span",{class:"sub"},a.sub):null,
+      [...new Set([...(a.forms||[]),...(a.live||[])])].length?h("span",{class:"jump"},[...new Set([...(a.forms||[]),...(a.live||[])])].map(f=>h("button",{onclick:()=>{state.form=f;renderHostForms(m)}},"表格："+FORMS[f].short))):null))),
+    ckDates.map(d=>live(h("div",{class:"checkbar"}),el=>{const n=Object.values(checkedIn(d)).filter(Boolean).length;el.append(h("span",null,(ckDates.length>1?md(d)+" ":"")+"報到 ",h("b",null,n),"／"+ALL_PEOPLE.length+" 人"),h("button",{class:"btn",style:"padding:3px 10px",onclick:()=>openCheckins(d)},"名單"))})),
+    m.next?h("div",{class:"next"},h("b",null,"下次議題"),m.next.topic,h("br"),h("span",{style:"color:var(--muted)"},"時間："+m.next.when)):null,
+    h("button",{class:"btn primary present",onclick:()=>Deck.open(m)},"▶ 開始會議簡報"));
+  wrap.append(h("section",{class:"meeting"},ag,h("div",{id:"formArea"})));
+  root.append(wrap);
+  renderHostForms(m);
+}
+function renderHostForms(m){
+  const area=$("#formArea");if(!area)return;area.innerHTML="";const forms=allForms(m);
+  if(!forms.length){area.append(h("div",{class:"empty"},"這次會議沒有需要填寫的表格，可直接開始會議簡報。"));return}
+  area.append(h("div",{class:"formtabs",role:"tablist"},forms.map(f=>h("button",{class:"formtab",role:"tab","aria-selected":String(f===state.form),onclick:()=>{state.form=f;state.selTag=null;renderHostForms(m)}},FORMS[f].short))));
+  const f=FORMS[state.form],groups=groupsFor(state.form);
+  if(!groups.includes(state.group))state.group=groups[0];
+  const gsel=h("div",{class:"groupsel",role:"group","aria-label":"選擇組別"},groups.map(g=>h("button",{"aria-pressed":String(g===state.group),onclick:()=>{state.group=g;renderHostForms(m)}},
+    h("span",{class:"dot",style:"background:"+GROUPS[g].color}),GROUPS[g].name,live(h("span",{class:"fill"}),el=>el.append(fillCount(state.form,g))))));
+  area.append(h("div",{class:"formhead"},h("div",null,h("h3",null,f.title),h("p",null,f.desc)),gsel));
+  if(state.group!=="X")area.append(h("p",{class:"members"},h("b",null,GROUPS[state.group].name+"成員："),members(state.group).map(x=>x[0]).join("、")));
+  area.append(...examplesFor(state.form),buildForm(state.form,state.group,false));
+}
+
+/* ================= 與會者頁 ================= */
+function renderParticipant(){
+  const root=$("#app");root.innerHTML="";
+  const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));
+  const me=getMe();const g=me?groupOf(me):null;const d=checkinDateFor(m);const today=isMeetingDay(m);
+  const wrap=h("div",{class:"pwrap"});
+  const msel=h("select",{"aria-label":"切換會議",style:"min-width:0"},MEETINGS.map(x=>h("option",{value:x.id},mDateLabel(x)+" "+x.no)));msel.value=m.id;
+  msel.addEventListener("change",()=>{state.pMeeting=msel.value;state.pForm=null;render()});
+  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮 2026 年度檢討"),h("h1",null,m.no+"・"+m.theme),h("div",{class:"dt"},mWhen(m))),msel));
+  if(!me){
+    const pick=h("div",{class:"pick"},h("h2",null,today?"請點選你的名字完成報到":"請點選你的名字"));
+    const ck=checkedIn(d);
+    ["A","B","C"].forEach(x=>{pick.append(h("div",{class:"gl"},h("span",{class:"dot",style:"width:9px;height:9px;border-radius:50%;display:inline-block;background:"+GROUPS[x].color}),GROUPS[x].name),
+      h("div",{class:"names"},GROUPS[x].members.map(([n])=>h("button",{class:ck[n]?"done":null,onclick:()=>choose(n)},n))))});
+    pick.append(h("div",{class:"gl"},"總經理室"),h("div",{class:"names"},GM.map(([n])=>h("button",{class:ck[n]?"done":null,onclick:()=>choose(n)},n))));
+    wrap.append(pick);
+    function choose(n){setMe(n);if(today&&!checkedIn(d)[n])Store.write(ckId(d),"cells",n,new Date().toISOString());render();if(today)toast(n+" 報到完成")}
+  }else{
+    wrap.append(live(h("div",{class:"meCard"}),el=>{
+      const t=checkedIn(d)[me];
+      el.append(h("div",{class:"who"},me,g?h("span",{style:"display:inline-flex;align-items:center;gap:6px;font-weight:500"},h("span",{class:"dot",style:"width:9px;height:9px;border-radius:50%;display:inline-block;background:"+GROUPS[g].color}),GROUPS[g].name):h("span",{style:"font-weight:500;color:var(--muted)"},"（分組待抽籤）"),
+        today?(t?h("span",{class:"ok"},"✓ 已報到 "+new Date(t).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Taipei"})):h("button",{class:"bigbtn",onclick:()=>{Store.write(ckId(d),"cells",me,new Date().toISOString());toast("報到完成")}},"報到")):null),
+        h("button",{class:"linkbtn",onclick:()=>{setMe("");render()}},"不是我，重新選擇"));
+    }));
+    const forms=m.pforms||[];
+    if(!state.pForm||!forms.includes(state.pForm))state.pForm=forms[0];
+    if(forms.length>1)wrap.append(h("div",{class:"formtabs",role:"tablist"},forms.map(f=>h("button",{class:"formtab",role:"tab","aria-selected":String(f===state.pForm),onclick:()=>{state.pForm=f;state.selTag=null;render()}},FORMS[f].short))));
+    const f=FORMS[state.pForm];
+    if(f){
+      const company=f.scope==="company";
+      wrap.append(h("div",{class:"formhead"},h("div",null,h("h3",null,f.title+(company?"":g?"｜"+GROUPS[g].name:"")),h("p",null,f.desc))));
+      if(!company&&!g)wrap.append(h("div",{class:"empty"},"分組抽籤後即可填寫。"));
+      else wrap.append(...examplesFor(state.pForm),buildForm(state.pForm,company?"X":g,false));
+    }
+  }
+  wrap.append(h("div",{class:"pfoot"},statusEl(),h("br"),h("button",{onclick:()=>setMode("host")},"主持人畫面")));
+  root.append(wrap);
+}
+
+/* ================= 即時更新 ================= */
+function refreshLive(){
+  const a=document.activeElement;
+  document.querySelectorAll("#app [data-doc][data-key]").forEach(el=>{if(el===a)return;const v=Store.cell(el.dataset.doc,el.dataset.key);if(el.value!==v)el.value=v});
+  document.querySelectorAll("#app [data-live]").forEach(el=>{
+    if(el.parentElement&&el.parentElement.closest("[data-live]"))return;
+    const typing=a&&el.contains(a)&&["TEXTAREA","INPUT","SELECT"].includes(a.tagName);
+    if(!typing)el._draw();
+  });
+  if(Deck.isOpen)Deck.refresh();
+  if($("#rosterDlg").classList.contains("open"))$("#rosterDlg")._draw&&$("#rosterDlg")._draw();
+}
+Store.subs.add(refreshLive);
+
+/* ================= 名單／報到 對話框 ================= */
+function openDialog(title,draw){
+  const dlg=$("#rosterDlg");$("#rosterTitle").textContent=title;
+  dlg._draw=()=>{const b=$("#rosterBody");b.innerHTML="";draw(b)};dlg._draw();dlg.classList.add("open");$("#rosterDlg [data-close]").focus();
+}
+function openRoster(){openDialog("分組名單",b=>{
+  ["A","B","C"].forEach(g=>{const lead=Store.cell(docId("roles",g),"leader");
+    b.append(h("div",null,h("h3",null,h("span",{class:"dot",style:"width:10px;height:10px;border-radius:50%;display:inline-block;background:"+GROUPS[g].color}),GROUPS[g].name),
+      h("ul",null,members(g).map(([n,u])=>h("li",null,h("span",null,n,n===lead?h("span",{class:"lead"}," 組長"):null),h("small",null,u))))))});
+  const u=undrawn();
+  if(u.length)b.append(h("div",null,h("h3",null,"總經理室（待抽籤）"),h("ul",null,u.map(([n,d])=>h("li",null,h("span",null,n),h("small",null,d)))),
+    h("button",{class:"btn primary",style:"margin-top:10px",onclick:doDraw},"抽籤分組")));
+})}
+function openCheckins(d){openDialog(md(d)+" 報到名單",b=>{
+  const ck=checkedIn(d);
+  ["A","B","C"].forEach(g=>b.append(h("div",null,h("h3",null,GROUPS[g].name),h("ul",null,members(g).map(([n])=>h("li",null,h("span",null,n),h("small",{style:ck[n]?"color:var(--gB)":""},ck[n]?"✓ 已報到":"未報到")))))));
+  const u=undrawn();if(u.length)b.append(h("div",null,h("h3",null,"總經理室"),h("ul",null,u.map(([n])=>h("li",null,h("span",null,n),h("small",{style:ck[n]?"color:var(--gB)":""},ck[n]?"✓ 已報到":"未報到"))))));
+  b.append(h("div",{style:"grid-column:1/-1;font-size:13px;color:var(--muted)"},"點名字可手動切換報到狀態："),
+    h("div",{class:"tlist",style:"grid-column:1/-1"},ALL_PEOPLE.map(([n])=>h("button",{class:"btn",style:"padding:3px 10px;font-size:13px"+(ck[n]?";background:var(--mist)":""),onclick:()=>Store.write(ckId(d),"cells",n,ck[n]?"":new Date().toISOString())},(ck[n]?"✓ ":"")+n))));
+})}
+$("#rosterDlg").addEventListener("click",e=>{if(e.target.id==="rosterDlg"||e.target.hasAttribute("data-close"))$("#rosterDlg").classList.remove("open")});
+
+/* ================= 簡報 ================= */
+function pageURL(){return (window.claude?ARTIFACT_URL:location.href.split("#")[0])}
+const Deck={
+  isOpen:false,slides:[],i:0,m:null,timer:null,repGroup:"A",animating:false,
+  open(m){this.m=m;this.slides=this.build(m);this.i=0;this.isOpen=true;$("#deck").classList.add("open");
+    try{if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}this.show()},
+  close(){this.stopTimer();this.isOpen=false;$("#deck").classList.remove("open");try{if(document.fullscreenElement)document.exitFullscreen()}catch(e){}},
+  build(m){
+    const S=[{k:"cover"},{k:"flow"}],seen=new Set();let curDate=m.date;
+    m.agenda.forEach(a=>{
+      if(a.day){curDate=a.date;S.push({k:"day",a});return}
+      if(a.checkin)S.push({k:"checkin",date:a.date||curDate});
+      if(a.roadmap)S.push({k:"road"});
+      if(a.members)S.push({k:"members"});
+      if(a.example==="xmf")S.push({k:"xmf"});
+      [...(a.topic||[]),...(a.forms||[])].forEach(f=>{if(f!=="roles"&&!seen.has(f)){seen.add(f);S.push({k:"topic",a,f})}});
+      if(a.min&&!a.dept&&!a.sand)S.push({k:"timer",a,min:a.min,title:"分組討論 "+a.min+" 分鐘"});
+      if((a.forms||[]).includes("roles")&&!seen.has("roles")){seen.add("roles");S.push({k:"roles"})}
+      (a.live||[]).forEach(f=>S.push({k:"live",a,f}));
+      (a.preview||[]).forEach(f=>S.push({k:"topic",a,f,preview:true}));
+      if(a.report&&a.repMin)S.push({k:"timer",a,min:a.repMin,title:"分組報告・每組 "+a.repMin+" 分鐘",sub:"每組報告前按「重設」重新計時"});
+      (a.report||[]).forEach(f=>S.push({k:"report",a,f}));
+      if(a.dept){S.push({k:"dept",a});S.push({k:"timer",a,min:a.min,title:a.dept+"報告 "+a.min+" 分鐘"})}
+      if(a.sand){S.push({k:"sand",a});S.push({k:"timer",a,min:a.min,title:a.sand+" 沙盤推演 "+a.min+" 分鐘"})}
+    });
+    S.push({k:"next"});return S;
+  },
+  show(){
+    this.stopTimer();
+    const s=this.slides[this.i],el=$("#slide"),m=this.m;el.innerHTML="";
+    const add=(...k)=>el.append(...k.flat(Infinity).filter(x=>x!=null&&x!==false));
+    const kick=t=>h("div",{class:"kicker"},t);
+    $("#dCount").textContent=(this.i+1)+" / "+this.slides.length;
+    if(s.k==="cover")add(kick("百鮮企業有限公司"),h("h1",null,m.id==="m7"?"2027 年度計劃工作坊":"2026 年度檢討",h("br"),m.id==="m7"?"11/20–11/21":m.no),h("p",{class:"lead"},"日期："+mWhen(m)+"　｜　主題："+m.theme));
+    if(s.k==="flow"){
+      const items=m.agenda;
+      if(items.some(a=>a.day)){const days=[];items.forEach(a=>{if(a.day)days.push({d:a.day,xs:[]});else if(!a.checkin)days[days.length-1].xs.push(a)});
+        add(kick(m.no),h("h2",null,"兩天流程"),h("div",{class:"twocol"},days.map(d=>h("div",null,h("h3",null,d.d),h("ol",{class:"flow"},d.xs.map(a=>h("li",null,a.t,minLabel(a,1)?h("small",null,minLabel(a,1)):null)))))));
+      }else add(kick(m.no),h("h2",null,"會議流程"),h("ol",{class:"flow"},items.filter(a=>!a.checkin).map(a=>h("li",null,a.t,minLabel(a)?h("small",null,minLabel(a)):null))),m.next?h("p",{class:"lead"},"下次會議："+m.next.when):null);
+    }
+    if(s.k==="day")add(kick(m.no),h("div",{class:"daybig"},s.a.day));
+    if(s.k==="checkin"){
+      const qr=h("div",{class:"code"});let ok=false;try{if(window.QRCode){new QRCode(qr,{text:pageURL(),width:220,height:220});ok=true}}catch(e){}
+      const ck=checkedIn(s.date);const n=Object.values(ck).filter(Boolean).length;
+      add(kick("掃碼報到"+(m.dateEnd?"・"+md(s.date):"")),h("div",{class:"qrbig"},ok?qr:null,h("div",null,h("h2",{style:"margin-bottom:1vh"},"手機掃描，點選名字即完成報到"),
+        h("div",{style:"display:flex;align-items:baseline;gap:12px"},h("span",{class:"count"},n),h("span",{style:"font-size:clamp(16px,2vw,28px);color:#C6D1DC"},"／"+ALL_PEOPLE.length+" 人已報到")),
+        ok?null:h("p",{class:"lead",style:"word-break:break-all"},pageURL()))),
+        h("div",{class:"ckgrid"},["A","B","C"].map(g=>h("div",null,h("h3",{style:"color:"+DARK_GC[g]},GROUPS[g].name),members(g).map(([x])=>h("div",{class:ck[x]?"in":null},x)))),
+          undrawn().length?h("div",null,h("h3",null,"總經理室"),undrawn().map(([x])=>h("div",{class:ck[x]?"in":null},x))):null));
+    }
+    if(s.k==="road")add(kick("整體時程"),h("h2",null,"2026 年度檢討到 2027 年度計劃"),h("div",{class:"road"},MEETINGS.map(x=>h("div",{class:x.id===m.id?"hl":""},h("b",null,mDateLabel(x)),h("span",null,x.theme)))));
+    if(s.k==="members"){
+      const u=undrawn();
+      add(kick("分組名單"),h("h2",null,"分組名單・決定組長"),h("div",{class:"rgrid"},["A","B","C"].map(g=>{const lead=Store.cell(docId("roles",g),"leader");
+        return h("div",null,h("h3",{style:"color:"+DARK_GC[g]},GROUPS[g].name),members(g).map(([n,d])=>h("div",{class:d==="總經理室"?"drawn":null},n+(n===lead?"（組長）":""),h("span",{style:"color:#9FB0C0;font-size:.8em;margin-left:8px"},d))))})));
+      if(u.length){const who=h("div",{class:"who"},u.map(([n])=>h("span",null,n,h("b",{"data-draw":n},"？"))));
+        const btn=h("button",{class:"go",onclick:()=>{btn.disabled=true;this.animating=true;let t=0;const iv=setInterval(()=>{who.querySelectorAll("[data-draw]").forEach(b=>b.textContent="ABC"[Math.floor(Math.random()*3)]);if((t+=90)>=1800){clearInterval(iv);this.animating=false;doDraw();setTimeout(()=>this.show(),60)}},90)}},"開始抽籤");
+        add(h("div",{class:"draw"},h("span",null,"總經理室："),who,h("div",{class:"tctl"},btn)));
+      }else{const rb=h("button",{class:"smallbtn",onclick:()=>{if(rb.dataset.c){GM.forEach(([n])=>Store.write(DRAW_ID,"cells",n,""));setTimeout(()=>this.show(),60)}else{rb.dataset.c="1";rb.textContent="確定要重新抽籤？再按一次"}}},"重新抽籤");add(rb)}
+    }
+    if(s.k==="xmf")add(kick("競爭者分析範例"),h("h2",null,"小磨坊國際貿易股份有限公司"),h("div",{class:"rep"},xmfTable()));
+    if(s.k==="topic"){
+      const f=FORMS[s.f];let struct=[],extra=null;
+      if(f.type==="sw"){struct=["① 列出強勢（S）／弱勢（W）","② 歸到七大面向","③ 標記重要性、急迫性"];extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅（依七大面向整理）"),example7Table())}
+      else if(f.type==="list"){struct=f.examples;extra=null}
+      else if(f.type==="board"){const pool=tagPool();struct=Object.entries(CATS).map(([c,[nm]])=>nm+" "+pool.filter(t=>t.cat===c).length+" 項")}
+      else struct=f.rowGroups?f.rowGroups.map(g=>g.label):(f.rows||[]);
+      add(kick(s.preview?"下次討論主題":"討論主題"),h("h2",{style:"margin-bottom:1vh"},f.title),h("p",{class:"lead",style:"margin-top:0"},f.desc),
+        f.type==="list"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"例如："):null,
+        h("div",{class:"chips"},struct.map(x=>h("span",null,x))),
+        f.hints?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"提示："+f.hints.join("、")):null,
+        f.type==="sw"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"百鮮起手例：強勢－"+f.seed.S.map(x=>x[0]).join("、")+"；弱勢－"+f.seed.W.map(x=>x[0]).join("、")):null,
+        extra);
+    }
+    if(s.k==="timer"){
+      const total=s.min*60;let left=total,running=false,last=0;
+      const disp=h("div",{class:"timer"});const fmt=()=>{const a=Math.abs(left);disp.textContent=(left<0?"-":"")+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0");disp.classList.toggle("over",left<0)};
+      const go=h("button",{class:"go",onclick:()=>{running=!running;go.textContent=running?"暫停":"繼續";if(running){last=Date.now();this.timer=setInterval(()=>{const now=Date.now();if(now-last>=1000){left-=Math.floor((now-last)/1000);last=now-((now-last)%1000);fmt()}},250)}else this.stopTimer()}},"開始計時");
+      fmt();add(kick(s.a.t),h("h2",null,s.title),s.sub||s.a.sub?h("p",{class:"lead",style:"margin:0"},s.sub||s.a.sub):null,disp,
+        h("div",{class:"tctl"},go,h("button",{onclick:()=>{left+=60;fmt()}},"＋1 分鐘"),h("button",{onclick:()=>{this.stopTimer();running=false;go.textContent="開始計時";left=total;fmt()}},"重設")));
+    }
+    if(s.k==="roles")add(kick("分工確認"),h("h2",{style:"margin-bottom:2vh"},"組長・記錄人・報告人"),h("div",{class:"rolesall"},["A","B","C"].map(g=>h("div",null,h("h3",{style:"color:"+DARK_GC[g]},GROUPS[g].name),buildRoles("roles",g,false,true)))));
+    if(s.k==="live")add(kick(s.a.t),h("h2",{style:"margin-bottom:1vh"},FORMS[s.f].title),h("p",{class:"lead",style:"margin:0 0 2vh;font-size:clamp(14px,1.5vw,21px)"},FORMS[s.f].desc),h("div",{class:"light",id:"repBox"},buildForm(s.f,"X",false)));
+    if(s.k==="report"){
+      const f=FORMS[s.f],groups=groupsFor(s.f);if(!groups.includes(this.repGroup))this.repGroup=groups[0];
+      const tabs=h("div",{class:"rep-tabs"},groups.map(g=>h("button",{"aria-pressed":String(g===this.repGroup),onclick:()=>{this.repGroup=g;this.show()}},GROUPS[g].name)));
+      const box=h("div",{class:"rep",id:"repBox"});box.append(f.type==="sw"?sw7Table(this.repGroup):buildForm(s.f,this.repGroup,true));
+      add(kick(s.a.t.startsWith("分組報告")?s.a.t:"成果呈現"),h("h2",{style:"margin-bottom:2vh"},f.type==="sw"?"內部能力分析・七大面向":f.title),groups.length>1?tabs:null,box);
+    }
+    if(s.k==="dept"){
+      const id=docId("strategy","X"),b=Store.body(id).cells,units=DEPT_UNITS[s.a.dept];
+      add(kick("各部門年度計劃報告"),h("h2",{style:"margin-bottom:1vh"},s.a.dept),
+        h("ul",{class:"bl",style:"margin-top:1vh"},h("li",null,h("b",null,"1"),"年度目標與策略展開"),h("li",null,h("b",null,"2"),"KPI 指標與目標值"),h("li",null,h("b",null,"3"),"重點專案展開（負責人、時程、Q1–Q4 里程碑）")),
+        h("div",{class:"rep",style:"margin-top:3vh"},h("div",{class:"cap",style:"padding:8px 12px;font-size:13px;color:#5E6B78"},"11/4 策略展開中本部門的內容"),
+          h("table",{class:"sheet"},h("thead",null,h("tr",null,h("th",null,""),units.map(u=>h("th",null,STRAT_COLS[u])))),
+            h("tbody",null,["策略展開（專案）","KPI 指標"].map((r,ri)=>h("tr",null,h("th",{class:"rowh"},r),units.map(u=>h("td",null,h("div",{class:"cellro"},b["r"+ri+"c"+u]||"")))))))));
+    }
+    if(s.k==="sand")add(kick("沙盤推演"),h("h2",null,s.a.sand+" 沙盤推演"),h("p",{class:"lead",style:"margin-top:0"},"以"+(s.a.sand==="Q1"?"第一季（1–3 月）":"第二季（4–6 月）")+"為情境，各部門依年度計劃逐月推演。"),
+      h("ul",{class:"bl"},h("li",null,h("b",null,"1"),"本季目標與 KPI：要達成什麼？"),h("li",null,h("b",null,"2"),"各部門行動：誰、何時、做什麼？"),h("li",null,h("b",null,"3"),"跨部門銜接：需要誰配合、資源夠不夠？"),h("li",null,h("b",null,"4"),"可能狀況與因應：旺季、缺工、原物料、客戶變動")));
+    if(s.k==="next"){if(m.next)add(kick("下次議題說明"),h("h1",null,m.next.topic),h("p",{class:"lead"},"下次會議時間："+m.next.when));else add(kick("百鮮企業有限公司"),h("h1",null,"2027，一起出發"),h("p",{class:"lead"},"感謝大家這兩個月的投入"))}
+    el.scrollTop=0;
+  },
+  refresh(){
+    const s=this.slides[this.i];if(!s||this.animating)return;const el=$("#slide");const a=document.activeElement;
+    if(!["checkin","report","members","roles","live","dept","topic"].includes(s.k))return;
+    if(a&&el.contains(a)&&["SELECT","INPUT","TEXTAREA"].includes(a.tagName)){
+      el.querySelectorAll("[data-doc][data-key]").forEach(x=>{if(x!==a){const v=Store.cell(x.dataset.doc,x.dataset.key);if(x.value!==v)x.value=v}});
+      el.querySelectorAll("[data-live]").forEach(x=>{if(!x.contains(a)&&!(x.parentElement&&x.parentElement.closest("[data-live]")))x._draw()});return;
+    }
+    if(s.k==="topic"&&FORMS[s.f].type!=="board")return;
+    const box=$("#repBox");const st=box?box.scrollTop:0;const es=el.scrollTop;this.show();const nb=$("#repBox");if(nb)nb.scrollTop=st;el.scrollTop=es;
+  },
+  stopTimer(){if(this.timer){clearInterval(this.timer);this.timer=null}},
+  go(d){const n=this.i+d;if(n<0||n>=this.slides.length)return;this.i=n;this.show()}
+};
+$("#dPrev").onclick=()=>Deck.go(-1);$("#dNext").onclick=()=>Deck.go(1);$("#dClose").onclick=()=>Deck.close();
+document.addEventListener("keydown",e=>{
+  if(Deck.isOpen){const tag=(e.target.tagName||"");if(["INPUT","TEXTAREA","SELECT"].includes(tag))return;
+    if(["ArrowRight","PageDown"].includes(e.key)){e.preventDefault();Deck.go(1)}else if(["ArrowLeft","PageUp"].includes(e.key)){e.preventDefault();Deck.go(-1)}
+    else if(e.key===" "){e.preventDefault();Deck.go(1)}else if(e.key==="Escape")Deck.close()}
+  else if(e.key==="Escape")$("#rosterDlg").classList.remove("open");
+});
+
+/* ================= 匯出 ================= */
+function exportRows(){
+  const rows=[["表格","組別","項目","欄位","內容"]];
+  Object.entries(FORMS).forEach(([fid,f])=>groupsFor(fid).forEach(g=>{
+    const id=docId(fid,g),b=Store.body(id),gn=GROUPS[g].name;
+    if(f.type==="grid"){(f.topFields||[]).forEach(([k,l])=>b.cells[k]&&rows.push([f.title,gn,l,"",b.cells[k]]));
+      gridRows(f).forEach((r,ri)=>f.cols.forEach((c,ci)=>{const v=b.cells["r"+ri+"c"+ci];if(v)rows.push([f.title,gn,(r.glabel?r.glabel+"／":"")+r.label,(f.editableCols&&f.editableCols.includes(ci)&&b.cells["col"+ci])||c,v])}))}
+    else if(f.type==="sw")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,v.dim||"未分類",(v.side==="W"?"劣勢":"優勢")+(v.imp?"・"+v.imp:"")+(v.urg?"・"+v.urg:""),v.text]));
+    else if(f.type==="list")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,"","",v.text]));
+    else if(f.type==="traits8"){const all=Store.items(id);all.filter(([k,v])=>v.kind==="trait").sort(byT).forEach(([k,v])=>{const ns=all.filter(([nk,nv])=>nv.kind==="nom"&&nv.trait===k).map(([nk,nv])=>nv.name);rows.push([f.title,gn,v.text,"代表人物",ns.join("、")])})}
+    else if(f.type==="board"){const rs=gridRows(f);Store.items(id).forEach(([k,v])=>{const mm=/^r(\d+)c(\d+)$/.exec(v.cell||"");if(!mm)return;const r=rs[+mm[1]];rows.push([f.title,gn,r.glabel+"／"+r.label,f.cols[+mm[2]],(v.star?"★ ":"")+v.text])})}
+    else if(f.type==="roles"){rows.push([f.title,gn,"組長","",b.cells.leader||""]);ROLE_MEETINGS.forEach(([m,d])=>{rows.push([f.title,gn,d,"記錄人",b.cells["rec_"+m]||""]);rows.push([f.title,gn,d,"報告人",b.cells["rep_"+m]||""])})}
+  }));
+  MEETINGS.forEach(m=>meetingDates(m).forEach(d=>{const ck=checkedIn(d);Object.entries(ck).forEach(([n,t])=>t&&rows.push(["報到紀錄",md(d),n,"",t]))}));
+  return rows;
+}
+async function exportCSV(){
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const csv="\ufeff"+exportRows().map(r=>r.map(q).join(",")).join("\n");const name="百鮮2026年度檢討_全部表格.csv";
+  let dl=null;try{if(window.claude&&claude.use)dl=await claude.use("downloads")}catch(e){}
+  if(dl){try{await dl.save({filename:name,data:new Blob([csv],{type:"text/csv"})})}catch(e){toast("沒有下載檔案")}return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download=name;document.body.append(a);a.click();a.remove();
+}
+
+/* ================= 啟動 ================= */
+render();
+Store.init().then(()=>{render()});
+
+</script>
+</body>
+</html>
