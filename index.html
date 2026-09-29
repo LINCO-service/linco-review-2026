@@ -338,6 +338,7 @@ table.board td.armed:hover .drop{background:var(--saffron-soft)}
 </style>
 </head>
 <body>
+<div id="syncBanner" style="display:none;position:sticky;top:0;z-index:70;background:#B3261E;color:#fff;padding:10px 16px;font-size:14px;text-align:center"></div>
 <div id="app"></div>
 <div class="dialog" id="rosterDlg" role="dialog" aria-modal="true" aria-labelledby="rosterTitle">
   <div class="card">
@@ -360,7 +361,7 @@ table.board td.armed:hover .drop{background:var(--saffron-soft)}
 <script>
 /* ================= 設定 ================= */
 // 放到 GitHub Pages 等外部網站時：填入 Google Apps Script 網頁應用程式網址（見部署說明）
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbwqJ-_I9GS0yUf3j1EBn3aanJkO2DFb_KcjXsQ41WMhZVL4VGByTvEW4uexQZ9PM8M7/exec";
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzpEhE4EZfIx_n2vvXbCNjxgEIx1IDUQjeemJNbjPBBzktsI1fwcb9AhiyWSrhBo2Wm/exec";
 const ARTIFACT_URL = "https://claude.ai/artifact/BQVTzja7PmnxVJvGa8Exnc";
 const SELFEVAL_URL = "https://linco-selfeval-335998383755.asia-east1.run.app";
 const LATE_MIN = 10;          // 開始後超過幾分鐘報到算遲到
@@ -509,7 +510,7 @@ const Store={
   items(id){return Object.entries(this.body(id).items).filter(([k,v])=>v)},
   notify(){this.subs.forEach(f=>{try{f()}catch(e){console.error(e)}})},
   statusText:"",statusKind:"local",
-  setStatus(kind,text){this.statusKind=kind;this.statusText=text;document.querySelectorAll(".status").forEach(el=>{el.className="status "+kind;el.lastElementChild.textContent=text})},
+  setStatus(kind,text){this.statusKind=kind;this.statusText=text;const bn=document.getElementById("syncBanner");if(bn){const bad=kind==="local"&&this.mode!=="local";bn.style.display=bad?"block":"none";bn.textContent=bad?"⚠ "+text+"。已填的內容先保存在這支手機，請不要清除瀏覽資料，恢復連線後會自動上傳。":""}document.querySelectorAll(".status").forEach(el=>{el.className="status "+kind;el.lastElementChild.textContent=text})},
   async init(){
     let db=null;
     try{ if(window.claude&&claude.use) db=await claude.use("db"); }catch(e){db=null}
@@ -521,6 +522,8 @@ const Store={
     }
     if(BACKEND_URL){
       this.mode="remote";this.setStatus("busy","連線中…");
+      try{const un=JSON.parse(localStorage.getItem("linco-unsent")||"{}");Object.entries(un).forEach(([id,o])=>{this.overlay[id]={cells:Object.assign({},o.cells),items:Object.assign({},o.items)};this.pending[id]={cells:Object.assign({},o.cells),items:Object.assign({},o.items)}});
+        Object.keys(un).forEach(id=>setTimeout(()=>this.flush(id),1500))}catch(e){}
       await this.poll(true); setInterval(()=>this.poll(),4000); return;
     }
     this.mode="local";try{this.server=JSON.parse(localStorage.getItem(LS_KEY)||"{}")||{}}catch(e){this.server={}}
@@ -532,6 +535,7 @@ const Store={
       if(j.ok){this.server=j.docs||{};if(!nonEmpty(this.pending))this.setStatus("","已同步");this.notify()}}
     catch(e){this.setStatus("local","連線中斷，自動重試中")}
   },
+  saveUnsent(){if(this.mode!=="remote")return;try{const o={};Object.entries(this.overlay).forEach(([id,v])=>{if(nonEmpty(v.cells)||nonEmpty(v.items))o[id]=v});localStorage.setItem("linco-unsent",JSON.stringify(o))}catch(e){}},
   write(id,field,key,val){
     (this.overlay[id]=this.overlay[id]||{cells:{},items:{}})[field][key]=val;
     (this.pending[id]=this.pending[id]||{cells:{},items:{}})[field][key]=val;
@@ -540,7 +544,7 @@ const Store={
       delete this.pending[id];delete this.overlay[id];try{localStorage.setItem(LS_KEY,JSON.stringify(this.server))}catch(e){}
       this.notify();return;
     }
-    this.setStatus("busy","儲存中…");this.notify();
+    this.saveUnsent();this.setStatus("busy","儲存中…");this.notify();
     clearTimeout(this.timers[id]);this.timers[id]=setTimeout(()=>this.flush(id),600);
   },
   async send(id,p){
@@ -566,7 +570,7 @@ const Store={
         this.setStatus("local","有內容尚未存到雲端，重試中");setTimeout(()=>this.flush(id),4000);return}}
     const o=this.overlay[id];
     if(o)["cells","items"].forEach(f=>Object.keys(p[f]).forEach(k=>{if(!(this.pending[id]&&k in this.pending[id][f]))delete o[f][k]}));
-    this.inflight[id]=false;
+    this.saveUnsent();this.inflight[id]=false;
     if(this.pending[id])this.flush(id);else if(!nonEmpty(this.pending))this.setStatus("","已同步");
     this.notify();
   }
