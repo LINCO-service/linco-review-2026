@@ -681,14 +681,20 @@ const setMe=n=>{try{n?localStorage.setItem("linco-me",n):localStorage.removeItem
 function setMode(m){
   if(m==="host"&&Store.mode==="remote"){hostLogin();return}
   state.mode=m;try{localStorage.setItem("linco-mode",m)}catch(e){}render();window.scrollTo(0,0)}
-async function verifyKey(k){try{const r=await fetch(BACKEND_URL+"?action=verify&key="+encodeURIComponent(k)+"&t="+Date.now());const j=await r.json();return !!j.ok}catch(e){return false}}
+async function verifyKey(k){
+  let txt="";
+  try{const r=await fetch(BACKEND_URL+"?action=verify&key="+encodeURIComponent(k)+"&t="+Date.now());txt=await r.text();}
+  catch(e){verifyKey.err="連不到 Apps Script（請確認部署的「誰可以存取」是「所有人」）";return false}
+  let j;try{j=JSON.parse(txt)}catch(e){verifyKey.err="Apps Script 沒有回傳正確資料，可能需要重新授權或重新部署";return false}
+  if(j.docs){verifyKey.err="Apps Script 還是舊版程式，請用「管理部署作業 → 編輯 → 新版本」重新部署";return false}
+  verifyKey.err=j.ok?"":"密碼不正確（請確認與 Code.gs 第 7 行 HOST_KEY 完全相同，且已重新部署新版本）";return !!j.ok}
 async function hostLogin(){
   const saved=Att.hostKey();
   if(saved&&await verifyKey(saved)){state.mode="host";try{localStorage.setItem("linco-mode","host")}catch(e){}render();return}
   openDialog("主持人登入",b=>{
     const inp=h("input",{type:"password",placeholder:"主持人密碼",style:"border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:var(--field)","aria-label":"主持人密碼"});
     const msg=h("div",{style:"color:var(--danger);font-size:13px;min-height:1.4em"});
-    const go=async()=>{msg.textContent="確認中…";if(await verifyKey(inp.value)){try{localStorage.setItem("linco-hostkey",inp.value);localStorage.setItem("linco-mode","host")}catch(e){}$("#rosterDlg").classList.remove("open");state.mode="host";render()}else msg.textContent="密碼不正確"};
+    const go=async()=>{msg.textContent="確認中…";inp.value=inp.value.trim();if(await verifyKey(inp.value)){try{localStorage.setItem("linco-hostkey",inp.value);localStorage.setItem("linco-mode","host")}catch(e){}$("#rosterDlg").classList.remove("open");state.mode="host";render()}else msg.textContent=verifyKey.err||"密碼不正確"};
     inp.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
     b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px;max-width:360px"},inp,h("button",{class:"btn primary",onclick:go},"進入主持人畫面"),msg));
     setTimeout(()=>inp.focus(),50);
