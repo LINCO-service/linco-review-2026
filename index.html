@@ -364,6 +364,8 @@ table.board td.armed:hover .drop{background:var(--saffron-soft)}
 const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzpEhE4EZfIx_n2vvXbCNjxgEIx1IDUQjeemJNbjPBBzktsI1fwcb9AhiyWSrhBo2Wm/exec";
 const ARTIFACT_URL = "https://claude.ai/artifact/BQVTzja7PmnxVJvGa8Exnc";
 const SELFEVAL_URL = "https://linco-selfeval-335998383755.asia-east1.run.app";
+// 主持人密碼（只存雜湊值，網頁原始碼看不到密碼本身）
+const HOST_HASH = "97ea148d14234fad349ec701be3a350c8e830de4fea7d87c580a9728466b56fa";
 const LATE_MIN = 10;          // 開始後超過幾分鐘報到算遲到
 const OPEN_BEFORE_MIN = 30;   // 開始前幾分鐘開放報到
 const LEAVE_DEADLINE = "12:00"; // 會議當天幾點前可請假
@@ -675,10 +677,12 @@ function live(el,draw){el.setAttribute("data-live","");el._draw=()=>{el.innerHTM
 /* ================= 狀態 ================= */
 const state={mode:"participant",meeting:currentMeeting().id,form:null,group:"A",pMeeting:null,pForm:null,selTag:null,poolCat:{}};
 try{state.mode=localStorage.getItem("linco-mode")||"participant"}catch(e){}
+if(state.mode==="host"&&HOST_HASH&&!window.claude&&!hostOK())state.mode="participant";
 
 const getMe=()=>{try{return localStorage.getItem("linco-me")||""}catch(e){return ""}};
 const setMe=n=>{try{n?localStorage.setItem("linco-me",n):localStorage.removeItem("linco-me")}catch(e){}};
 function setMode(m){
+  if(m==="host"&&HOST_HASH&&!window.claude&&!hostOK()){hostLogin();return}
   state.mode=m;try{localStorage.setItem("linco-mode",m)}catch(e){}render();window.scrollTo(0,0)}
 async function verifyKey(k){
   let txt="";
@@ -687,13 +691,15 @@ async function verifyKey(k){
   let j;try{j=JSON.parse(txt)}catch(e){verifyKey.err="Apps Script 沒有回傳正確資料，可能需要重新授權或重新部署";return false}
   if(j.docs){verifyKey.err="Apps Script 還是舊版程式，請用「管理部署作業 → 編輯 → 新版本」重新部署";return false}
   verifyKey.err=j.ok?"":"密碼不正確（請確認與 Code.gs 第 7 行 HOST_KEY 完全相同，且已重新部署新版本）";return !!j.ok}
-async function hostLogin(){
-  const saved=Att.hostKey();
-  if(saved&&await verifyKey(saved)){state.mode="host";try{localStorage.setItem("linco-mode","host")}catch(e){}render();return}
+async function sha256hex(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function hostOK(){try{return localStorage.getItem("linco-host")===HOST_HASH}catch(e){return false}}
+function hostLogin(){
   openDialog("主持人登入",b=>{
-    const inp=h("input",{type:"password",placeholder:"主持人密碼",style:"border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:var(--field)","aria-label":"主持人密碼"});
+    const inp=h("input",{type:"password",placeholder:"主持人密碼",autocomplete:"current-password",style:"border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:var(--field)","aria-label":"主持人密碼"});
     const msg=h("div",{style:"color:var(--danger);font-size:13px;min-height:1.4em"});
-    const go=async()=>{msg.textContent="確認中…";inp.value=inp.value.trim();if(await verifyKey(inp.value)){try{localStorage.setItem("linco-hostkey",inp.value);localStorage.setItem("linco-mode","host")}catch(e){}$("#rosterDlg").classList.remove("open");state.mode="host";render()}else msg.textContent=verifyKey.err||"密碼不正確"};
+    const go=async()=>{let hx="";try{hx=await sha256hex("linco-host|"+inp.value.trim())}catch(e){msg.textContent="這個瀏覽器不支援，請改用 Chrome 或 Safari";return}
+      if(hx===HOST_HASH){try{localStorage.setItem("linco-host",HOST_HASH);localStorage.setItem("linco-mode","host")}catch(e){}$("#rosterDlg").classList.remove("open");state.mode="host";render();window.scrollTo(0,0)}
+      else{msg.textContent="密碼不正確";inp.select()}};
     inp.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
     b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px;max-width:360px"},inp,h("button",{class:"btn primary",onclick:go},"進入主持人畫面"),msg));
     setTimeout(()=>inp.focus(),50);
@@ -924,7 +930,7 @@ function renderHost(){
   const wrap=h("div",{class:"wrap"});
   const exportBtn=h("button",{class:"btn",onclick:exportCSV},"匯出 CSV");
   wrap.append(h("header",{class:"top"},h("div",{class:"brand"},h("h1",null,"百鮮 2026 年度檢討・週會工作台"),h("p",null,"主持人畫面｜會議流程、簡報與各組表格")),
-    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"))));
+    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",onclick:()=>{try{localStorage.removeItem("linco-host")}catch(e){}setMode("participant")}},"登出"))));
   const t=todayStr();
   wrap.append(h("nav",{class:"timeline","aria-label":"會議時程"},MEETINGS.map(x=>{
     const cls=["tl-item"];const last=x.dateEnd||x.date;if(last<t)cls.push("past");if(meetingDates(x).includes(t))cls.push("today");if(x.id===m.id)cls.push("active");
