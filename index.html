@@ -617,7 +617,7 @@ function meetingOfDate(d){return MEETINGS.find(m=>meetingDates(m).includes(d))}
 function fnv(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
 const SLOT=30;
 const Att={
-  id:d=>"att__"+d.replace(/-/g,""),
+  id:d=>"attn__"+d.replace(/-/g,""),
   rec(d,n){return Store.body(Att.id(d)).items[n]||{}},
   all(d){return Store.body(Att.id(d)).items},
   device(){let x="";try{x=localStorage.getItem("linco-dev")||"";if(!x){x=uid()+uid();localStorage.setItem("linco-dev",x)}}catch(e){x="nodev"}return x},
@@ -626,14 +626,10 @@ const Att={
   canLeave(d){const t=todayStr();return t<d||(t===d&&nowMin()<hm2min(LEAVE_DEADLINE))},
   localCode(d,slot){return String(fnv("linco-local|"+d+"|"+slot)%10000).padStart(4,"0")},
   async code(d){
-    if(Store.mode==="remote"){const r=await fetch(BACKEND_URL+"?action=code&date="+d+"&key="+encodeURIComponent(Att.hostKey())+"&t="+Date.now());return r.json()}
     const now=Math.floor(Date.now()/1000);return {ok:true,code:Att.localCode(d,Math.floor(now/SLOT)),left:SLOT-now%SLOT};
   },
   async call(action,p){
-    if(Store.mode==="remote"){
-      const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action},p))});
-      const j=await r.json();if(j.ok)await Store.poll(true);return j;
-    }
+    if(Store.mode==="remote")await Store.poll(true);
     // Claude／本機模式：在瀏覽器端做同樣的檢查
     const id=Att.id(p.date),all=Att.all(p.date),rec=Object.assign({},all[p.name]||{}),iso=new Date().toISOString();
     if(action==="checkin"){
@@ -675,11 +671,10 @@ function live(el,draw){el.setAttribute("data-live","");el._draw=()=>{el.innerHTM
 /* ================= 狀態 ================= */
 const state={mode:"participant",meeting:currentMeeting().id,form:null,group:"A",pMeeting:null,pForm:null,selTag:null,poolCat:{}};
 try{state.mode=localStorage.getItem("linco-mode")||"participant"}catch(e){}
-if(BACKEND_URL&&!(window.claude)&&state.mode==="host"&&!(()=>{try{return localStorage.getItem("linco-hostkey")}catch(e){return ""}})())state.mode="participant";
+
 const getMe=()=>{try{return localStorage.getItem("linco-me")||""}catch(e){return ""}};
 const setMe=n=>{try{n?localStorage.setItem("linco-me",n):localStorage.removeItem("linco-me")}catch(e){}};
 function setMode(m){
-  if(m==="host"&&Store.mode==="remote"){hostLogin();return}
   state.mode=m;try{localStorage.setItem("linco-mode",m)}catch(e){}render();window.scrollTo(0,0)}
 async function verifyKey(k){
   let txt="";
@@ -1122,7 +1117,7 @@ const Deck={
         h("div",{class:"qrbig"},ok?qr:null,h("div",null,h("div",{style:"font-size:clamp(18px,2vw,28px);margin-bottom:1vh"},"① 掃描 QR code　② 點選名字　③ 輸入報到碼"),codeEl,leftEl,cnt,ok?null:h("p",{class:"lead",style:"word-break:break-all;font-size:14px"},pageURL()))),grid);
       if(todayStr()!==s.date){codeEl.textContent="—";leftEl.textContent="報到碼只在會議當天顯示"}
       else{const tick=async()=>{try{const j=await Att.code(s.date);if(j.ok){codeEl.textContent=j.code;leftEl.textContent="報到碼每 "+SLOT+" 秒更新，剩 "+j.left+" 秒"}else{codeEl.textContent="—";leftEl.textContent=j.error||"無法取得報到碼"}}catch(e){leftEl.textContent="無法取得報到碼，請檢查網路"}};
-        tick();this.codeTimer=setInterval(tick,Store.mode==="remote"?3000:1000)}
+        tick();this.codeTimer=setInterval(tick,1000)}
     }
     if(s.k==="selfeval"){
       const qr=h("div",{class:"code"});let ok=false;try{if(window.QRCode){new QRCode(qr,{text:SELFEVAL_URL,width:240,height:240});ok=true}}catch(e){}
