@@ -352,6 +352,13 @@ thead .mgrid .mv{text-align:left}
 #dBadges .bdg.mini b{font-size:18px}
 .sched.tiny{font-size:clamp(12px,1.12vw,16px)}
 .sched.tiny .srow{padding:.22em 0}
+/* 簡報內淺色區塊一律使用淺色主題變數，避免深色模式下看不到內容 */
+.slide .light,.slide .rep,.slide .ex{--ink:#1E2B3A;--paper:#FFFFFF;--mist:#F2F4F6;--line:#D9DEE3;--muted:#5E6B78;--field:#FFFFFF;--saffron:#C98F0A;--saffron-soft:#FBF1D6;color:#1E2B3A}
+.slide .light .formtab{background:#fff;color:#1E2B3A;border-color:#D9DEE3}
+.slide .light .formtab[aria-selected="true"]{background:#1E2B3A;color:#fff}
+.slide .light .btn{background:#fff;color:#1E2B3A;border-color:#D9DEE3}
+tr.cum td,tr.cum th{background:#EEF6F1!important}
+#dBadges .bdg.rs{padding:4px 8px;font-size:14px}
 .empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:8px;font-size:14px;display:none;z-index:60}
 
@@ -1303,6 +1310,7 @@ const P1_DEFAULT=[];  // 產品類別待提供（2026 檢討分類）
 const p1Cats=id=>{const s=Store.cell(id,"cats");return s?s.split(",").filter(Boolean):P1_DEFAULT.map(x=>x[0])};
 const p1Name=(id,c)=>Store.cell(id,c+".name")||((P1_DEFAULT.find(x=>x[0]===c)||[])[1])||"產品類別";
 const p1Sum=(id,c,r,ms)=>ms.reduce((s,m)=>s+num(Store.cell(id,c+"."+r+m)),0);
+const upTo=m=>M12.filter(x=>x<=m);
 function buildP1(code,ro){const id=docId("p1",code);
   return live(h("div"),el=>{const cats=p1Cats(id);const calc=calcBox(el);
     const head1=h("tr",null,h("th",{rowspan:2},"產品類別"),h("th",{rowspan:2},"項目"),QTR.map((q,qi)=>h("th",{colspan:4,style:"text-align:center"},"第"+"一二三四"[qi]+"季")),h("th",{rowspan:2},"全年"),h("th",{rowspan:2},"佔比"));
@@ -1310,18 +1318,22 @@ function buildP1(code,ro){const id=docId("p1",code);
     const tb=h("tbody");const totT=()=>cats.reduce((s,c)=>s+p1Sum(id,c,"t",M12),0);
     cats.forEach(c=>{
       const nameCell=(ro||state.mode!=="host")?h("b",null,p1Name(id,c)):h("div",{style:"display:grid;gap:4px"},txtIn(id,c+".name",false,p1Name(id,c)),cats.length>1?h("button",{class:"linkbtn",style:"font-size:12px",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="確定刪除？";return}Store.write(id,"cells","cats",cats.filter(x=>x!==c).join(","))}},"刪除此類別"):null);
-      [["a","2026 營業額（實績＋預估）"],["t","2027 目標營業額"]].forEach(([r,l],ri)=>tb.append(h("tr",null,ri===0?h("th",{class:"rowh",rowspan:3},nameCell):null,h("th",{class:"rowh"},l),
+      [["a","2026 營業額（實績＋預估）"],["t","2027 目標營業額"]].forEach(([r,l],ri)=>tb.append(h("tr",null,ri===0?h("th",{class:"rowh",rowspan:4},nameCell):null,h("th",{class:"rowh"},l),
         QTR.map(q=>[q.map(m=>h("td",null,numIn(id,c+"."+r+m,ro))),h("td",{class:"qt"},calc(()=>fmtN(p1Sum(id,c,r,q))))]),h("td",{class:"qt"},calc(()=>fmtN(p1Sum(id,c,r,M12)))),
         h("td",{class:"qt"},r==="t"?calc(()=>ratS(p1Sum(id,c,"t",M12),totT())):""))));
       tb.append(h("tr",null,h("th",{class:"rowh"},"成長率"),QTR.map(q=>[q.map(m=>h("td",{class:"qt"},calc(()=>pctS(num(Store.cell(id,c+".t"+m)),num(Store.cell(id,c+".a"+m)))))),h("td",{class:"qt"},calc(()=>pctS(p1Sum(id,c,"t",q),p1Sum(id,c,"a",q))))]),
         h("td",{class:"qt"},calc(()=>pctS(p1Sum(id,c,"t",M12),p1Sum(id,c,"a",M12)))),h("td")));
+      tb.append(h("tr",{class:"cum"},h("th",{class:"rowh"},"累計成長率"),QTR.map(q=>[q.map(m=>h("td",{class:"qt"},calc(()=>pctS(p1Sum(id,c,"t",upTo(m)),p1Sum(id,c,"a",upTo(m)))))),h("td",{class:"qt"},calc(()=>pctS(p1Sum(id,c,"t",upTo(q[2])),p1Sum(id,c,"a",upTo(q[2])))))]),
+        h("td",{class:"qt"},calc(()=>pctS(p1Sum(id,c,"t",M12),p1Sum(id,c,"a",M12)))),h("td")));
     });
     const tot=(r,ms)=>cats.reduce((s,c)=>s+p1Sum(id,c,r,ms),0);
     [["a","合計 2026"],["t","合計 2027"]].forEach(([r,l])=>tb.append(h("tr",{class:"tot"},h("th",{class:"rowh",colspan:2},l),QTR.map(q=>[q.map(m=>h("td",{class:"qt"},calc(()=>fmtN(tot(r,[m]))))),h("td",{class:"qt"},calc(()=>fmtN(tot(r,q))))]),h("td",{class:"qt"},calc(()=>fmtN(tot(r,M12)))),h("td"))));
+    tb.append(h("tr",{class:"tot cum"},h("th",{class:"rowh",colspan:2},"2027 累計目標"),QTR.map(q=>[q.map(m=>h("td",{class:"qt"},calc(()=>fmtN(tot("t",upTo(m)))))),h("td",{class:"qt"},calc(()=>fmtN(tot("t",upTo(q[2])))))]),h("td",{class:"qt"},calc(()=>fmtN(tot("t",M12)))),h("td")));
+    tb.append(h("tr",{class:"tot cum"},h("th",{class:"rowh",colspan:2},"整體累計成長率"),QTR.map(q=>[q.map(m=>h("td",{class:"qt"},calc(()=>pctS(tot("t",upTo(m)),tot("a",upTo(m)))))),h("td",{class:"qt"},calc(()=>pctS(tot("t",upTo(q[2])),tot("a",upTo(q[2])))))]),h("td",{class:"qt"},calc(()=>pctS(tot("t",M12),tot("a",M12)))),h("td")));
     tb.append(h("tr",{class:"tot"},h("th",{class:"rowh",colspan:2},"整體成長率／季佔比"),QTR.map(q=>[q.map(m=>h("td",{class:"qt"},calc(()=>pctS(tot("t",[m]),tot("a",[m]))))),h("td",{class:"qt"},calc(()=>pctS(tot("t",q),tot("a",q))+" ／ "+ratS(tot("t",q),tot("t",M12))))]),h("td",{class:"qt"},calc(()=>pctS(tot("t",M12),tot("a",M12)))),h("td")));
     el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet plan"},h("thead",null,head1,head2),tb)));
     if(!cats.length)el.append(h("div",{class:"empty",style:"margin-top:10px"},"產品類別將依 2026 檢討的分類設定，設定後即可填寫"));
-    if(!ro&&state.mode==="host")el.append(h("button",{class:"add",onclick:()=>Store.write(id,"cells","cats",cats.concat("c"+Date.now().toString(36)).join(","))},"＋ 新增產品類別"),h("span",{style:"font-size:12px;color:var(--muted);margin-left:10px"},"金額單位：元；季合計、全年、成長率、佔比會自動計算"));
+    if(!ro&&state.mode==="host")el.append(h("button",{class:"add",onclick:()=>Store.write(id,"cells","cats",cats.concat("c"+Date.now().toString(36)).join(","))},"＋ 新增產品類別"),h("span",{style:"font-size:12px;color:var(--muted);margin-left:10px"},"金額單位：元；季合計、全年、成長率、累計成長率、佔比會自動計算。累計成長率＝1 月到該月的 2027 累計目標 ÷ 2026 同期累計 − 1，可作為部門與個人的基礎業績標準"));
   })}
 
 /* P2 產能規劃（廠務部） */
@@ -1447,8 +1459,9 @@ function buildHrSum(){return live(h("div"),el=>{const H=hrData();const T=k=>H.re
 
 function p1Summary(code){const id=docId("p1",code),cats=p1Cats(id);const tot=(r,ms)=>cats.reduce((s,c)=>s+p1Sum(id,c,r,ms),0);
   return h("div",{class:"tablewrap"},h("table",{class:"sheet plan big"},h("thead",null,h("tr",null,h("th",null,"產品類別"),h("th",null,"項目"),QTR.map((q,i)=>h("th",null,"Q"+(i+1))),h("th",null,"全年"),h("th",null,"佔比"))),
-    h("tbody",null,cats.map(c=>[["a","2026"],["t","2027 目標"],["g","成長率"]].map(([r,l],ri)=>h("tr",null,ri===0?h("th",{class:"rowh",rowspan:3},p1Name(id,c)):null,h("th",{class:"rowh"},l),
-      QTR.map(q=>h("td",{class:"qt"},r==="g"?pctS(p1Sum(id,c,"t",q),p1Sum(id,c,"a",q)):fmtN(p1Sum(id,c,r,q)))),h("td",{class:"qt"},r==="g"?pctS(p1Sum(id,c,"t",M12),p1Sum(id,c,"a",M12)):fmtN(p1Sum(id,c,r,M12))),h("td",{class:"qt"},r==="t"?ratS(p1Sum(id,c,"t",M12),tot("t",M12)):"")))),
+    h("tbody",null,cats.map(c=>[["a","2026"],["t","2027 目標"],["g","成長率"],["cg","累計成長率"]].map(([r,l],ri)=>h("tr",null,ri===0?h("th",{class:"rowh",rowspan:4},p1Name(id,c)):null,h("th",{class:"rowh"},l),
+      QTR.map(q=>h("td",{class:"qt"},r==="cg"?pctS(p1Sum(id,c,"t",upTo(q[2])),p1Sum(id,c,"a",upTo(q[2]))):r==="g"?pctS(p1Sum(id,c,"t",q),p1Sum(id,c,"a",q)):fmtN(p1Sum(id,c,r,q)))),h("td",{class:"qt"},(r==="g"||r==="cg")?pctS(p1Sum(id,c,"t",M12),p1Sum(id,c,"a",M12)):fmtN(p1Sum(id,c,r,M12))),h("td",{class:"qt"},r==="t"?ratS(p1Sum(id,c,"t",M12),tot("t",M12)):"")))),
+      h("tr",{class:"tot"},h("th",{class:"rowh",colspan:2},"2027 累計目標（累計成長率）"),QTR.map(q=>h("td",{class:"qt"},fmtN(tot("t",upTo(q[2])))+"（"+pctS(tot("t",upTo(q[2])),tot("a",upTo(q[2])))+"）")),h("td",{class:"qt"},fmtN(tot("t",M12))),h("td")),
       h("tr",{class:"tot"},h("th",{class:"rowh",colspan:2},"合計 2027（成長率）"),QTR.map(q=>h("td",{class:"qt"},fmtN(tot("t",q))+"（"+pctS(tot("t",q),tot("a",q))+"）")),h("td",{class:"qt"},fmtN(tot("t",M12))+"（"+pctS(tot("t",M12),tot("a",M12))+"）"),h("td")))))}
 function p2Summary(code){const id=docId("p2",code),ls=p2Lines(id);
   return h("div",{class:"tablewrap"},h("table",{class:"sheet plan big"},h("thead",null,h("tr",null,h("th",null,"產線"),h("th",null,"單位"),h("th",null,"2027 理論產能"),h("th",null,"2026 實際產量"),h("th",null,"2027 計劃產量"),h("th",null,"產能使用率"),h("th",null,"產量提升率"))),
@@ -2114,11 +2127,11 @@ $("#rosterDlg").addEventListener("click",e=>{if(e.target.id==="rosterDlg"||e.tar
 const Timers={map:{},
   load(){try{this.map=JSON.parse(localStorage.getItem("linco-timers")||"{}")||{}}catch(e){this.map={}}},
   save(){try{localStorage.setItem("linco-timers",JSON.stringify(this.map))}catch(e){}},
-  get(id,total,label,slide){const t=this.map[id]||(this.map[id]={total,left:total,endAt:0});t.total=t.total||total;t.label=label;t.slide=slide;return t},
+  get(id,total,label,slide){const today=todayStr();let t=this.map[id];if(!t||t.day!==today||(t.total!==total&&!t.endAt)){t=this.map[id]={total,left:total,endAt:0,day:today}}t.label=label;t.slide=slide;return t},
   left(t){return t.endAt?Math.round((t.endAt-Date.now())/1000):t.left},
   start(t){t.endAt=Date.now()+t.left*1000;t.startedAt=Date.now();this.save()},
   pause(t){t.left=this.left(t);t.endAt=0;this.save()},
-  reset(t){t.left=t.total;t.endAt=0;t.beeped=false;this.save()},
+  reset(t){t.left=t.total;t.endAt=0;t.beeped=false;t.started=0;this.save()},
   add(t,sec){if(t.endAt)t.endAt+=sec*1000;else t.left+=sec;if(this.left(t)>0)t.beeped=false;this.save()}};
 Timers.load();
 const fmtT=sec=>{const a=Math.abs(sec);return (sec<0?"-":"")+String(Math.floor(a/60)).padStart(2,"0")+":"+String(a%60).padStart(2,"0")};
@@ -2159,10 +2172,10 @@ const Deck={
       (a.live||[]).forEach(f=>S.push({k:"live",a,f}));
       (a.preview||[]).forEach(f=>S.push({k:"topic",a,f,preview:true}));
       const rep3=(a.report||[]).filter(f=>FORMS[f].type==="compare3"),repN=(a.report||[]).filter(f=>FORMS[f].type!=="compare3");
-      if(repN.length&&a.repMin)S.push({k:"timer",a,min:a.repMin,title:"分組報告・每組 "+a.repMin+" 分鐘",sub:"每組報告前按「重設」重新計時"});
-      repN.forEach(f=>S.push({k:"report",a,f}));
-      rep3.forEach(()=>["A","B","C"].forEach(g=>{S.push({k:"timer",a,min:a.repMin||10,title:GROUPS[g].name+"報告 "+(a.repMin||10)+" 分鐘",sub:"傳統盤、專案代工、未來目標三家公司"});
-        if(gdeckUse(g))S.push({k:"gfile",g});else RIVAL_SLOTS.forEach(([sl])=>{S.push({k:"cprof",g,sl});S.push({k:"cvs",g,sl})})}));
+      const ai=m.agenda.indexOf(a);
+      repN.forEach(f=>S.push({k:"report",a,f,autoG:a.repMin?{key:m.id+":rep:"+ai,min:a.repMin}:null}));
+      rep3.forEach(()=>["A","B","C"].forEach(g=>{const au={id:m.id+":rep3:"+g,min:a.repMin||10,label:GROUPS[g].name+"報告"};
+        if(gdeckUse(g))S.push({k:"gfile",g,auto:au});else RIVAL_SLOTS.forEach(([sl])=>{S.push({k:"cprof",g,sl,auto:au});S.push({k:"cvs",g,sl,auto:au})})}));
       if(a.dept){const c=deptByName(a.dept).code;const au={id:m.id+":dept:"+c,min:a.min,label:a.dept+"報告"};S.push({k:"dorg",c,auto:au},{k:"dtitle",a,c,auto:au});if(c==="SALES")S.push({k:"dp1",c,auto:au});if(c==="FAC")S.push({k:"dp2",c,auto:au});S.push({k:"dproj",c,auto:au},{k:"dkpi",c,auto:au})}
       if(a.roadmap2)S.push({k:"today",m});
       if(a.deptfix){DEPTS.forEach(d=>{const au={id:m.id+":fix:"+d.code,min:DEPT_FIX_MIN[d.code],label:d.name+"修改重點"};S.push({k:"dfixsum",c:d.code,auto:au},{k:"dproj",c:d.code,fix:true,auto:au})})}
@@ -2176,7 +2189,7 @@ const Deck={
   },
   show(){
     if(this.codeTimer){clearInterval(this.codeTimer);this.codeTimer=null}this.paintCheckin=null;this.curTimer=null;
-    {const s0=this.slides[this.i];if(s0&&s0.auto){const t=Timers.get(s0.auto.id,s0.auto.min*60,s0.auto.label,-1);if(!t.endAt&&!t.started){t.started=1;Timers.start(t)}}}
+    {const s0=this.slides[this.i];if(s0&&s0.autoG){const gg=groupsFor(s0.f).includes(this.repGroup)?this.repGroup:groupsFor(s0.f)[0];s0.auto=gg==="X"?{id:s0.autoG.key,min:s0.autoG.min,label:"報告"}:{id:s0.autoG.key+":"+gg,min:s0.autoG.min,label:GROUPS[gg].name+"報告"}}if(s0&&s0.auto){const t=Timers.get(s0.auto.id,s0.auto.min*60,s0.auto.label,-1);if(!t.endAt&&!t.started&&meetingDates(this.m).includes(todayStr())){t.started=1;Timers.start(t)}}}
     const s=this.slides[this.i],el=$("#slide"),m=this.m;el.innerHTML="";
     const add=(...k)=>el.append(...k.flat(Infinity).filter(x=>x!=null&&x!==false));
     const kick=t=>h("div",{class:"kicker"},t);
@@ -2343,7 +2356,7 @@ const Deck={
     if(s.k==="today"){const items=m.agenda.filter(a=>!a.checkin&&!a.hidden&&!a.roadmap2);
       add(kick(m.no),h("h2",null,"今天的行程"),h("ol",{class:"flow"},items.map(a=>h("li",null,(a.at?a.at+"　":"")+a.t,minLabel(a,1)?h("small",null,minLabel(a,1)):null))),
         h("p",{class:"lead"},"上午各部門分散討論修改，13:00 回到會場報告"));}
-    if(s.k==="sum")add(kick(s.a.t),h("h2",{style:"margin:0 0 1.5vh"},FORMS[s.f].title),h("div",{class:"light",id:"repBox",style:"max-height:74vh"},buildForm(s.f,"X",s.f!=="cal")));
+    if(s.k==="sum")add(kick(s.a.t),h("h2",{style:"margin:0 0 1.5vh"},FORMS[s.f].title),h("div",{class:"light",id:"repBox",style:"max-height:74vh"},buildForm(s.f,"X",true)));
     if(s.k==="dept"){
       const id=docId("strategy","X"),b=Store.body(id).cells,units=DEPT_UNITS[s.a.dept];
       add(kick("各部門年度計劃報告"),h("h2",{style:"margin-bottom:1vh"},s.a.dept),
@@ -2396,8 +2409,9 @@ const Deck={
     mine.forEach(([k,t])=>{if(Timers.left(t)<=0&&!t.beeped){t.beeped=true;Timers.save();beep()}});
     const run=mine.filter(([k,t])=>t.slide!==this.i&&!(t.slide===-1&&!(s.auto&&s.auto.id===k))).sort((a,b)=>(b[1].startedAt||0)-(a[1].startedAt||0))[0];
     const parts=[];
-    if(run){const L=Timers.left(run[1]);const auto=run[1].slide===-1;parts.push(h("button",{class:"bdg"+(auto?" mini":"")+(L<=0?" over":L<=60?" warn":""),title:auto?"點一下暫停／繼續":"回到計時頁",onclick:()=>{if(auto){const t=run[1];if(t.endAt)Timers.pause(t);else Timers.start(t);this.tick()}else{this.i=run[1].slide;this.show()}}},"⏱ ",h("b",null,fmtT(L)),h("small",null,run[1].label||"計時中")))}
-    else if(s.auto){const t=Timers.map[s.auto.id];if(t&&!t.endAt){const L=Timers.left(t);parts.push(h("button",{class:"bdg mini",title:"已暫停，點一下繼續",onclick:()=>{Timers.start(t);this.tick()}},"⏸ ",h("b",null,fmtT(L)),h("small",null,t.label)))}}
+    const rsBtn=t=>h("button",{class:"bdg mini rs",title:"重新計時",onclick:()=>{Timers.reset(t);t.started=1;Timers.start(t);this.tick()}},"↺");
+    if(run){const L=Timers.left(run[1]);const auto=run[1].slide===-1;parts.push(h("button",{class:"bdg"+(auto?" mini":"")+(L<=0?" over":L<=60?" warn":""),title:auto?"點一下暫停／繼續":"回到計時頁",onclick:()=>{if(auto){const t=run[1];if(t.endAt)Timers.pause(t);else Timers.start(t);this.tick()}else{this.i=run[1].slide;this.show()}}},"⏱ ",h("b",null,fmtT(L)),h("small",null,run[1].label||"計時中")));if(auto)parts.push(rsBtn(run[1]))}
+    else if(s.auto){const t=Timers.get(s.auto.id,s.auto.min*60,s.auto.label,-1);if(!t.endAt){const L=Timers.left(t);parts.push(h("button",{class:"bdg mini",title:"點一下開始／繼續",onclick:()=>{t.started=1;Timers.start(t);this.tick()}},"▶ ",h("b",null,fmtT(L)),h("small",null,t.label)),rsBtn(t))}}
     const today=todayStr();
     if(this.showCode&&s.k!=="checkin"&&meetingDates(this.m).includes(today)){const c=Att.localCode(today,Math.floor(Date.now()/1000/SLOT)),left=SLOT-Math.floor(Date.now()/1000)%SLOT;
       if(!this.qrSmall){this.qrSmall=h("div",{class:"bqr"});try{if(window.QRCode)new QRCode(this.qrSmall,{text:pageURL(),width:64,height:64})}catch(e){}}
