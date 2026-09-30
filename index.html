@@ -369,6 +369,8 @@ const ARTIFACT_URL = "https://claude.ai/artifact/BQVTzja7PmnxVJvGa8Exnc";
 const SELFEVAL_URL = "https://linco-selfeval-335998383755.asia-east1.run.app";
 // 主持人密碼（只存雜湊值，網頁原始碼看不到密碼本身）
 const HOST_HASH = "97ea148d14234fad349ec701be3a350c8e830de4fea7d87c580a9728466b56fa";
+// 個人認證碼：已啟用（改成 false 可關閉，Code.gs 的 REQUIRE_PERSON_LOGIN 也要一起改）
+const PERSON_LOGIN = true;
 const LATE_MIN_DEFAULT = 10;  // 預設：開始後超過幾分鐘報到算遲到（主持人可在「會議設定」調整）
 const OPEN_BEFORE_MIN = 30;   // 開始前幾分鐘開放報到
 const LEAVE_DEADLINE = "12:00"; // 會議當天幾點前可請假
@@ -570,8 +572,8 @@ const Store={
       if(this.server[id]){const patch={updatedAt:stamp};if(nonEmpty(p.cells))patch.cells=p.cells;if(nonEmpty(p.items))patch.items=p.items;await ref.update(patch)}
       else{const b=this.body(id);await ref.set({cells:b.cells,items:b.items,updatedAt:stamp})}
     }else{
-      const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({writes:[{id,patch:p}]})});
-      const j=await r.json();if(!j.ok)throw new Error(j.error||"寫入失敗");
+      const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({writes:[{id,patch:p}],auth:authFor()})});
+      const j=await r.json();if(!j.ok){const er=new Error(j.error||"寫入失敗");er.fatal=!!(j.auth||j.denied);er.auth=!!j.auth;throw er}
       const s=this.server[id]=this.server[id]||{cells:{},items:{}};s.cells=Object.assign({},s.cells||{},p.cells);s.items=s.items||{};
       for(const [k,v] of Object.entries(p.items))s.items[k]=v===null?null:Object.assign({},s.items[k]||{},v);
     }
@@ -580,8 +582,11 @@ const Store={
     if(this.inflight[id])return;const p=this.pending[id];if(!p)return;
     delete this.pending[id];this.inflight[id]=true;
     try{await this.send(id,p)}
-    catch(e){try{await new Promise(r=>setTimeout(r,500+Math.random()*700));await this.send(id,p)}
+    catch(e){if(e.fatal){this.inflight[id]=false;const o=this.overlay[id];if(o)["cells","items"].forEach(f=>Object.keys(p[f]).forEach(k=>delete o[f][k]));
+        this.saveUnsent();this.setStatus("","已同步");toast(e.message);if(e.auth)authLost();this.notify();return}
+      try{await new Promise(r=>setTimeout(r,500+Math.random()*700));await this.send(id,p)}
       catch(e2){console.warn(e2);this.inflight[id]=false;
+        if(e2.fatal){const o=this.overlay[id];if(o)["cells","items"].forEach(f=>Object.keys(p[f]).forEach(k=>delete o[f][k]));this.saveUnsent();this.setStatus("","已同步");toast(e2.message);if(e2.auth)authLost();this.notify();return}
         const q=this.pending[id]=this.pending[id]||{cells:{},items:{}};Object.assign(q.cells,Object.assign({},p.cells,q.cells));Object.assign(q.items,Object.assign({},p.items,q.items));
         this.setStatus("local","有內容尚未存到雲端，重試中");setTimeout(()=>this.flush(id),4000);return}}
     const o=this.overlay[id];
@@ -734,8 +739,11 @@ const state={hostEdit:false,cmpSlot:"trad",selItem:null,mode:"participant",meeti
 try{state.mode=localStorage.getItem("linco-mode")||"participant"}catch(e){}
 if(state.mode==="host"&&HOST_HASH&&!window.claude&&!hostOK())state.mode="participant";
 
-const getMe=()=>{try{return localStorage.getItem("linco-me")||""}catch(e){return ""}};
-const setMe=n=>{try{n?localStorage.setItem("linco-me",n):localStorage.removeItem("linco-me")}catch(e){}};
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k)||"";v?localStorage.setItem(k,v):localStorage.removeItem(k)}catch(e){return ""}};
+const getMe=()=>{const n=LS("linco-me");if(PERSON_LOGIN&&n&&BACKEND_URL&&Store.mode!=="db"&&!LS("linco-tok"))return "";return n};
+function authFor(){if(state.mode==="host"&&LS("linco-hosttok"))return {name:"__host__",token:LS("linco-hosttok")};const n=LS("linco-me"),t=LS("linco-tok");return n&&t?{name:n,token:t}:(LS("linco-hosttok")?{name:"__host__",token:LS("linco-hosttok")}:null)}
+function authLost(){LS("linco-tok","");LS("linco-hosttok","");LS("linco-host","");toast("登入已失效，請重新登入");if(state.mode==="host"){state.mode="participant";LS("linco-mode","participant")}render()}
+const setMe=n=>{LS("linco-me",n);if(!n)LS("linco-tok","")};
 function setMode(m){
   if(m==="host"&&HOST_HASH&&!window.claude&&!hostOK()){hostLogin();return}
   state.mode=m;try{localStorage.setItem("linco-mode",m)}catch(e){}render();window.scrollTo(0,0)}
@@ -747,12 +755,29 @@ async function verifyKey(k){
   if(j.docs){verifyKey.err="Apps Script 還是舊版程式，請用「管理部署作業 → 編輯 → 新版本」重新部署";return false}
   verifyKey.err=j.ok?"":"密碼不正確（請確認與 Code.gs 第 7 行 HOST_KEY 完全相同，且已重新部署新版本）";return !!j.ok}
 async function sha256hex(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-function hostOK(){try{return localStorage.getItem("linco-host")===HOST_HASH}catch(e){return false}}
+function hostOK(){try{if(BACKEND_URL&&!window.claude&&!localStorage.getItem("linco-hosttok"))return false;return localStorage.getItem("linco-host")===HOST_HASH}catch(e){return false}}
+function personLogin(n){
+  if(!PERSON_LOGIN||!(BACKEND_URL&&Store.mode==="remote")){setMe(n);render();return}
+  openDialog(n+"，請輸入認證碼",b=>{
+    const inp=h("input",{type:"password",inputmode:"numeric",maxlength:8,autocomplete:"off",placeholder:"生日月日 4 碼，例如 0321",style:"border:1px solid var(--line);border-radius:8px;padding:10px;width:100%;font-size:20px;letter-spacing:.2em;text-align:center;background:var(--field)","aria-label":"認證碼"});
+    const msg=h("div",{style:"color:var(--danger);font-size:13px;min-height:1.4em"});
+    const btn=h("button",{class:"btn primary",onclick:async()=>{msg.textContent="確認中…";btn.disabled=true;
+      try{const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"login",name:n,code:inp.value.trim()})});const j=await r.json();
+        if(j.ok){LS("linco-tok",j.token);LS("linco-me",n);$("#rosterDlg").classList.remove("open");render();toast("歡迎，"+n)}else{msg.textContent=j.error||"認證失敗";inp.select()}}
+      catch(e){msg.textContent="連線失敗，請再試一次"}finally{btn.disabled=false}}},"登入");
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click()});
+    b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px;max-width:360px"},h("p",{style:"margin:0;font-size:14px;color:var(--muted)"},"為了確保不會被別人登入，請輸入你的認證碼（生日月日 4 碼）。忘記或有問題請找主持人。"),inp,btn,msg));
+    setTimeout(()=>inp.focus(),50);
+  });
+}
 function hostLogin(){
   openDialog("主持人登入",b=>{
     const inp=h("input",{type:"password",placeholder:"主持人密碼",autocomplete:"current-password",style:"border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;background:var(--field)","aria-label":"主持人密碼"});
     const msg=h("div",{style:"color:var(--danger);font-size:13px;min-height:1.4em"});
-    const go=async()=>{let hx="";try{hx=await sha256hex("linco-host|"+inp.value.trim())}catch(e){msg.textContent="這個瀏覽器不支援，請改用 Chrome 或 Safari";return}
+    const go=async()=>{
+      if(BACKEND_URL&&Store.mode==="remote"){msg.textContent="確認中…";try{const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"hostlogin",password:inp.value.trim()})});const j=await r.json();
+          if(j.ok){LS("linco-hosttok",j.token);LS("linco-host",HOST_HASH);LS("linco-mode","host");$("#rosterDlg").classList.remove("open");state.mode="host";render();window.scrollTo(0,0)}else{msg.textContent=j.error||"密碼不正確";inp.select()}}catch(e){msg.textContent="連線失敗，請再試一次"}return}
+      let hx="";try{hx=await sha256hex("linco-host|"+inp.value.trim())}catch(e){msg.textContent="這個瀏覽器不支援，請改用 Chrome 或 Safari";return}
       if(hx===HOST_HASH){try{localStorage.setItem("linco-host",HOST_HASH);localStorage.setItem("linco-mode","host")}catch(e){}$("#rosterDlg").classList.remove("open");state.mode="host";render();window.scrollTo(0,0)}
       else{msg.textContent="密碼不正確";inp.select()}};
     inp.addEventListener("keydown",e=>{if(e.key==="Enter")go()});
@@ -861,9 +886,9 @@ function buildClass(g,ro){
 }
 async function backendPost(obj){
   if(Store.mode!=="remote")throw new Error("附件上傳與圖片辨識需使用正式網址（GitHub 版）");
-  const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)});
+  const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({auth:authFor()},obj))});
   let j;try{j=await r.json()}catch(e){throw new Error("後端沒有回應，請確認 Apps Script 已更新並重新部署")}
-  if(!j.ok)throw new Error(j.error||"處理失敗");return j;
+  if(!j.ok){if(j.auth)authLost();throw new Error(j.error||"處理失敗")}return j;
 }
 function fileB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=()=>rej(new Error("讀檔失敗"));r.readAsDataURL(file)})}
 function shrinkImage(file,max){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(img.src);res(c.toDataURL("image/jpeg",.9).split(",")[1])};img.onerror=()=>rej(new Error("無法讀取圖片"));img.src=URL.createObjectURL(file)})}
@@ -1248,7 +1273,7 @@ function renderHost(){
   const wrap=h("div",{class:"wrap"});
   const exportBtn=h("button",{class:"btn",onclick:exportCSV},"匯出 CSV");
   wrap.append(h("header",{class:"top"},h("div",{class:"brand"},h("h1",null,"百鮮 2026 年度檢討・週會工作台"),h("p",null,"主持人畫面｜會議流程、簡報與各組表格")),
-    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",onclick:()=>{try{localStorage.removeItem("linco-host")}catch(e){}setMode("participant")}},"登出"))));
+    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",onclick:()=>{LS("linco-host","");LS("linco-hosttok","");setMode("participant")}},"登出"))));
   const t=todayStr();
   wrap.append(h("nav",{class:"timeline","aria-label":"會議時程"},MEETINGS.map(x=>{
     const cls=["tl-item"];const last=x.dateEnd||x.date;if(last<t)cls.push("past");if(meetingDates(x).includes(t))cls.push("today");if(x.id===m.id)cls.push("active");
@@ -1325,8 +1350,8 @@ function renderParticipant(){
   if(!me){
     const pick=h("div",{class:"pick"},h("h2",null,"請點選你的名字"),h("p",{style:"margin:0;color:var(--muted);font-size:14px"},"選好後，開會時輸入螢幕上的報到碼完成報到；不克出席請在會議當天中午 12:00 前請假。"));
     ["A","B","C"].forEach(x=>{pick.append(h("div",{class:"gl"},h("span",{class:"dot",style:"width:9px;height:9px;border-radius:50%;display:inline-block;background:"+GROUPS[x].color}),GROUPS[x].name),
-      h("div",{class:"names"},GROUPS[x].members.map(([n])=>h("button",{onclick:()=>{setMe(n);render()}},n))))});
-    pick.append(h("div",{class:"gl"},"總經理室"),h("div",{class:"names"},GM.map(([n])=>h("button",{onclick:()=>{setMe(n);render()}},n))));
+      h("div",{class:"names"},GROUPS[x].members.map(([n])=>h("button",{onclick:()=>personLogin(n)},n))))});
+    pick.append(h("div",{class:"gl"},"總經理室"),h("div",{class:"names"},GM.map(([n])=>h("button",{onclick:()=>personLogin(n)},n))));
     wrap.append(pick);
   }else{
     wrap.append(live(h("div",{class:"meCard",style:"display:block"}),el=>attCard(el,m,d,me,g)));
