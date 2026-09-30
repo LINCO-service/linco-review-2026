@@ -418,8 +418,8 @@ const FB_Q = [
   {k:"deptVoice",t:"部門擬定年度計劃時，我的意見有被聽見與納入",type:"scale",by:"dept",sec:"我的部門（工作坊策略與年度計劃）"},
   {k:"best",t:"對我最有收穫的環節（依序點選前 3 名）",type:"rank",max:3,sec:"內容與安排",opts:["內部能力分析","競爭者分析","外部環境趨勢","SWOT／策略展開","各部門年度計劃報告","Q1＆Q2 沙盤推演","共事特質與代表人物"]},
   {k:"time",t:"整體時間安排",type:"single",opts:["太趕","剛好","太長"],sec:"內容與安排"},
-  {k:"again",t:"明年如果再舉辦，我願意參加，也會推薦同事參加",type:"scale",sec:"內容與安排"},
-  {k:"gain",t:"這次最大的收穫或啟發是什麼？（選填）",type:"text",sec:"想法與建議"},
+  {k:"again",t:"明年的年度檢討與計劃工作坊，我會更積極投入、主動提出想法",type:"scale",sec:"內容與安排"},
+  {k:"gain",t:"這次最大的收穫或啟發是什麼？",type:"text",req:true,sec:"想法與建議"},
   {k:"improve",t:"明年的年度檢討／工作坊，你建議可以怎麼改進？（選填）",type:"text",sec:"想法與建議"},
   {k:"commit",t:"2027 年，我願意承諾的一個具體行動（30 字內）",type:"text",max:30,sec:"想法與建議"},
   {k:"msg",t:"對 2027 年的目標與策略，想對團隊說的一句話（20 字內，會以文字雲顯示在大螢幕，不顯示姓名）",type:"text",max:20,short:true,sec:"想法與建議"}];
@@ -434,7 +434,7 @@ const SWOT_IN = ["財務（營運目標）","市場（外部機會）","組織�
 const ROLE_MEETINGS = [["m1","10/6"],["m2","10/13"],["m3","10/20"],["m4","10/27"],["m5","11/3"]];  // 標籤會依會議設定自動更新
 const STRAT_COLS = ["傳統盤","專案代工","後勤行政","生產製造","設備管理","庫存管理","研發技術部","品質部","財務","採購","資訊/HR"];
 const DEPT_UNITS = {"業務部":[0,1,2],"廠務部":[3,4,5],"研發技術部":[6],"品質部":[7],"管理部":[8,9,10]};
-const CATS = {S:["強勢 S","#2E8B6A"],W:["弱勢 W","#C0392B"],O:["機會 O","#2F6FB2"],T:["威脅 T","#C98F0A"],K:["百鮮競爭力","#7A55B0"],R:["競爭者","#6B7A89"],U:["自訂","#34495E"]};
+const CATS = {S:["優勢 S","#2E8B6A"],W:["劣勢 W","#C0392B"],O:["機會 O","#2F6FB2"],T:["威脅 T","#C98F0A"],K:["百鮮競爭力","#7A55B0"],R:["競爭者","#6B7A89"],U:["自訂","#34495E"]};
 
 const FORMS = {
   roles:{title:"分組角色分工",short:"角色分工",type:"roles",desc:"決定組長，並排定每次會議的記錄人與報告人。"},
@@ -448,19 +448,19 @@ const FORMS = {
     desc:"第二階段：把上一階段列出的優勢、劣勢，拖到對應的七大面向（手機：先點項目，再點面向）。放錯了可以再拖到別的面向，或拖回上方。"},
   self10:{title:"百鮮的競爭力分析",short:"百鮮競爭力",type:"grid",desc:"用與競爭者相同的十個構面，先把百鮮自己看清楚。",rows:COMP10,cols:["百鮮企業有限公司"],example:"xmf"},
   pick:{title:"競爭者選擇",short:"競爭者選擇",type:"grid",desc:"Who is 競爭者？各組列出 3 個競爭者：傳統盤、專案代工、未來目標各一。",rows:["傳統盤","專案代工","未來目標"],cols:["競爭者名稱","選擇理由"]},
-  feedback:{title:"工作坊回饋",short:"工作坊回饋",type:"feedback",scope:"company",desc:"約 6 分鐘，共 15 題：跨部門小組與自己部門各 3 題。統計結果不會顯示姓名；分組／分部門的平均分數在填答少於 3 人時不顯示。"},
+  feedback:{title:"工作坊回饋",short:"工作坊回饋",type:"feedback",scope:"company",desc:"約 6 分鐘，共 15 題（第 12 題必填）。統計結果不會顯示姓名，請放心填寫。"},
   gdeck:{title:"本組報告簡報",short:"本組簡報",type:"gdeck",desc:"依本組 10/12 填好的競爭者資料自動產生的報告簡報。可以預覽、點「修改此頁」回到表格修改；想做更細的排版，可下載成 PPT 編輯後再上傳，主持人報告時就會播放上傳的版本。"},
   rivals:{title:"競爭者基本資料",short:"競爭者基本資料",type:"rivals",desc:"依「競爭者選擇」的三家公司，填入工商登記資料與公司網址，並可上傳附件（型錄、報導、截圖）。按「AI 自動帶入基本資料」即可依公司名稱查出工商登記資料，也可複製 AI 查詢提示，請 ChatGPT／Gemini／Claude 幫忙整理。"},
   compare:{title:"競爭者分析（三家）",short:"競爭者分析",type:"compare3",example:"xmf",desc:"傳統盤、專案代工、未來目標三家競爭者各一頁：填入對方十個構面的資料，右邊會帶出本組「百鮮競爭力分析」的內容，逐項判斷百鮮較強、相當或較弱。可上傳照片與附件，報告時會自動做成每家公司的簡報頁。"},
   pestc:{title:"外部環境發展趨勢（PESTC）",short:"外部環境",type:"grid",desc:"從政策、經濟、社會、技術、競爭者五個面向，分別列出未來的機會與威脅。每一點換一行，之後會變成 SO／WT 的標籤。",
     rows:PESTC_ROWS,cols:["未來發展趨勢（機會）","未來發展趨勢（威脅）"],hints:["自動化設備","FSSC 認證","原物料取得成本增加","新創品牌增加","傳統產業難請人","混料分裝技術門檻低"]},
-  traits:{title:"想和什麼樣的人一起共事？",short:"共事特質",type:"list",desc:"每組列出希望一起共事的人具備哪些特質，一項一個。",
+  traits:{title:"想和什麼樣的人一起共事？",short:"共事特質",type:"traitsubmit",scope:"company",desc:"全公司一起寫，不分組。想到一個特質就送出一次，可以送出很多個；大螢幕會以文字雲即時飄出大家的答案。",
     examples:["主動積極","負責任","樂於分享","溝通順暢","團隊合作","誠信正直","解決問題","持續學習","細心嚴謹","正向樂觀"]},
-  traits8:{title:"共事特質彙整與代表人物",short:"特質與代表人物",type:"traits8",scope:"company",desc:"按「AI 彙整」把各組特質整合為 8–10 大特質（每項 8 字內），可直接修改；10/27 再由大家主動提名代表人物。"},
+  traits8:{title:"共事特質彙整與代表人物",short:"特質與代表人物",type:"traits8",scope:"company",desc:"先按「AI 彙整」把上週大家寫的特質整合為 8–10 大特質（每項 8 字內，可直接修改），再由大家主動提名代表人物。"},
   swot_so:{title:"SO 分析：核心能力建構",short:"SO 分析",type:"board",board:"SO",desc:"利用內部最大的優勢，來面對外部的機會（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
-    rowGroups:[{label:"O 機會",rows:SWOT_EXT},{label:"S 優勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["S","O"]},
+    rowGroups:[{label:"O 機會",rows:SWOT_EXT},{label:"S 優勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["S","O"],cats:["S","O"]},
   swot_wt:{title:"WT 分析：核心能力建構",short:"WT 分析",type:"board",board:"WT",desc:"克服內部的弱勢，並同時降低外部的威脅（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
-    rowGroups:[{label:"T 威脅",rows:SWOT_EXT},{label:"W 弱勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["W","T"]},
+    rowGroups:[{label:"T 威脅",rows:SWOT_EXT},{label:"W 弱勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["W","T"],cats:["W","T"]},
   strategy:{title:"百鮮企業有限公司 2027 年度策略展開",short:"2027 策略展開",type:"grid",wide:true,scope:"company",
     desc:"全公司一份：先定營運目標與策略重點，再展開到各部門的專案與 KPI。",
     topFields:[["goal","營運目標"],["focus","策略重點"]],
@@ -503,12 +503,11 @@ const MEETINGS = [
    {t:"競爭者資料蒐集",sub:"上傳附件、填入工商登記資料與公司網址；可用 AI 協助查找",forms:["rivals"]},
    {t:"下次議題說明：競爭者分析",sub:"10/20 前各組完成兩家競爭者與百鮮的比較，當天直接上台報告",preview:["compare"]}],
   next:{topic:"競爭者分析（各組報告）",when:"10/20（二）16:00"}},
- {id:"m3",no:"第三次會議",date:"2026-10-20",time:"16:00",theme:"競爭者分析・共事特質",pforms:["gdeck","compare","rivals","traits"],
+ {id:"m3",no:"第三次會議",date:"2026-10-20",time:"16:00",theme:"競爭者分析・共事特質",pforms:["rivals","compare","gdeck","traits"],tabs:["rivals","compare","gdeck","traits"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"分組報告：競爭者分析",sub:"各組 10 分鐘，依傳統盤、專案代工、未來目標三家公司報告",report:["compare"],repMin:10},
-   {t:"分組討論：想和什麼樣的人一起共事？",min:5,forms:["traits"]},
-   {t:"AI 彙整共事特質",sub:"由 AI 把各組特質整理成 8–10 大特質（8 字內），現場可修改",live:["traits8"]},
+   {t:"全體討論：想和什麼樣的人一起共事？",min:5,sub:"不分組，手機點「共事特質」，一個特質送出一次",forms:["traits"],cloud:true},
    {t:"下次議題說明：外部環境發展趨勢",preview:["pestc"]}],
   next:{topic:"外部環境發展趨勢",when:"10/27（二）16:00"}},
  {id:"m4",no:"第四次會議",date:"2026-10-27",time:"16:00",theme:"外部環境・共事特質",pforms:["pestc","traits8"],
@@ -516,7 +515,7 @@ const MEETINGS = [
    {t:"掃碼報到",checkin:true},
    {t:"分組討論：外部環境發展趨勢",min:10,forms:["pestc"]},
    {t:"分組報告",sub:"每組 5 分鐘",report:["pestc"],repMin:5},
-   {t:"共事特質確認・代表人物提名",sub:"確認上週 AI 彙整的 8–10 大特質，不分組，由大家主動提名代表人物",live:["traits8"]},
+   {t:"共事特質彙整・代表人物提名",sub:"AI 把上週大家寫的特質整合為 8–10 大特質（8 字內），確認後由大家主動提名代表人物",live:["traits8"]},
    {t:"下次議題說明：SWOT 分析＆策略擬定",preview:["swot_so"]}],
   next:{topic:"SWOT 分析＆策略擬定",when:"11/3（二）16:00"}},
  {id:"m5",no:"第五次會議",date:"2026-11-03",time:"16:00",theme:"SWOT 分析＆策略擬定",pforms:["swot_so","swot_wt"],
@@ -525,6 +524,8 @@ const MEETINGS = [
    {t:"SO／WT 分析說明",sub:"內部能力與外部環境的每個要素都已變成標籤，拖進 SO／WT 表格並標記重要",topic:["swot_so","swot_wt"]},
    {t:"分組討論：SO／WT 分析",min:10,forms:["swot_so","swot_wt"]},
    {t:"分組報告",sub:"每組 5 分鐘",report:["swot_so","swot_wt"],repMin:5},
+   {t:"AI 比對三組差異・共同討論",sub:"三組都按「完成」後，由 AI 整理一致與差異，並指出可能放錯的項目",swotai:true},
+   {t:"用 AI 擬定對應策略與專案",sub:"複製指令給自己的 AI，依 SO／WT 找出策略與 2027 專案，帶到 11/4 策略展開",swotplan:true},
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
  {id:"m6",no:"管理月會",date:"2026-11-04",time:"全天",start:"09:00",theme:"管理月會＆年度策略展開",pforms:["strategy"],
@@ -718,10 +719,11 @@ function attStatus(m,d,name){
   const t=todayStr();if(t<d)return "未開始";if(t===d)return "未報到";return "缺席";
 }
 function attCounts(m,d){const c={"出席":0,"遲到":0,"請假":0,"未到":0};ALL_PEOPLE.forEach(([n])=>{const s=attStatus(m,d,n);if(c[s]!=null)c[s]++;else c["未到"]++});return c}
-function allForms(m){const s=[];const add=f=>{if(f&&!s.includes(f))s.push(f)};m.agenda.forEach(a=>{(a.forms||[]).forEach(add);(a.topic||[]).forEach(add);(a.live||[]).forEach(add);(a.report||[]).forEach(add)});(m.pforms||[]).forEach(add);return s}
+function allForms(m){if(m.tabs)return m.tabs.slice();const s=[];const add=f=>{if(f&&!s.includes(f))s.push(f)};m.agenda.forEach(a=>{(a.forms||[]).forEach(add);(a.topic||[]).forEach(add);(a.live||[]).forEach(add);(a.report||[]).forEach(add)});(m.pforms||[]).forEach(add);return s}
 function fillCount(fid,g){
   const f=FORMS[fid];const id=docId(fid,g);const b=Store.body(id);
   if(f.type==="feedback")return fbAll().length+" 人";
+  if(f.type==="traitsubmit")return Store.items(docId("traits","X")).length+" 則";
   if(f.type==="gdeck")return gdeckUse(g)?"已上傳":"自動";
   if(f.type==="compare3"){let n=0;RIVAL_SLOTS.forEach(([sl])=>COMP10.forEach((d,i)=>{if((b.cells[sl+".r"+i]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*COMP10.length}
   if(f.type==="rivals"){let n=0;RIVAL_SLOTS.forEach(([sl])=>RIVAL_FIELDS.forEach(([k])=>{if((b.cells[sl+"."+k]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*RIVAL_FIELDS.length}
@@ -836,6 +838,7 @@ function buildForm(fid,g,ro,opts){
   if(f.type==="compare3")return buildCompare3(g,ro);
   if(f.type==="gdeck")return buildGdeck(g,ro);
   if(f.type==="feedback")return buildFeedback(ro);
+  if(f.type==="traitsubmit")return buildTraitSubmit(ro);
   if(f.type==="roles")return buildRoles(fid,g,ro,opts&&opts.compact);
   if(f.type==="list")return buildList(fid,g,ro);
   if(f.type==="traits8")return buildTraits8(ro);
@@ -1086,11 +1089,7 @@ function fbStats(){
     FB_Q.forEach(q=>{const box=h("div",{style:"border:1px solid rgba(127,127,127,.3);border-radius:10px;padding:10px 12px"},h("div",{style:"font-weight:700;margin-bottom:6px"},q.t));
       if(q.type==="scale"){const vals=all.map(a=>a[q.k]).filter(Boolean),avg=vals.length?(vals.reduce((x,y)=>x+y,0)/vals.length):0;
         box.append(h("div",{style:"font-size:28px;font-weight:900;color:#C98F0A;font-family:var(--serif)"},avg.toFixed(1),h("small",{style:"font-size:14px;color:var(--muted);font-weight:400"}," / 5（"+vals.length+" 人）")));
-        const mx=Math.max(1,...[1,2,3,4,5].map(i=>vals.filter(v=>v===i).length));[5,4,3,2,1].forEach(i=>box.append(bar(SCALE[i-1],vals.filter(v=>v===i).length,mx)));
-        if(q.by){const keyOf=q.by==="group"?(nm=>groupOf(nm)):(nm=>deptOf(nm));const lab=q.by==="group"?(k=>GROUPS[k]?GROUPS[k].name:k):(k=>k);
-          const buckets={};ents.forEach(([nm,a])=>{const k=keyOf(nm);if(k&&a[q.k]){(buckets[k]=buckets[k]||[]).push(a[q.k])}});
-          const keys=Object.keys(buckets).sort();if(keys.length)box.append(h("div",{style:"margin-top:8px;padding-top:6px;border-top:1px dashed rgba(127,127,127,.35);display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px"},
-            h("span",{style:"color:var(--muted)"},q.by==="group"?"各組平均：":"各部門平均："),keys.map(k=>{const v=buckets[k];return h("span",null,lab(k)+" ",v.length>=3?h("b",null,(v.reduce((x,y)=>x+y,0)/v.length).toFixed(1)):h("span",{style:"color:var(--muted)"},"—"),h("small",{style:"color:var(--muted)"},"（"+v.length+"人）"))})))}}
+        const mx=Math.max(1,...[1,2,3,4,5].map(i=>vals.filter(v=>v===i).length));[5,4,3,2,1].forEach(i=>box.append(bar(SCALE[i-1],vals.filter(v=>v===i).length,mx)));}
       else if(q.type==="rank"){const pts=q.opts.map(o=>{let sc=0,first=0;all.forEach(a=>{const r=(a[q.k]||[]).indexOf(o);if(r>=0){sc+=q.max-r;if(r===0)first++}});return [o,sc,first]}).sort((a,b)=>b[1]-a[1]);
         const mx=Math.max(1,...pts.map(p=>p[1]));box.append(h("div",{style:"font-size:12px;color:var(--muted);margin-bottom:4px"},"計分：第 1 名 "+q.max+" 分、第 2 名 "+(q.max-1)+" 分…"));pts.forEach(([o,sc,f])=>box.append(bar(o,sc,mx," 分")))}
       else if(q.type==="multi"||q.type==="single"){const cnt=q.opts.map(o=>[o,all.filter(a=>q.type==="multi"?(a[q.k]||[]).includes(o):a[q.k]===o).length]).sort((a,b)=>q.type==="multi"?b[1]-a[1]:0);
@@ -1105,7 +1104,7 @@ function buildFeedback(ro){
   const save=(k,v)=>{const o=cur();o[k]=v;o.t=Date.now();Store.write(fbId,"items",me,o)};
   return live(h("div",{style:"display:grid;gap:14px"}),el=>{const o=cur();
     let sec="";FB_Q.forEach((q,qi)=>{if(q.sec!==sec){sec=q.sec;el.append(h("div",{style:"font-family:var(--serif);font-weight:900;color:var(--saffron);margin-top:6px"},sec))}
-      const box=h("div",{style:"border:1px solid var(--line);border-radius:12px;padding:12px 14px"},h("div",{style:"font-weight:700;margin-bottom:8px"},(qi+1)+". "+q.t));
+      const box=h("div",{style:"border:1px solid var(--line);border-radius:12px;padding:12px 14px"},h("div",{style:"font-weight:700;margin-bottom:8px"},(qi+1)+". "+q.t,q.req?h("span",{style:"color:var(--danger);font-size:12px;margin-left:6px"},"＊必填"):null));
       if(q.type==="scale")box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},SCALE.map((l,i)=>h("button",{class:"btn",style:o[q.k]===i+1?"background:var(--ink);color:var(--paper);border-color:var(--ink)":"",onclick:()=>save(q.k,i+1)},(i+1)+" "+l))));
       else if(q.type==="single")box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},q.opts.map(x=>h("button",{class:"btn",style:o[q.k]===x?"background:var(--ink);color:var(--paper);border-color:var(--ink)":"",onclick:()=>save(q.k,x)},x))));
       else if(q.type==="rank"){const r=o[q.k]||[];box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},q.opts.map(x=>{const pos=r.indexOf(x);
@@ -1115,7 +1114,10 @@ function buildFeedback(ro){
       else{const ta=h(q.short?"input":"textarea",{rows:q.max?2:3,maxlength:q.max||null,style:"width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--field)",placeholder:q.short?"例如：一起把品質做到最好！":"請寫下你的想法"});ta.value=o[q.k]||"";
         if(q.max){const c=h("div",{style:"font-size:12px;color:var(--muted);text-align:right"},(ta.value.length)+"／"+q.max);ta.addEventListener("input",()=>c.textContent=ta.value.length+"／"+q.max);setTimeout(()=>box.append(c),0)}let tm;ta.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(()=>save(q.k,ta.value),500)});box.append(ta)}
       el.append(box)});
-    el.append(h("div",{style:"font-size:14px;color:"+(o.t?"var(--gB)":"var(--muted)")},o.t?"✓ 已自動儲存，可以隨時修改":"點選後會自動儲存"));
+    const miss=FB_Q.map((q,i)=>[q,i]).filter(([q])=>q.req&&!String(o[q.k]||"").trim()).map(([q,i])=>"第 "+(i+1)+" 題");
+    if(miss.length)el.append(h("div",{style:"font-size:14px;color:var(--danger);font-weight:700"},"⚠ "+miss.join("、")+"為必填，請記得填寫"));
+    el.append(
+      h("div",{style:"font-size:14px;color:"+(o.t?"var(--gB)":"var(--muted)")},o.t?"✓ 已自動儲存，可以隨時修改":"點選後會自動儲存"));
   });
 }
 function buildRivals(g,ro){
@@ -1201,15 +1203,36 @@ function buildList(fid,g,ro){
     xs.forEach(([k,v])=>el.append(h("span",{class:"tchip"},v.text,ro?null:h("button",{"aria-label":"刪除 "+v.text,onclick:()=>Store.write(id,"items",k,null)},"×"))))}));
   return wrap;
 }
-function mergedTraits(){const map=new Map();["A","B","C"].forEach(g=>Store.items(docId("traits",g)).forEach(([k,v])=>{const t=(v.text||"").trim();if(!t)return;if(!map.has(t))map.set(t,new Set());map.get(t).add(g)}));return map}
+function mergedTraits(){const map=new Map();Store.items(docId("traits","X")).forEach(([k,v])=>{const t=(v.text||"").trim();if(!t)return;map.set(t,(map.get(t)||0)+1)});return map}
 function traitsPrompt(){const m=mergedTraits();
-  return "以下是公司內部三個小組列出的「希望一起共事的人具備的特質」（括號內是提到的組別）：\n"+[...m.entries()].map(([t,gs])=>"- "+t+"（"+[...gs].join("、")+"）").join("\n")+
-  "\n\n請整合意思相近的特質，歸納成 8–10 大特質，被越多組提到的越優先。每一項特質名稱必須在 8 個中文字以內（例如「主動積極」「團隊合作」），並用一句話說明涵蓋的意思。只輸出 JSON 陣列，不要其他文字：[{\"trait\":\"主動積極\",\"desc\":\"…\"}]"}
+  return "以下是公司同仁寫下的「希望一起共事的人具備的特質」（括號內是被寫到的次數）：\n"+[...m.entries()].sort((a,b)=>b[1]-a[1]).map(([t,n])=>"- "+t+"（"+n+"）").join("\n")+
+  "\n\n請整合意思相近的特質，歸納成 8–10 大特質，被越多人寫到的越優先。每一項特質名稱必須在 8 個中文字以內（例如「主動積極」「團隊合作」），並用一句話說明涵蓋的意思。只輸出 JSON 陣列，不要其他文字：[{\"trait\":\"主動積極\",\"desc\":\"…\"}]"}
 function jsonArr(t){const m=String(t||"").replace(/```json|```/g,"").match(/\[[\s\S]*\]/);if(!m)return null;try{const a=JSON.parse(m[0]);return Array.isArray(a)?a:null}catch(e){return null}}
+function buildTraitSubmit(ro){
+  const id=docId("traits","X");const me=getMe();const wrap=h("div");
+  if(!ro&&state.mode!=="host"&&me){
+    const inp=h("input",{maxlength:12,placeholder:"輸入一個特質，例如：主動積極","aria-label":"特質",style:"flex:1 1 220px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:16px;background:var(--field)"});
+    const send=()=>{const t=inp.value.trim();if(!t)return;Store.write(id,"items",uid(),{text:t,by:me,t:Date.now()});inp.value="";inp.focus();toast("已送出：「"+t+"」")};
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)send()});
+    wrap.append(h("div",{class:"addrow"},inp,h("button",{class:"btn primary",onclick:send},"送出")),
+      h("div",{class:"hints"},h("span",{class:"lbl"},"想不到？例如："),FORMS.traits.examples.map(x=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>{inp.value=x;inp.focus()}},x))),
+      live(h("div",{style:"margin-top:10px"}),el=>{const mine=Store.items(id).filter(([k,v])=>v.by===me).sort(byT);
+        el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"我送出的（"+mine.length+"）："),h("div",{class:"tlist"},mine.map(([k,v])=>h("span",{class:"tchip"},v.text,h("button",{"aria-label":"刪除 "+v.text,onclick:()=>Store.write(id,"items",k,null)},"×")))))}));
+  }else{
+    wrap.append(live(h("div"),el=>{const m=mergedTraits();el.append(h("div",{style:"font-weight:700;margin-bottom:8px"},"已送出 "+[...m.values()].reduce((a,b)=>a+b,0)+" 則、"+m.size+" 種特質"),
+      h("div",{class:"tlist"},[...m.entries()].sort((a,b)=>b[1]-a[1]).map(([t,n])=>h("span",{class:"tchip",style:"padding-right:12px"},t,n>1?h("b",{style:"color:var(--saffron);margin-left:4px"},"×"+n):null))))}));
+  }
+  return wrap;
+}
+function traitCloud(){return live(h("div",{class:"cloud"}),el=>{const m=[...mergedTraits().entries()];
+  if(!m.length){el.append(h("div",{style:"color:#6D7E8F;font-size:clamp(16px,2vw,26px)"},"等待大家送出…"));return}
+  const pal=["#E9B43A","#8DB8E8","#7FD1AE","#C4A6EA","#FF9E8A","#F3F5F7"];
+  m.map(([t,n])=>[t,n,fnv(t)]).sort((a,b)=>a[2]-b[2]).forEach(([t,n,hv])=>{const size=Math.min(72,22+n*9)*(0.9+(hv%20)/100);
+    el.append(h("span",{class:"cw",style:"font-size:"+size.toFixed(0)+"px;color:"+pal[hv%pal.length]+";animation-duration:"+(5+hv%5)+"s;animation-delay:-"+(hv%7)+"s;"+(n>1?"font-weight:900;font-family:var(--serif)":"")},t))})})}
 function buildTraits8(ro){
   const id=docId("traits8","X");const wrap=h("div");
-  wrap.append(live(h("div",{class:"refbox"}),el=>{const m=mergedTraits();el.append(h("div",{class:"cap"},"上週各組列出的特質（共 "+m.size+" 項，圓點表示哪幾組提到）"),
-    m.size?h("div",{class:"tlist"},[...m.entries()].sort((a,b)=>b[1].size-a[1].size).map(([t,gs])=>h("span",{class:"tchip",style:"padding-right:12px"},t,h("span",{class:"gdots"},[...gs].map(g=>h("i",{style:"background:"+GROUPS[g].color})))))):h("span",{style:"color:var(--muted);font-size:14px"},"各組尚未填寫"))}));
+  wrap.append(live(h("div",{class:"refbox"}),el=>{const m=mergedTraits();el.append(h("div",{class:"cap"},"上週大家寫的特質（共 "+m.size+" 種，數字為被寫到的次數）"),
+    m.size?h("div",{class:"tlist"},[...m.entries()].sort((a,b)=>b[1]-a[1]).map(([t,n])=>h("span",{class:"tchip",style:"padding-right:12px"},t,n>1?h("b",{style:"color:var(--saffron);margin-left:4px"},"×"+n):null))):h("span",{style:"color:var(--muted);font-size:14px"},"尚無資料"))}));
   wrap.append(live(h("div",{class:"t8"}),el=>{
     const all=Store.items(id);const traits=all.filter(([k,v])=>v.kind==="trait").sort(byT);const noms=all.filter(([k,v])=>v.kind==="nom");
     traits.forEach(([k,v],i)=>{
@@ -1245,6 +1268,35 @@ function buildTraits8(ro){
 }
 
 /* ---- SO/WT 標籤池 ---- */
+function boardLines(fid,g){const f=FORMS[fid],rows=gridRows(f);return Store.items(docId(fid,g)).filter(([k,v])=>v.cell).sort(byT).map(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell);const r=rows[+m[1]];
+  return "- 【"+r.glabel.split(" ")[0]+"・"+r.label+" × "+f.cols[+m[2]]+"】"+v.text+(v.star?"（★重要）":"")})}
+function swotComparePrompt(fid){const f=FORMS[fid];
+  return "以下是三個跨部門小組把內部能力與外部環境的項目，放進「"+f.board+" 分析」表格的結果。表格的列是："+f.rowGroups.map(g=>g.label+"（"+g.rows.join("、")+"）").join("；")+"；欄是七大功能（"+f.cols.join("、")+"）。每一行格式為【列 × 欄】項目。\n\n"+
+  ["A","B","C"].map(g=>GROUPS[g].name+"：\n"+(boardLines(fid,g).join("\n")||"（未填）")).join("\n\n")+
+  "\n\n請用繁體中文，分成四個標題條列：\n一、三組一致的配置（放在相同或相近位置的項目）\n二、三組差異較大的項目（說明各組放的位置）\n三、可能放錯的項目（例如類別不符："+(f.board==="SO"?"把劣勢或威脅放進 SO":"把優勢或機會放進 WT")+"、列或功能欄位不合理），說明原因與建議位置\n四、三組都標記★重要、或多組重複出現的前 5 項重點"}
+function swotPlanPrompt(fid,groups){const f=FORMS[fid];
+  return "你是熟悉台灣食品製造業的經營顧問。以下是百鮮企業有限公司（新北市林口，調味品與食品代工製造，強項為代工彈性與少量接單，弱項為產能與連鎖餐飲通路）的「"+f.board+" 分析」結果，★為重要項目：\n\n"+
+  groups.map(g=>(groups.length>1?GROUPS[g].name+"：\n":"")+(boardLines(fid,g).join("\n")||"（未填）")).join("\n\n")+
+  "\n\n請針對★重要項目（沒有★就挑最重要的 5 項），提出"+(f.board==="SO"?"SO 策略（運用內部優勢把握外部機會）":"WT 策略（降低內部劣勢、避開外部威脅）")+"，再展開為 2027 年可執行的專案。\n用表格輸出，欄位：策略、專案名稱、負責部門（業務部／廠務部／研發技術部／品質部／管理部）、目標與 KPI、主要行動、預計執行季度。\n最後列出執行時最需要注意的 3 個風險。請使用繁體中文。"}
+function swotAIBox(fid,big){const key=FORMS[fid].board;
+  return live(h("div",{style:"margin-top:14px"}),el=>{const res=Store.cell("swotai__X",key),done=["A","B","C"].filter(g=>Store.cell(docId(fid,g),"done"));
+    const head=h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px"},h("b",null,"🤖 AI 比對三組（"+key+"）"),
+      h("span",{style:"font-size:13px;color:var(--muted)"},"完成："+["A","B","C"].map(g=>GROUPS[g].name+(done.includes(g)?" ✅":" …")).join("　")));
+    if(state.mode==="host"){const msg=h("span",{style:"font-size:13px;color:var(--muted)"});
+      const b=h("button",{class:"btn primary",style:"padding:4px 12px",onclick:async()=>{if(done.length<3&&!b.dataset.c){b.dataset.c="1";b.textContent="還有組別未完成，仍要比對？再按一次";return}
+        b.disabled=true;msg.textContent="AI 比對中，約 20–40 秒…";try{const j=await backendPost({action:"ai",prompt:swotComparePrompt(fid)});Store.write("swotai__X","cells",key,j.text);msg.textContent="✓ 完成"}catch(e){msg.textContent=e.message}finally{b.disabled=false}}},res?"重新比對":"✨ 開始 AI 比對");
+      head.append(b,h("button",{class:"btn",style:"padding:4px 12px",onclick:()=>copyText(swotComparePrompt(fid),t=>msg.textContent=t)},"📋 複製比對指令"),msg)}
+    el.append(head);
+    if(res)el.append(h("div",{style:"white-space:pre-wrap;line-height:1.7;border:1px solid var(--saffron);background:var(--saffron-soft);color:var(--ink);border-radius:10px;padding:12px 14px;"+(big?"font-size:clamp(14px,1.35vw,19px)":"font-size:14px")},res.replace(/\*\*/g,"").replace(/^#+\s*/gm,"")));
+    else el.append(h("div",{style:"font-size:13px;color:var(--muted)"},"三組完成後，主持人按「開始 AI 比對」，結果會顯示在這裡"));
+  });
+}
+function promptBoxDyn(title,getText){const box=h("details",{class:"example",style:"border-style:solid;border-color:var(--saffron);background:var(--saffron-soft);margin-top:14px"},h("summary",{style:"color:var(--ink);font-weight:700"},"🤖 "+title));
+  box.addEventListener("toggle",()=>{if(!box.open||box.dataset.built)return;box.dataset.built="1";box.append(promptBoxInner(getText()))});return box}
+function promptBoxInner(text){const pre=h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;margin:8px 0;max-height:320px;overflow:auto;background:var(--mist);border-radius:8px;padding:10px 12px"},text);const msg=h("span",{style:"font-size:13px;color:var(--gB)"});
+  const link=(u,t)=>h("a",{class:"btn",href:u,target:"_blank",rel:"noopener",style:"text-decoration:none;padding:5px 12px"},t);
+  return h("div",null,h("p",{style:"margin:8px 0 0;font-size:13px;color:var(--muted)"},"複製後貼到 ChatGPT、Gemini、Claude 或自己的 AI agent；結果可帶到 11/4 的 2027 策略展開。"),pre,
+    h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},h("button",{class:"btn primary",style:"padding:5px 14px",onclick:()=>copyText(pre.textContent,t=>msg.textContent=t)},"📋 複製指令"),link("https://chatgpt.com/","ChatGPT"),link("https://gemini.google.com/app","Gemini"),link("https://claude.ai/new","Claude"),msg))}
 function tagPool(){
   const map=new Map();
   const put=(cat,text,sub,g)=>{text=(text||"").trim();if(!text)return;const key=cat+"|"+text;if(!map.has(key))map.set(key,{key,cat,text,sub,groups:new Set()});if(g&&g!=="X")map.get(key).groups.add(g)};
@@ -1254,7 +1306,7 @@ function tagPool(){
     const se=Store.body(docId("self10",g)).cells;COMP10.forEach((r,ri)=>splitLines(se["r"+ri+"c0"]).forEach(t=>put("K",t,r,g)));
     const cp=Store.body(docId("compare",g)).cells;RIVAL_SLOTS.forEach(([sl])=>{const nm=rivalName(g,sl)||"競爭者";COMP10.forEach((r,ri)=>splitLines(cp[sl+".r"+ri]).forEach(t=>put("R",t,nm+"・"+r,g)))});
   });
-  Store.items(docId("tags","X")).sort(byT).forEach(([k,v])=>put("U",v.text,"",null));
+  Store.items(docId("tags","X")).sort(byT).forEach(([k,v])=>put(v.cat||"U",v.text,"自訂",null));
   return [...map.values()];
 }
 function buildBoard(fid,g,ro){
@@ -1266,7 +1318,7 @@ function buildBoard(fid,g,ro){
     wrap.append(live(h("div",{class:"pool"}),el=>{
       const pool=tagPool();const placed=Store.items(id);const used=new Set(placed.map(([k,v])=>v.key));
       const cats=state.poolCat[fid];
-      el.append(h("div",{class:"filters"},h("span",{style:"font-size:13px;color:var(--muted)"},"標籤來源："),Object.entries(CATS).map(([c,[nm,col]])=>{
+      el.append(h("div",{class:"filters"},h("span",{style:"font-size:13px;color:var(--muted)"},"三組匯整（已刪除重複）："),Object.entries(CATS).filter(([c])=>f.cats.includes(c)).map(([c,[nm,col]])=>{
         const n=pool.filter(t=>t.cat===c).length;
         return h("button",{"aria-pressed":String(cats.includes(c)),onclick:()=>{const i=cats.indexOf(c);i>=0?cats.splice(i,1):cats.push(c);el._draw()}},h("i",{class:"cd",style:"width:8px;height:8px;border-radius:50%;background:"+col}),nm+" "+n)})));
       const shown=pool.filter(t=>cats.includes(t.cat));
@@ -1276,10 +1328,11 @@ function buildBoard(fid,g,ro){
           h("i",{class:"cd",style:"background:"+CATS[t.cat][1]}),t.text,t.sub?h("small",null,t.sub):null,h("span",{class:"gdots"},[...t.groups].map(x=>h("i",{style:"background:"+GROUPS[x].color}))));
         chip.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",JSON.stringify({tag:t}));e.dataTransfer.effectAllowed="copy"});
         return chip}):h("span",{style:"font-size:13px;color:var(--muted)"},"這個來源目前沒有內容")));
-      const inp=h("input",{placeholder:"新增自訂標籤（全公司共用）",style:"flex:1 1 200px;border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:var(--field)","aria-label":"自訂標籤"});
-      const addU=()=>{const t=inp.value.trim();if(!t)return;Store.write(docId("tags","X"),"items",uid(),{text:t,t:Date.now()});inp.value="";if(!cats.includes("U"))cats.push("U")};
+      const inp=h("input",{placeholder:"手動新增項目（三組共用）",style:"flex:1 1 200px;border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:var(--field)","aria-label":"手動新增項目"});
+      const csel=h("select",{"aria-label":"類別",style:"min-width:0"},f.cats.map(c=>h("option",{value:c},CATS[c][0])));
+      const addU=()=>{const t=inp.value.trim();if(!t)return;Store.write(docId("tags","X"),"items",uid(),{text:t,cat:csel.value,by:getMe()||"主持人",t:Date.now()});inp.value="";if(!cats.includes(csel.value))cats.push(csel.value)};
       inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)addU()});
-      el.append(h("div",{class:"addrow",style:"margin:8px 0 0"},inp,h("button",{class:"btn",onclick:addU},"新增")),
+      el.append(h("div",{class:"addrow",style:"margin:8px 0 0"},csel,inp,h("button",{class:"btn",onclick:addU},"新增")),
         h("div",{class:"hintline"},state.selTag?"已選取「"+state.selTag.text+"」，點下方任一格放入":"電腦：直接把標籤拖進格子｜手機：先點標籤，再點格子"));
     }));
   }
@@ -1314,6 +1367,12 @@ function buildBoard(fid,g,ro){
   });
   table.append(tb);
   wrap.append(h("div",{class:"tablewrap"},table));
+  if(g!=="X")wrap.append(live(h("div",{style:"display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px"}),el=>{const d=Store.cell(id,"done");
+    if(d){const [t,by]=d.split("|");el.append(h("span",{style:"color:var(--gB);font-weight:700"},"✅ "+GROUPS[g].name+"已完成（"+isoHM(t)+(by?"・"+by:"")+"）"));if(!ro)el.append(h("button",{class:"btn",style:"padding:3px 10px;font-size:13px",onclick:()=>Store.write(id,"cells","done","")},"取消完成，繼續修改"))}
+    else if(!ro)el.append(h("button",{class:"btn primary",onclick:()=>Store.write(id,"cells","done",new Date().toISOString()+"|"+(getMe()||"主持人"))},"✅ 完成並儲存"),h("span",{style:"font-size:13px;color:var(--muted)"},"內容會自動儲存；完成後按這裡，讓主持人知道本組已完成"));
+    else el.append(h("span",{style:"color:var(--muted)"},"尚未完成"))}));
+  wrap.append(swotAIBox(fid,false));
+  if(!ro&&g!=="X")wrap.append(promptBoxDyn("AI 指令：依本組 "+f.board+" 分析擬定策略與 2027 專案",()=>swotPlanPrompt(fid,[g])));
   setTimeout(armCells,0);
   return wrap;
 }
@@ -1536,6 +1595,9 @@ const Deck={
     m.agenda.forEach(a=>{
       if(a.day){curDate=a.date||m.date;S.push({k:"day",a});return}
       if(a.checkin)S.push({k:"checkin",date:a.date||curDate});
+      if(a.cloud){(a.forms||[]).forEach(f=>{if(!seen.has(f)){seen.add(f);S.push({k:"topic",a,f})}});S.push({k:"tcloud",a,min:a.min});return}
+      if(a.swotai){S.push({k:"swotai",f:"swot_so"});S.push({k:"swotai",f:"swot_wt"});return}
+      if(a.swotplan){S.push({k:"swotplan"});return}
       if(a.fb){S.push({k:"fbqr"});if(a.min)S.push({k:"timer",a,min:a.min,title:"工作坊回饋 "+a.min+" 分鐘"});S.push({k:"fbstats"});S.push({k:"fbcloud"});return}
       if(a.selfeval){S.push({k:"selfeval"});if(a.min)S.push({k:"timer",a,min:a.min,title:"自評表填寫 "+a.min+" 分鐘"});return}
       if(a.roadmap)S.push({k:"road"});
@@ -1594,6 +1656,13 @@ const Deck={
       add(kick("工作坊回饋"),h("div",{class:"qrbig"},ok?qr:null,h("div",null,h("h2",{style:"margin-bottom:2vh"},"請花 3 分鐘給我們回饋"),
         h("ul",{class:"bl",style:"margin-top:0"},h("li",null,h("b",null,"1"),"手機打開工作台（或掃 QR code）"),h("li",null,h("b",null,"2"),"點「工作坊回饋」分頁（約 6 分鐘）"),h("li",null,h("b",null,"3"),"點選後自動儲存，統計不顯示姓名")),
         live(h("p",{class:"lead"}),el=>el.append("已回覆 ",h("b",{style:"color:#E9B43A"},fbAll().length)," 人")))));}
+    if(s.k==="tcloud"){const t=Timers.get(m.id+":"+this.i,(s.min||5)*60,"共事特質",this.i);
+      add(kick("全體討論・不分組"),h("h2",{style:"margin:0"},"想和什麼樣的人一起共事？"),
+        h("div",{style:"display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:1vh"},h("span",{style:"color:#9FB0C0;font-size:clamp(13px,1.3vw,18px)"},"手機點「共事特質」，想到一個就送出一次；越多人寫到的特質字越大"),
+          h("span",{id:"tDisp",class:"timer",style:"font-size:clamp(24px,3vw,44px);margin:0"}),h("div",{class:"tctl"},h("button",{class:"go",id:"tGo",style:"padding:6px 14px",onclick:()=>{if(t.endAt)Timers.pause(t);else Timers.start(t);this.tick()}}),h("button",{style:"padding:6px 14px",onclick:()=>{Timers.reset(t);this.tick()}},"重設"))),traitCloud());this.curTimer=t}
+    if(s.k==="swotai")add(kick("AI 比對三組"),h("h2",{style:"margin-bottom:1.5vh"},FORMS[s.f].title),h("div",{class:"light",id:"repBox",style:"max-height:72vh"},swotAIBox(s.f,true)));
+    if(s.k==="swotplan")add(kick("下一步：策略與專案"),h("h2",null,"用 AI 擬定對應策略與 2027 專案"),
+      h("ul",{class:"bl"},h("li",null,h("b",null,"1"),"手機打開 SO／WT 分頁，最下方展開「AI 指令」"),h("li",null,h("b",null,"2"),"按「複製指令」，貼到 ChatGPT／Gemini／Claude 或自己的 AI agent"),h("li",null,h("b",null,"3"),"AI 會依★重要項目提出策略，並展開成專案、負責部門、KPI、執行季度"),h("li",null,h("b",null,"4"),"各部門整理後，帶到 11/4 的 2027 策略展開")));
     if(s.k==="fbcloud"){
       const cloud=live(h("div",{class:"cloud"}),el=>{const msgs=fbAll().map(x=>(x[1].msg||"").trim()).filter(Boolean);
         if(!msgs.length){el.append(h("div",{style:"color:#6D7E8F;font-size:clamp(16px,2vw,26px)"},"等待大家的留言…"));return}
@@ -1629,11 +1698,11 @@ const Deck={
       else if(f.type==="compare3"){struct=["傳統盤","專案代工","未來目標","每家：十構面 × 百鮮比較","照片／附件","AI 查詢與比較指令"]}
       else if(s.f==="pick"){struct=f.rows;extra=h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"🤖 分組頁面提供「AI 評估競爭者」指令，可一鍵複製到自己的 AI 使用")}
       else if(f.type==="classify"){struct=DIM7;extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅（依七大面向整理）"),example7Table())}
-      else if(f.type==="list"){struct=f.examples;extra=null}
+      else if(f.type==="list"||f.type==="traitsubmit"){struct=f.examples;extra=null}
       else if(f.type==="board"){const pool=tagPool();struct=Object.entries(CATS).map(([c,[nm]])=>nm+" "+pool.filter(t=>t.cat===c).length+" 項")}
       else struct=f.rowGroups?f.rowGroups.map(g=>g.label):(f.rows||[]);
       add(kick(s.preview?"下次討論主題":"討論主題"),h("h2",{style:"margin-bottom:1vh"},f.title),h("p",{class:"lead",style:"margin-top:0"},f.desc),
-        f.type==="list"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"例如："):null,
+        (f.type==="list"||f.type==="traitsubmit")?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"例如："):null,
         h("div",{class:"chips"},struct.map(x=>h("span",null,x))),
         f.hints?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"提示："+f.hints.join("、")):null,
         f.type==="sw"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"百鮮起手例：優勢－"+f.seed.S.map(x=>x[0]).join("、")+"；劣勢－"+f.seed.W.map(x=>x[0]).join("、")):null,
@@ -1696,7 +1765,7 @@ const Deck={
   refresh(){
     const s=this.slides[this.i];if(!s||this.animating)return;const el=$("#slide");const a=document.activeElement;
     if(s.k==="checkin"){if(this.paintCheckin)this.paintCheckin();return}
-    if(!["checkin","report","members","roles","live","dept","topic","cprof","cvs","fbqr","fbstats","fbcloud"].includes(s.k))return;
+    if(!["checkin","report","members","roles","live","dept","topic","cprof","cvs","fbqr","fbstats","fbcloud","tcloud","swotai"].includes(s.k))return;
     if(a&&el.contains(a)&&["SELECT","INPUT","TEXTAREA"].includes(a.tagName)){
       el.querySelectorAll("[data-doc][data-key]").forEach(x=>{if(x!==a){const v=Store.cell(x.dataset.doc,x.dataset.key);if(x.value!==v)x.value=v}});
       el.querySelectorAll("[data-live]").forEach(x=>{if(!x.contains(a)&&!(x.parentElement&&x.parentElement.closest("[data-live]")))x._draw()});return;
@@ -1748,6 +1817,7 @@ function exportRows(){
     else if(f.type==="sw")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,v.dim||"未分類",(v.side==="W"?"劣勢":"優勢")+(v.imp?"・"+v.imp:"")+(v.urg?"・"+v.urg:""),v.text]));
     else if(f.type==="compare3"){RIVAL_SLOTS.forEach(([sl,lab])=>{const nm=rivalName(g,sl);COMP10.forEach((d,i)=>{const r=b.cells[sl+".r"+i],v=b.cells[sl+".v"+i],n=b.cells[sl+".n"+i];if(r||v||n)rows.push([f.title,gn,lab+"："+nm+"／"+d,v?VERDICT[v][0]:"",(r||"")+(n?"｜比較："+n:"")])});if(b.cells[sl+".sum"])rows.push([f.title,gn,lab+"："+nm,"總結",b.cells[sl+".sum"]])})}
     else if(f.type==="rivals"){RIVAL_SLOTS.forEach(([sl,lab])=>{RIVAL_FIELDS.forEach(([k,l])=>{const v=b.cells[sl+"."+k];if(v)rows.push([f.title,gn,lab,l,v])});Store.items(id).filter(([k,v])=>v.slot===sl&&v.url).forEach(([k,v])=>rows.push([f.title,gn,lab,"附件",v.name+" "+v.url]))})}
+    else if(f.type==="traitsubmit"){[...mergedTraits().entries()].forEach(([t,n])=>rows.push([f.title,"全公司",t,"次數",String(n)]))}
     else if(f.type==="feedback"){fbAll().forEach(([k,v])=>FB_Q.forEach(q=>{const x=v[q.k];if(x!=null&&x!=="")rows.push([f.title,"",q.t,"",Array.isArray(x)?x.join("、"):String(x)])}))}
     else if(f.type==="list")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,"","",v.text]));
     else if(f.type==="traits8"){const all=Store.items(id);all.filter(([k,v])=>v.kind==="trait").sort(byT).forEach(([k,v])=>{const ns=all.filter(([nk,nv])=>nv.kind==="nom"&&nv.trait===k).map(([nk,nv])=>nv.name);rows.push([f.title,gn,v.text,"代表人物",ns.join("、")])})}
