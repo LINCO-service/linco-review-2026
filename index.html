@@ -647,14 +647,12 @@ const MEETINGS = [
    {t:"用 AI 擬定對應策略與專案",sub:"複製指令給自己的 AI，依 SO／WT 找出策略與 2027 專案，帶到 11/4 策略展開",swotplan:true},
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
- {id:"m6",no:"年度策略展開",date:"2026-11-04",time:"全天",start:"09:00",theme:"2027 年度策略展開",pforms:["strategy"],
+ {id:"m6",no:"年度策略展開",date:"2026-11-04",time:"13:00",theme:"2027 年度策略展開",pforms:["strategy"],
   agenda:[
    {t:"掃碼報到",checkin:true,dur:10},
-   {t:"管理月會",dur:120},
-   {t:"2026 檢討及成果",sub:"各部門報告",dur:60},
-   {t:"SO／WT 成果回顧",report:["swot_so","swot_wt"],at:"13:00",dur:40},
-   {t:"2027 策略展開",sub:"營運目標、策略重點，展開到各部門專案與 KPI",forms:["strategy"],report:["strategy"],dur:120}],
-  next:{topic:"年度計劃工作坊",when:"11/20（五）13:00"}},
+   {t:"SO／WT 成果回顧",report:["swot_so","swot_wt"],dur:40},
+   {t:"2027 策略展開",sub:"訂出公司營運目標與策略重點",forms:["strategy"],report:["strategy"],dur:120}],
+  next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
   tabs:["strategy","p1","p2","dproj","dkpi","dorg","dfb","cal"],
   agenda:[
@@ -1556,7 +1554,7 @@ function workDays(m){const days=new Date(Date.UTC(2027,m,0)).getUTCDate();let n=
 const deptLight={SALES:"#DCE8F6",FAC:"#DCF0E7",RD:"#E8E0F3",QA:"#F7EBCB",ADM:"#F6DCDA"};
 function opsBlocks(id){return Store.items(id).filter(([k,v])=>v.kind==="blk")}
 function buildOps(ro,monthsArg,gArg){const g=gArg||"X";const id=docId("ops",g),mid=docId("ops","X");const me=getMe();
-  const allDept=state.mode==="host"||isGM(me);const canEdit=!ro&&(allDept||(g!=="X"&&groupOf(me)===g));const rowOK=dc=>canEdit&&(allDept||myDeptCode()===dc);
+  const allDept=state.mode==="host"||isGM(me);const canEdit=!ro&&(allDept||(g!=="X"&&groupOf(me)===g));const rowOK=dc=>canEdit;
   return live(h("div"),el=>{const MS=monthsArg||opsMonths(),N=MS.length,m0=MS[0];
     if(!ro&&!monthsArg&&state.mode==="host")el.append(h("div",{style:"display:flex;gap:8px;align-items:center;margin-bottom:8px"},"推演期間：",[["Q1","Q1（1–3 月）"],["Q1Q2","Q1＋Q2（1–6 月）"]].map(([v,l])=>h("button",{class:"formtab","aria-selected":String((cfg("ops.period")||"Q1")===v),onclick:()=>Store.write(CFG_ID,"cells","ops.period",v)},l))));
     const facEdit=!ro&&(state.mode==="host"||isGM(me)||myDeptCode()==="FAC");
@@ -1582,7 +1580,7 @@ function buildOps(ro,monthsArg,gArg){const g=gArg||"X";const id=docId("ops",g),m
         MS.forEach((m,mi)=>{const cell=h("div",{class:"opcell",style:"grid-column:"+(mi+2)+";grid-row:1/-1"+(re?"":";cursor:default")});
           if(re){cell.addEventListener("dragover",e=>{e.preventDefault();cell.classList.add("hot")});cell.addEventListener("dragleave",()=>cell.classList.remove("hot"));
             cell.addEventListener("drop",e=>{e.preventDefault();cell.classList.remove("hot");let d;try{d=JSON.parse(e.dataTransfer.getData("text/plain"))}catch(x){return}
-              if(d.move){const v=Store.body(id).items[d.move];if(v&&(allDept||v.dept===dc))Store.write(id,"items",d.move,Object.assign({},v,{start:m,row:rk,dept:dc}))}
+              if(d.move){const v=Store.body(id).items[d.move];if(v)Store.write(id,"items",d.move,Object.assign({},v,{start:m,row:rk,dept:dc}))}
               else if(d.text)Store.write(id,"items",uid(),{kind:"blk",row:rk,start:m,span:d.span||1,text:d.text,proj:d.proj||"",dept:dc,t:Date.now()})});
             cell.addEventListener("click",()=>{if(state.opsSel){Store.write(id,"items",uid(),{kind:"blk",row:rk,start:m,span:state.opsSel.span||1,text:state.opsSel.text,proj:state.opsSel.proj,dept:dc,t:Date.now()});state.opsSel=null;return}
               const t=prompt(label+"｜"+m+"月起：預計要做的事");if(t&&t.trim())Store.write(id,"items",uid(),{kind:"blk",row:rk,start:m,span:1,text:t.trim(),dept:dc,t:Date.now()})})}
@@ -1605,9 +1603,9 @@ function buildOps(ro,monthsArg,gArg){const g=gArg||"X";const id=docId("ops",g),m
       const add=()=>{const t=x.value.trim();if(!t)return;Store.write(id,"items",uid(),{kind:"sug",dept:ds.value,text:t,by:me||"主持人",t:Date.now()});x.value=""};
       x.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)add()});pbox.append(h("div",{class:"addrow",style:"margin-top:8px"},ds,x,h("button",{class:"btn primary",onclick:add},"新增建議")))}
     if(!ro||g!=="X")el.append(pbox);
-    if(canEdit){const pool=(allDept?DEPTS:[deptByCode(myDeptCode())].filter(Boolean)).flatMap(d=>deptProjects(d.code).map(([k,v])=>({k,v,d}))).filter(x=>(x.v.name||"").trim());
+    if(canEdit){const pool=DEPTS.flatMap(d=>deptProjects(d.code).map(([k,v])=>({k,v,d}))).filter(x=>(x.v.name||"").trim());
       const spanOf=v=>{const ms=(v.months||[]).filter(m=>MS.includes(m)).sort((a,b)=>a-b);if(!ms.length)return {start:m0,span:1};let e=ms[0];while(ms.includes(e+1))e++;return {start:ms[0],span:e-ms[0]+1}};
-      el.prepend(h("div",{class:"pool",style:"margin-bottom:10px"},h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},(allDept?"各部門專案":"本部門專案")+"（拖到自己部門的列；手機：先點專案再點格子）。方塊可拖移、◀▶ 移動月份、＋－ 調整長度；點自己部門列的空白處可直接輸入"),
+      el.prepend(h("div",{class:"pool",style:"margin-bottom:10px"},h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"各部門專案（拖到對應部門的列；手機：先點專案再點格子）。本組成員可移動任何部門的方塊：拖移、◀▶ 移動月份、＋－ 調整長度；點空白處可直接輸入"),
         h("div",{class:"tags"},pool.length?pool.map(x=>{const sp=spanOf(x.v);const c=h("span",{role:"button",tabindex:"0",class:"tag"+(state.opsSel&&state.opsSel.proj===x.k?" sel":""),draggable:"true",style:"background:"+deptLight[x.d.code],onclick:()=>{state.opsSel=state.opsSel&&state.opsSel.proj===x.k?null:{text:x.v.name,proj:x.k,span:sp.span};el._draw()}},
           h("i",{class:"cd",style:"background:"+x.d.color}),x.v.name,h("small",null,x.d.name+((x.v.months||[]).length?"・"+(x.v.months||[]).join("、")+"月":"")));
           c.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",JSON.stringify({text:x.v.name,proj:x.k,span:sp.span})));return c}):h("span",{style:"font-size:13px;color:var(--muted)"},"各部門尚無專案"))))}
