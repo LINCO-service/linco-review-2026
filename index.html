@@ -648,13 +648,13 @@ const MEETINGS = [
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
  {id:"m6",no:"年度策略展開",date:"2026-11-04",time:"13:00",theme:"2027 年度策略展開",deptMode:true,
-  tabs:["swot_so","swot_wt","strategy","dproj","dkpi"],
+  tabs:["swot_so","swot_wt","strategy","dproj"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"SO／WT 成果回顧",report:["swot_so","swot_wt"],dur:30},
    {t:"發佈 2027 年度營運目標及策略重點",goalfocus:true,dur:15},
-   {t:"各部門討論：年度專案及專案 KPI",sub:"手機點「專案管理」「KPI 指標」填寫；可視情況延長",min:60},
-   {t:"各部門發表預計專案",sub:"各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
+   {t:"各部門討論：年度專案",sub:"手機點「專案管理」，先列出專案標題、目標與預期指標；可視情況延長",min:60},
+   {t:"各部門發表預計專案",sub:"專案標題、目標與預期指標；各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
   next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
   tabs:["strategy","p1","p2","dproj","dkpi","dorg","dfb","cal"],
@@ -1354,7 +1354,19 @@ function buildDStrat(code,ro){const d=deptByCode(code),id=docId("strategy","X"),
 
 /* 專案管理 */
 function deptProjects(code){return Store.items(docId("dproj",code)).sort(byT)}
-function buildDProj(code,ro){const id=docId("dproj",code),d=deptByCode(code);
+function activeMeetingId(){return state.mode==="host"?state.meeting:(state.pMeeting||currentMeeting().id)}
+function projSimple(code,ro){const id=docId("dproj",code),d=deptByCode(code);
+  return live(h("div"),el=>{const ps=deptProjects(code);
+    if(!ro)el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"11/4 先列出專案標題、專案目標與預期指標即可；行動計劃、預訂進度、預算、配合部門等細節，之後在年度計劃的「專案管理」再詳細展開。"));
+    const rows=ps.map(([k,v],i)=>{const cur=()=>Object.assign({},Store.body(id).items[k]||v);const set=(f,val)=>Store.write(id,"items",k,Object.assign(cur(),{[f]:val}));
+      const ta=(f,ph)=>{if(ro)return h("div",{style:"white-space:pre-wrap"},v[f]||"");const x=h("textarea",{class:"pin",placeholder:ph,rows:2});x.value=v[f]||"";x.addEventListener("input",()=>set(f,x.value));return x};
+      return h("tr",null,h("td",{class:"qt",style:"width:2em;text-align:center"},i+1),h("td",{style:"min-width:160px"},ro?h("b",null,v.name||""):ta("name","專案標題")),h("td",{style:"min-width:220px"},ta("goal","這個專案要達成什麼")),h("td",{style:"min-width:180px"},ta("kpi","例如：新客戶 3 家、良率 98%")),
+        ro?null:h("td",null,h("button",{class:"del",title:"刪除專案",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="刪?";return}Store.write(id,"items",k,null)}},"×")))});
+    el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet plan"+(ro?" big":"")},h("thead",null,h("tr",null,h("th",null,""),h("th",null,"專案"),h("th",null,"專案目標"),h("th",null,"預期指標"),ro?null:h("th",null,""))),h("tbody",null,rows))));
+    if(!ro)el.append(h("button",{class:"add",onclick:()=>Store.write(id,"items",uid(),{name:"",goal:"",kpi:"",w:"",plan:"",months:[],budget:"",partners:[],owner:d.name,t:Date.now()})},"＋ 新增專案"));
+    else if(!ps.length)el.append(h("div",{class:"cellro",style:"color:#5E6B78"},"尚未填寫"));
+  })}
+function buildDProj(code,ro){if(activeMeetingId()==="m6")return projSimple(code,ro);const id=docId("dproj",code),d=deptByCode(code);
   return live(h("div"),el=>{const ps=deptProjects(code);const calc=calcBox(el);
     el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"重要度合計：",calc(()=>{const t=deptProjects(code).reduce((s,[k,v])=>s+num(v.w),0);return t+"%"+(t===100?" ✓":"（建議合計 100%）")}),"　預訂進度：點選月份格子標示執行期間"));
     const rows=ps.map(([k,v])=>{const cur=()=>Object.assign({},Store.body(id).items[k]||v);const set=(f,val)=>Store.write(id,"items",k,Object.assign(cur(),{[f]:val}));
@@ -1363,13 +1375,13 @@ function buildDProj(code,ro){const id=docId("dproj",code),d=deptByCode(code);
       const mcell=m=>{const on=(v.months||[]).includes(m);return h("td",{class:"gantt"+(on?" on":""),style:ro?"":"cursor:pointer",title:m+"月",onclick:ro?null:()=>{const a=(cur().months||[]).slice();const j=a.indexOf(m);j>=0?a.splice(j,1):a.push(m);set("months",a.sort((x,y)=>x-y))}})};
       const partners=h("div",{style:"display:flex;flex-direction:column;gap:3px"},DEPTS.filter(x=>x.code!==code).map(x=>{const on=(v.partners||[]).includes(x.name);
         return ro?(on?h("span",null,x.name):null):h("label",{style:"display:flex;gap:4px;align-items:center;font-size:12px;white-space:nowrap"},(()=>{const c=h("input",{type:"checkbox"});c.checked=on;c.addEventListener("change",()=>{const a=(cur().partners||[]).slice();const j=a.indexOf(x.name);j>=0?a.splice(j,1):a.push(x.name);set("partners",a)});return c})(),x.name)}));
-      return h("tr",null,h("td",{style:"min-width:140px"},ta("name","專案名稱")),h("td",null,inp("w","%","52px")),h("td",{style:"min-width:160px"},ta("goal","專案目標")),h("td",{style:"min-width:180px"},ta("plan","行動計劃")),
+      return h("tr",null,h("td",{style:"min-width:140px"},ta("name","專案名稱")),h("td",null,inp("w","%","52px")),h("td",{style:"min-width:160px"},ta("goal","專案目標")),h("td",{style:"min-width:140px"},ta("kpi","預期指標")),h("td",{style:"min-width:180px"},ta("plan","行動計劃")),
         M12.map(mcell),h("td",null,inp("budget","","90px")),h("td",{style:"white-space:nowrap"},v.owner||d.name),h("td",null,partners),
         ro?null:h("td",null,h("button",{class:"del",title:"刪除專案",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="刪?";return}Store.write(id,"items",k,null)}},"×")))});
     el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet plan proj"},h("thead",null,
-      h("tr",null,h("th",{rowspan:2},"專案"),h("th",{rowspan:2},"重要度"),h("th",{rowspan:2},"專案目標"),h("th",{rowspan:2},"行動計劃"),h("th",{colspan:12,style:"text-align:center"},"預訂進度（月）"),h("th",{rowspan:2},"預算費用"),h("th",{rowspan:2},"負責部門"),h("th",{rowspan:2},"配合部門"),ro?null:h("th",{rowspan:2},"")),
+      h("tr",null,h("th",{rowspan:2},"專案"),h("th",{rowspan:2},"重要度"),h("th",{rowspan:2},"專案目標"),h("th",{rowspan:2},"預期指標"),h("th",{rowspan:2},"行動計劃"),h("th",{colspan:12,style:"text-align:center"},"預訂進度（月）"),h("th",{rowspan:2},"預算費用"),h("th",{rowspan:2},"負責部門"),h("th",{rowspan:2},"配合部門"),ro?null:h("th",{rowspan:2},"")),
       h("tr",null,M12.map(m=>h("th",{style:"text-align:center;width:24px;padding:4px 2px"},m)))),h("tbody",null,rows))));
-    if(!ro)el.append(h("button",{class:"add",onclick:()=>Store.write(id,"items",uid(),{name:"",w:"",goal:"",plan:"",months:[],budget:"",partners:[],owner:d.name,t:Date.now()})},"＋ 新增專案"));
+    if(!ro)el.append(h("button",{class:"add",onclick:()=>Store.write(id,"items",uid(),{name:"",w:"",goal:"",kpi:"",plan:"",months:[],budget:"",partners:[],owner:d.name,t:Date.now()})},"＋ 新增專案"));
     else if(!ps.length)el.append(h("div",{class:"cellro",style:"color:var(--muted)"},"尚未填寫"));
   })}
 
@@ -1442,10 +1454,10 @@ function p2Summary(code){const id=docId("p2",code),ls=p2Lines(id);
   return h("div",{class:"tablewrap"},h("table",{class:"sheet plan big"},h("thead",null,h("tr",null,h("th",null,"產線"),h("th",null,"單位"),h("th",null,"2027 理論產能"),h("th",null,"2026 實際產量"),h("th",null,"2027 計劃產量"),h("th",null,"產能使用率"),h("th",null,"產量提升率"))),
     h("tbody",null,ls.map(l=>h("tr",null,h("th",{class:"rowh"},p2Name(id,l)),h("td",null,Store.cell(id,l+".unit")),h("td",{class:"qt"},fmtN(p2Sum(id,l,"a"))),h("td",{class:"qt"},fmtN(p2Sum(id,l,"b"))),h("td",{class:"qt"},fmtN(p2Sum(id,l,"c"))),h("td",{class:"qt"},ratS(p2Sum(id,l,"c"),p2Sum(id,l,"a"))),h("td",{class:"qt"},ratS(p2Sum(id,l,"c"),p2Sum(id,l,"b"))))))))}
 function projGantt(code,fix){const o=fix?snapOf(code):null;const ps=deptProjects(code).filter(([k,p])=>(p.name||"").trim());if(!ps.length)return h("div",{class:"cellro",style:"color:var(--muted)"},"尚未填寫專案");
-  const FL=["name","w","goal","plan","months","budget","partners"];
-  return h("div",{class:"tablewrap"},h("table",{class:"sheet plan big"},h("thead",null,h("tr",null,h("th",null,"專案"),h("th",null,"重要度"),h("th",null,"專案目標"),h("th",null,"行動計劃"),M12.map(m=>h("th",{style:"text-align:center;width:26px"},m)),h("th",null,"預算費用"),h("th",null,"配合部門"))),
+  const FL=["name","w","goal","kpi","plan","months","budget","partners"];
+  return h("div",{class:"tablewrap"},h("table",{class:"sheet plan big"},h("thead",null,h("tr",null,h("th",null,"專案"),h("th",null,"重要度"),h("th",null,"專案目標"),h("th",null,"預期指標"),h("th",null,"行動計劃"),M12.map(m=>h("th",{style:"text-align:center;width:26px"},m)),h("th",null,"預算費用"),h("th",null,"配合部門"))),
     h("tbody",null,ps.map(([k,p])=>{const a=o&&(o.proj||{})[k];const isNew=o&&!a;const ch=f=>o&&a&&J(a[f])!==J(p[f])?" chg":"";
-      return h("tr",{class:isNew?"newrow":""},h("td",{class:ch("name")},h("b",null,p.name),isNew?h("span",{class:"badge"},"新增"):null),h("td",{class:"qt"+ch("w")},p.w?p.w+"%":""),h("td",{class:ch("goal"),style:"font-size:.85em;white-space:pre-wrap"},p.goal||""),h("td",{class:ch("plan"),style:"font-size:.85em;white-space:pre-wrap"},p.plan||""),
+      return h("tr",{class:isNew?"newrow":""},h("td",{class:ch("name")},h("b",null,p.name),isNew?h("span",{class:"badge"},"新增"):null),h("td",{class:"qt"+ch("w")},p.w?p.w+"%":""),h("td",{class:ch("goal"),style:"font-size:.85em;white-space:pre-wrap"},p.goal||""),h("td",{class:ch("kpi"),style:"font-size:.85em;white-space:pre-wrap"},p.kpi||""),h("td",{class:ch("plan"),style:"font-size:.85em;white-space:pre-wrap"},p.plan||""),
         M12.map(m=>h("td",{class:((p.months||[]).includes(m)?"gantt on":"gantt")+(ch("months")?" chgm":"")})),h("td",{class:"qt"+ch("budget")},p.budget||""),h("td",{class:ch("partners")},(p.partners||[]).join("、")))}))))}
 function fbOpen(){return !!cfg("release.fb")}
 function selfevalOpen(){const m8=MEETINGS.find(x=>x.id==="m8");if(cfg("release.selfeval"))return true;const t=todayStr();return m8&&(t>m8.date||(t===m8.date&&nowMin()>=hm2min(SELFEVAL_OPEN)))}
@@ -1458,8 +1470,8 @@ const uniq=a=>[...new Set(a.filter(Boolean))];
 function deptContext(code){const d=deptByCode(code),st=Store.body(docId("strategy","X")).cells,L=[];
   const blk=(title,items,max)=>{const xs=uniq(items).slice(0,max||15);L.push("【"+title+"】"+(xs.length?"\n"+xs.map(x=>"- "+x).join("\n"):"（尚無資料）"))};
   L.push("【公司 2027 營運目標】"+(st.goal||"（尚未填寫）"),"【公司 2027 策略重點】"+(st.focus||"（尚未填寫）"));
-  blk("本部門 11/4 初擬的年度專案",deptProjects(code).map(x=>x[1]).filter(p=>(p.name||"").trim()).map(p=>p.name+((p.months||[]).length?"（"+p.months.join("、")+"月）":"")+(p.goal?"：目標 "+p.goal.replace(/\n/g," "):"")+((p.partners||[]).length?"；配合 "+p.partners.join("、"):"")),20);
-  blk("本部門 11/4 初擬的專案 KPI",Store.items(docId("dkpi",code)).map(x=>x[1]).filter(k=>(k.name||"").trim()).map(k=>k.name+(k.target?"：2027 目標 "+k.target:"")+(k.attr?"（"+k.attr+"）":"")),20);
+  blk("本部門 11/4 初擬的年度專案",deptProjects(code).map(x=>x[1]).filter(p=>(p.name||"").trim()).map(p=>p.name+((p.months||[]).length?"（"+p.months.join("、")+"月）":"")+(p.goal?"：目標 "+p.goal.replace(/\n/g," "):"")+(p.kpi?"；預期指標 "+p.kpi.replace(/\n/g," "):"")+((p.partners||[]).length?"；配合 "+p.partners.join("、"):"")),20);
+  blk("本部門 KPI 指標",Store.items(docId("dkpi",code)).map(x=>x[1]).filter(k=>(k.name||"").trim()).map(k=>k.name+(k.target?"：2027 目標 "+k.target:"")+(k.attr?"（"+k.attr+"）":"")),20);
   const sw=["A","B","C"].flatMap(g=>Store.items(docId("sw",g)).map(x=>x[1]));const dims=DEPT_DIMS[code];
   blk("內部能力分析：與本部門相關的優勢（"+dims.join("、")+"）",sw.filter(v=>v.side==="S"&&dims.includes(v.dim)).map(v=>v.text+(v.imp==="重要"?"（重要）":"")));
   blk("內部能力分析：與本部門相關的劣勢（"+dims.join("、")+"）",sw.filter(v=>v.side==="W"&&dims.includes(v.dim)).map(v=>v.text+(v.imp==="重要"?"（重要）":"")+(v.urg==="急需"?"（急需）":"")));
@@ -1631,14 +1643,14 @@ function deptDiff(code){const o=snapOf(code);if(!o)return null;const n=deptSnaps
   Object.keys(n.strat).forEach(k=>{if(((o.strat||{})[k]||"")!==n.strat[k])out.push({t:"修改",sec:"策略展開",name:STRAT_COLS[+k.split("c")[1]]+"－"+(k.startsWith("r0")?"策略展開":"KPI 指標")})});
   const cc=(A,B)=>Object.keys(Object.assign({},A,B)).filter(k=>((A||{})[k]||"")!==((B||{})[k]||"")).length;
   const n1=cc(o.p1,n.p1);if(n1)out.push({t:"修改",sec:"營業目標",name:n1+" 格數字調整"});const n2=cc(o.p2,n.p2);if(n2)out.push({t:"修改",sec:"產能規劃",name:n2+" 格數字調整"});
-  cmp("專案",ob(o.proj),n.proj,v=>v.name||"（未命名專案）",[["name","專案名稱"],["w","重要度"],["goal","專案目標"],["plan","行動計劃"],["months","預訂進度"],["budget","預算費用"],["partners","配合部門"]]);
+  cmp("專案",ob(o.proj),n.proj,v=>v.name||"（未命名專案）",[["name","專案名稱"],["w","重要度"],["goal","專案目標"],["kpi","預期指標"],["plan","行動計劃"],["months","預訂進度"],["budget","預算費用"],["partners","配合部門"]]);
   cmp("KPI",ob(o.kpi),n.kpi,v=>v.name||"（未命名指標）",[["name","指標名稱"],["attr","屬性"],["w","重要度"],["last","2026 實際"],["target","2027 目標"],["def","定義"]]);
   return out}
 function diffList(code){const d=deptDiff(code);if(!d)return h("div",{class:"cellro"},"尚未建立第一天版本（主持人在第一天結束時按「建立第一天版本」）");
   if(!d.length)return h("div",{class:"cellro"},"與第一天版本相比沒有修改");
   const col={"新增":"#2E8B6A","修改":"#C98F0A","刪除":"#C0392B"};
   return h("div",{style:"display:grid;gap:6px"},d.map(x=>h("div",{class:"chgrow",style:"border-left:5px solid "+col[x.t]},h("b",{style:"color:"+col[x.t]},"【"+x.t+"】"),h("span",{style:"color:#5E6B78"},x.sec+"｜"),h("b",null,x.name),x.what?h("span",{style:"margin-left:6px;background:#FFF3C4;padding:0 6px;border-radius:4px"},"改了："+x.what.join("、")):null)))}
-function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));return ["dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["dstrat","dproj","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
+function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["dproj"];return ["dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["dstrat","dproj","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
 
 function buildRivals(g,ro){
   const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
@@ -2127,7 +2139,7 @@ const Deck={
       if(a.day){curDate=a.date||m.date;S.push({k:"day",a});return}
       if(a.checkin)return;
       if(a.twodays){S.push({k:"twodays"});return}
-      if(a.deptplan){DEPTS.forEach(d=>{const au={id:m.id+":plan:"+d.code,min:15,label:d.name+"（報告 10＋Q&A 5）"};S.push({k:"dproj",c:d.code,auto:au},{k:"dkpi",c:d.code,auto:au})});return}
+      if(a.deptplan){DEPTS.forEach(d=>{const au={id:m.id+":plan:"+d.code,min:15,label:d.name+"（報告 10＋Q&A 5）"};S.push({k:"dplan",c:d.code,auto:au})});return}
       if(a.goalfocus){S.push({k:"goalfocus"});return}
       if(a.stratall){S.push({k:"stratall"});if(a.snapshot)S.push({k:"snap",a});return}
       if(a.snapshot){S.push({k:"snap",a});return}
@@ -2305,6 +2317,7 @@ const Deck={
       if(s.k==="dfb"||s.k==="dfix")box.append(buildDFb(s.c,s.k==="dfix"));
       add(box);
     }
+    if(s.k==="dplan"){const d=deptByCode(s.c);add(h("div",{class:"kicker"},d.name+"｜2027 預計專案"),h("h2",{style:"margin:0 0 1.5vh"},"專案・目標・預期指標"),h("div",{class:"light",id:"repBox",style:"max-height:72vh"},projSimple(s.c,true)))}
     if(s.k==="twodays"){const ms=MEETINGS.filter(x=>x.id==="m7"||x.id==="m8");
       add(kick("年度計劃工作坊"),h("h2",{style:"margin-bottom:1.5vh"},"兩天行程"),h("div",{class:"twocol"},ms.map(x=>{const SC=sched(x);return h("div",null,h("h3",null,mWhen(x).replace(/　.*$/,"")),
         h("div",{class:"sched dense tiny"},x.agenda.map((a,ai)=>[a,SC[ai]]).filter(([a])=>!a.hidden&&!a.day).map(([a,sc])=>h("div",{class:"srow"},h("span",{class:"st"},sc?sc.time:""),h("span",{class:"sn"},a.t),h("span",{class:"sd"},sc&&sc.dur?sc.dur+" 分":"")))))})))}
@@ -2348,7 +2361,7 @@ const Deck={
   refresh(){
     const s=this.slides[this.i];if(!s||this.animating)return;const el=$("#slide");const a=document.activeElement;
     if(s.k==="checkin"){if(this.paintCheckin)this.paintCheckin();return}
-    if(!["checkin","report","members","roles","live","dept","topic","cprof","cvs","fbqr","fbstats","fbcloud","tcloud","swotai","dtitle","dp1","dp2","dproj","dkpi","dorg","dfb","dfix","sum","selfeval","goalfocus","stratall","dfixsum","ops","opsg","snap","twodays"].includes(s.k))return;
+    if(!["checkin","report","members","roles","live","dept","topic","cprof","cvs","fbqr","fbstats","fbcloud","tcloud","swotai","dtitle","dp1","dp2","dproj","dkpi","dorg","dfb","dfix","sum","selfeval","dplan","goalfocus","stratall","dfixsum","ops","opsg","snap","twodays"].includes(s.k))return;
     if(a&&el.contains(a)&&["SELECT","INPUT","TEXTAREA"].includes(a.tagName)){
       el.querySelectorAll("[data-doc][data-key]").forEach(x=>{if(x!==a){const v=Store.cell(x.dataset.doc,x.dataset.key);if(x.value!==v)x.value=v}});
       el.querySelectorAll("[data-live]").forEach(x=>{if(!x.contains(a)&&!(x.parentElement&&x.parentElement.closest("[data-live]")))x._draw()});return;
@@ -2363,7 +2376,7 @@ const Deck={
     if(s.k==="sum")return FORMS[s.f].title;if(s.k==="swotai")return "AI 比對："+FORMS[s.f].board;if(s.k==="cprof")return GROUPS[s.g].name+"｜"+rivalName(s.g,s.sl)+" 概況";if(s.k==="cvs")return GROUPS[s.g].name+"｜百鮮 vs "+rivalName(s.g,s.sl);
     if(s.k==="opsg")return GROUPS[s.g].name+"｜操盤表 "+s.ms[0]+"–"+s.ms[2]+" 月";
     if(s.k==="twodays")return "兩天行程";
-    const D={dorg:"組織執掌",dtitle:"策略展開",dp1:"營業目標",dp2:"產能規劃",dproj:s.fix?"修改後專案":"專案",dkpi:"KPI",dfixsum:"修改重點"};if(D[s.k])return dn+D[s.k];
+    const D={dplan:"預計專案",dorg:"組織執掌",dtitle:"策略展開",dp1:"營業目標",dp2:"產能規劃",dproj:s.fix?"修改後專案":"專案",dkpi:"KPI",dfixsum:"修改重點"};if(D[s.k])return dn+D[s.k];
     return L[s.k]||s.k},
   nav(){let ov=$("#dNav");if(ov){ov.remove();return}
     ov=h("div",{id:"dNav"},h("div",{class:"navhead"},h("b",null,"所有頁面（點選跳至該頁）"),h("button",{onclick:()=>ov.remove()},"關閉")),
