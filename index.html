@@ -386,6 +386,7 @@ const ALL_PEOPLE = ["A","B","C"].flatMap(g=>GROUPS[g].members).concat(GM);
 const DIM7 = ["市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力"];
 const FUNCS7 = ["市場/品牌","產品/研發","供應鏈管理","生產/品質","通路/銷售","財務/管理/資訊","人力資源"];
 const COMP10 = ["損益：收入/利潤；產品/區域","總體策略","市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力","核心競爭力"];
+const PICK_PROMPT = "你是一位熟悉台灣食品產業的經營顧問。請協助我評估「百鮮企業有限公司」在三個業務面向的競爭者或目標競爭者。\n\n【百鮮的基本背景】\n・公司：百鮮企業有限公司（LINCO），統一編號 22857149，位於新北市林口區，1988 年設立，資本額 2,000 萬元\n・登記營業項目：調味品製造、食品添加物製造與批發、糖果製造、飲料製造、乳品製造、食品什貨批發、國際貿易等\n・目前觀察到的優勢：在代工市場有一定知名度、可少量接單、彈性較大\n・目前觀察到的弱勢：連鎖餐飲領域尚未發展、產能不足、交貨期較長\n・我補充的資訊（主要產品、主要客戶類型、營收規模等，沒有可刪除）：＿＿＿＿\n\n【三個評估面向】\n1. 傳統盤：透過盤商、南北雜貨、傳統通路銷售自有或通路商品的市場\n2. 專案代工：替品牌商、通路商、餐飲業者做 OEM／ODM 開發與生產\n3. 未來目標：百鮮未來想進入或想成為的樣子（例如連鎖餐飲、零售品牌、海外市場等），要找的是「標竿」或「將來會正面競爭」的公司\n\n【請你這樣做】\n1. 每個面向列出 3–5 家台灣（可含在台灣有實際營運的外商）候選競爭者，說明：公司名稱、主要產品或服務、與百鮮重疊的地方、選它當比較對象的理由。\n2. 每個面向推薦 1 家「最值得深入分析」的公司，並說明原因。\n3. 對推薦的 3 家，簡要比較它們和百鮮在「規模、產品、通路、核心競爭力」上的差異。\n4. 最後提出 3 個我們在分組討論時應該思考的問題。\n\n【輸出要求】\n・用表格整理候選名單，表格欄位：面向、公司名稱、主要產品／服務、與百鮮重疊處、選擇理由、資料來源\n・只寫查得到的公開資訊，不確定的請標示「待確認」，不要編造公司或數字\n・附上資料來源網址\n・使用繁體中文";
 const COMP10_SHORT = ["損益","總體策略","市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力","核心競爭力"];
 const RIVAL_SLOTS = [["trad","傳統盤",0],["proj","專案代工",1],["future","未來目標",2]];
 const RIVAL_FIELDS = [["ubn","統一編號"],["name","公司名稱"],["capital","資本總額（元）"],["rep","代表人"],["address","公司所在地"],["setup","核准設立日期"],["url","公司網址"],["business","所營事業",1],["note","其他資訊／備註",1]];
@@ -1055,7 +1056,17 @@ function buildBoard(fid,g,ro){
 function example7Table(){return h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("thead",null,h("tr",null,h("th",null,"七大面向"),h("th",null,"內部能力（優勢）"),h("th",null,"內部能力（劣勢）"))),
   h("tbody",null,DIM7.map((r,i)=>h("tr",null,h("th",{class:"rowh"},r),FORMS.sw.example7[i].map(v=>h("td",null,h("div",{class:"cellro"},v))))))))}
 function xmfTable(){return h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("tbody",null,COMP10.map((r,i)=>h("tr",null,h("th",{class:"rowh"},r),h("td",null,h("div",{class:"cellro"},XMF[i])))))))}
+function promptBox(title,text,open){
+  const pre=h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;margin:8px 0;max-height:320px;overflow:auto;background:var(--mist);border-radius:8px;padding:10px 12px"},text);
+  const msg=h("span",{style:"font-size:13px;color:var(--gB)"});
+  const copy=h("button",{class:"btn primary",style:"padding:5px 14px",onclick:async()=>{try{await navigator.clipboard.writeText(text);msg.textContent="✓ 已複製，貼到您的 AI 即可"}catch(e){const r=document.createRange();r.selectNodeContents(pre);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);msg.textContent="已選取全文，請按 Ctrl+C（手機長按）複製"}}},"📋 複製指令");
+  const link=(u,t)=>h("a",{class:"btn",href:u,target:"_blank",rel:"noopener",style:"text-decoration:none;padding:5px 12px"},t);
+  return h("details",{class:"example",open:open?true:null,style:"border-style:solid;border-color:var(--saffron);background:var(--saffron-soft)"},h("summary",{style:"color:var(--ink);font-weight:700"},"🤖 "+title),
+    h("p",{style:"margin:8px 0 0;font-size:13px;color:var(--muted)"},"複製後貼到 ChatGPT、Gemini、Claude 或您自己的 AI agent。「我補充的資訊」那一行可以先填上您知道的內容，結果會更準。"),pre,
+    h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},copy,link("https://chatgpt.com/","ChatGPT"),link("https://gemini.google.com/app","Gemini"),link("https://claude.ai/new","Claude"),msg));
+}
 function examplesFor(fid){
+  if(fid==="pick")return [promptBox("AI 指令：評估傳統盤、專案代工、未來目標的競爭者",PICK_PROMPT,true)];
   if(FORMS[fid].type==="classify")return [h("details",{class:"example"},h("summary",null,"參考案例：康師傅（依七大面向整理）"),example7Table())];
   const f=FORMS[fid];const out=[];
   if(f.type==="sw")out.push(h("details",{class:"example"},h("summary",null,"參考案例：康師傅的優勢／劣勢"),h("div",{style:"display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px"},
@@ -1297,6 +1308,7 @@ const Deck={
       if(f.type==="sw"){struct=["① 列出優勢（S）／劣勢（W）","② 標記重要性、急迫性","③ 下一階段再歸類七大面向"];extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅"),h("div",{style:"display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 12px 12px"},
           h("div",null,h("b",null,"優勢（S）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.S.map(x=>h("li",null,x)))),h("div",null,h("b",null,"劣勢（W）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.W.map(x=>h("li",null,x))))))}
       else if(f.type==="rivals"){struct=RIVAL_FIELDS.map(x=>x[1])}
+      else if(s.f==="pick"){struct=f.rows;extra=h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"🤖 分組頁面提供「AI 評估競爭者」指令，可一鍵複製到自己的 AI 使用")}
       else if(f.type==="classify"){struct=DIM7;extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅（依七大面向整理）"),example7Table())}
       else if(f.type==="list"){struct=f.examples;extra=null}
       else if(f.type==="board"){const pool=tagPool();struct=Object.entries(CATS).map(([c,[nm]])=>nm+" "+pool.filter(t=>t.cat===c).length+" 項")}
