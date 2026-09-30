@@ -386,6 +386,9 @@ const ALL_PEOPLE = ["A","B","C"].flatMap(g=>GROUPS[g].members).concat(GM);
 const DIM7 = ["市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力"];
 const FUNCS7 = ["市場/品牌","產品/研發","供應鏈管理","生產/品質","通路/銷售","財務/管理/資訊","人力資源"];
 const COMP10 = ["損益：收入/利潤；產品/區域","總體策略","市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力","核心競爭力"];
+const COMP10_SHORT = ["損益","總體策略","市場/品牌","產品/研發","供應鏈管理","生產","通路/銷售","系統/流程","組織/人力","核心競爭力"];
+const RIVAL_SLOTS = [["trad","傳統盤",0],["proj","專案代工",1],["future","未來目標",2]];
+const RIVAL_FIELDS = [["ubn","統一編號"],["name","公司名稱"],["capital","資本總額（元）"],["rep","代表人"],["address","公司所在地"],["setup","核准設立日期"],["url","公司網址"],["business","所營事業",1],["note","其他資訊／備註",1]];
 const PESTC_ROWS = ["P 政策","E 經濟","S 社會","T 技術","C 競爭者"];
 const SWOT_EXT = ["P 政策","E 經濟","S 社會","T 技術","C 產業（競爭者）"];
 const SWOT_IN = ["財務（營運目標）","市場（外部機會）","組織（人/渠道）","系統/設備"];
@@ -406,6 +409,7 @@ const FORMS = {
     desc:"第二階段：把上一階段列出的優勢、劣勢，拖到對應的七大面向（手機：先點項目，再點面向）。放錯了可以再拖到別的面向，或拖回上方。"},
   self10:{title:"百鮮的競爭力分析",short:"百鮮競爭力",type:"grid",desc:"用與競爭者相同的十個構面，先把百鮮自己看清楚。",rows:COMP10,cols:["百鮮企業有限公司"],example:"xmf"},
   pick:{title:"競爭者選擇",short:"競爭者選擇",type:"grid",desc:"Who is 競爭者？各組列出 3 個競爭者：傳統盤、專案代工、未來目標各一。",rows:["傳統盤","專案代工","未來目標"],cols:["競爭者名稱","選擇理由"]},
+  rivals:{title:"競爭者基本資料",short:"競爭者基本資料",type:"rivals",desc:"依「競爭者選擇」的三家公司，填入工商登記資料與公司網址，並可上傳附件（型錄、報導、截圖）。可上傳登記截圖自動辨識填入，也可複製 AI 查詢提示，請 ChatGPT／Gemini／Claude 幫忙整理。"},
   compare:{title:"競爭者分析比較",short:"競爭者分析",type:"grid",desc:"選兩家競爭者與百鮮並列比較，表頭的競爭者名稱可直接修改。10/20 各組上台報告 10 分鐘。",rows:COMP10,cols:["競爭者1","競爭者2","百鮮企業有限公司"],editableCols:[0,1],example:"xmf"},
   pestc:{title:"外部環境發展趨勢（PESTC）",short:"外部環境",type:"grid",desc:"從政策、經濟、社會、技術、競爭者五個面向，分別列出未來的機會與威脅。每一點換一行，之後會變成 SO／WT 的標籤。",
     rows:PESTC_ROWS,cols:["未來發展趨勢（機會）","未來發展趨勢（威脅）"],hints:["自動化設備","FSSC 認證","原物料取得成本增加","新創品牌增加","傳統產業難請人","混料分裝技術門檻低"]},
@@ -447,7 +451,7 @@ const MEETINGS = [
    {t:"分組報告",sub:"每組 5 分鐘",report:["sw"],repMin:5},
    {t:"下次議題說明：百鮮競爭力分析、競爭者選擇",preview:["self10","pick"]}],
   next:{topic:"百鮮競爭力分析、競爭者選擇",when:"10/13（二）16:00"}},
- {id:"m2",no:"第二次會議",date:"2026-10-13",time:"16:00",theme:"百鮮競爭力・競爭者選擇",pforms:["self10","pick","compare"],
+ {id:"m2",no:"第二次會議",date:"2026-10-13",time:"16:00",theme:"百鮮競爭力・競爭者選擇",pforms:["self10","pick","rivals","compare"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"競爭者分析範例：小磨坊",sub:"以小磨坊為例說明十個分析構面",example:"xmf"},
@@ -455,9 +459,10 @@ const MEETINGS = [
    {t:"分組報告",sub:"每組 5 分鐘",report:["self10"],repMin:5},
    {t:"分組討論：競爭者選擇",min:10,sub:"傳統盤、專案代工、未來目標各選一家",forms:["pick"]},
    {t:"分組報告",sub:"每組 5 分鐘",report:["pick"],repMin:5},
+   {t:"競爭者資料蒐集",sub:"上傳附件、填入工商登記資料與公司網址；可用 AI 協助查找",forms:["rivals"]},
    {t:"下次議題說明：競爭者分析",sub:"10/20 前各組完成兩家競爭者與百鮮的比較，當天直接上台報告",preview:["compare"]}],
   next:{topic:"競爭者分析（各組報告）",when:"10/20（二）16:00"}},
- {id:"m3",no:"第三次會議",date:"2026-10-20",time:"16:00",theme:"競爭者分析・共事特質",pforms:["compare","traits"],
+ {id:"m3",no:"第三次會議",date:"2026-10-20",time:"16:00",theme:"競爭者分析・共事特質",pforms:["compare","rivals","traits"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"分組報告：競爭者分析",sub:"各組 10 分鐘",report:["compare"],repMin:10},
@@ -670,6 +675,7 @@ function attCounts(m,d){const c={"出席":0,"遲到":0,"請假":0,"未到":0};AL
 function allForms(m){const s=[];const add=f=>{if(f&&!s.includes(f))s.push(f)};m.agenda.forEach(a=>{(a.forms||[]).forEach(add);(a.topic||[]).forEach(add);(a.live||[]).forEach(add);(a.report||[]).forEach(add)});(m.pforms||[]).forEach(add);return s}
 function fillCount(fid,g){
   const f=FORMS[fid];const id=docId(fid,g);const b=Store.body(id);
+  if(f.type==="rivals"){let n=0;RIVAL_SLOTS.forEach(([sl])=>RIVAL_FIELDS.forEach(([k])=>{if((b.cells[sl+"."+k]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*RIVAL_FIELDS.length}
   if(f.type==="classify"){const xs=Store.items(docId("sw",g)).filter(([k,v])=>(v.text||"").trim());return xs.filter(([k,v])=>v.dim).length+"/"+xs.length}
   if(["sw","list","traits8","board"].includes(f.type))return Store.items(id).length+" 項";
   if(f.type==="roles"){let n=0;if(b.cells.leader)n++;ROLE_MEETINGS.forEach(([m])=>{if(b.cells["rec_"+m])n++;if(b.cells["rep_"+m])n++});return n+"/"+(1+ROLE_MEETINGS.length*2)}
@@ -756,6 +762,7 @@ function buildForm(fid,g,ro,opts){
   if(f.type==="grid")return buildGrid(fid,g,ro);
   if(f.type==="sw")return buildSW(fid,g,ro);
   if(f.type==="classify")return buildClass(g,ro);
+  if(f.type==="rivals")return buildRivals(g,ro);
   if(f.type==="roles")return buildRoles(fid,g,ro,opts&&opts.compact);
   if(f.type==="list")return buildList(fid,g,ro);
   if(f.type==="traits8")return buildTraits8(ro);
@@ -784,6 +791,8 @@ function buildGrid(fid,g,ro){
   }
   const body=rows.map((r,ri)=>h("tr",null,(f.rowGroups&&r.first)?h("th",{class:"grouph",rowspan:r.span},r.glabel):null,h("th",{class:"rowh"},r.label),
     f.cols.map((c,ci)=>h("td",null,cellArea(id,"r"+ri+"c"+ci,ro)))));
+  if(fid==="compare"&&!ro)frag.append(h("div",{class:"hints",style:"margin-bottom:10px"},h("span",{class:"lbl"},"用 AI 查好的資料："),
+    [0,1].map(ci=>h("button",{class:"btn",style:"padding:3px 10px;font-size:13px",onclick:()=>pasteAI(id,ci,Store.cell(id,"col"+ci)||f.cols[ci])},"貼上 AI 回覆到「"+(Store.cell(id,"col"+ci)||f.cols[ci])+"」"))));
   frag.append(h("div",{class:"tablewrap"},h("table",{class:"sheet"+(f.wide?" wide":"")},h("thead",null,head),h("tbody",null,body))));
   return frag;
 }
@@ -842,6 +851,69 @@ function buildClass(g,ro){
       return target(h("tr",{style:"cursor:"+(state.selItem?"copy":"default")},h("th",{class:"rowh"},d),cell("S"),cell("W")),d)});
     el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet board"},h("thead",null,h("tr",null,h("th",null,"七大面向"),h("th",null,"內部能力（優勢）"),h("th",null,"內部能力（劣勢）"))),h("tbody",null,rowsEl))));
   });
+}
+async function backendPost(obj){
+  if(Store.mode!=="remote")throw new Error("附件上傳與圖片辨識需使用正式網址（GitHub 版）");
+  const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(obj)});
+  let j;try{j=await r.json()}catch(e){throw new Error("後端沒有回應，請確認 Apps Script 已更新並重新部署")}
+  if(!j.ok)throw new Error(j.error||"處理失敗");return j;
+}
+function fileB64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(",")[1]);r.onerror=()=>rej(new Error("讀檔失敗"));r.readAsDataURL(file)})}
+function shrinkImage(file,max){return new Promise((res,rej)=>{const img=new Image();img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(img.src);res(c.toDataURL("image/jpeg",.9).split(",")[1])};img.onerror=()=>rej(new Error("無法讀取圖片"));img.src=URL.createObjectURL(file)})}
+function aiPrompt(name,ubn,url){
+  return "請幫我查詢台灣公司「"+(name||"（公司名稱）")+"」"+(ubn?"（統一編號 "+ubn+"）":"")+(url?"，官方網站 "+url:"")+" 的公開資訊，作為競爭者分析使用。\n"+
+    "請依下列十個構面整理，每個構面 1–3 句重點；查不到的請寫「查無公開資料」，不要猜測；最後附上資料來源網址。\n"+
+    "請嚴格使用以下格式輸出（保留【】標題）：\n"+COMP10_SHORT.map(x=>"【"+x+"】").join("\n");
+}
+function parseAI(text){const out={};const re=/【([^】]+)】([\s\S]*?)(?=【|$)/g;let m;
+  while((m=re.exec(text))){const lab=m[1].trim();let i=COMP10_SHORT.indexOf(lab);if(i<0)i=COMP10_SHORT.findIndex(x=>lab.includes(x.split("/")[0]));if(i>=0)out[i]=m[2].trim()}return out}
+function pasteAI(id,ci,label){openDialog("貼上 AI 回覆：「"+label+"」",b=>{
+  const ta=h("textarea",{style:"width:100%;min-height:260px;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--field)",placeholder:"把 AI 的完整回覆貼在這裡（需含【損益】【總體策略】…等標題）"});
+  const msg=h("div",{style:"font-size:13px;color:var(--muted);min-height:1.3em"});
+  b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px"},ta,h("div",{style:"display:flex;gap:10px;align-items:center"},h("button",{class:"btn primary",onclick:()=>{
+    const r=parseAI(ta.value);const ks=Object.keys(r);if(!ks.length){msg.textContent="找不到【構面】標題，請確認 AI 是照格式回覆";return}
+    ks.forEach(i=>Store.write(id,"cells","r"+i+"c"+ci,r[i]));$("#rosterDlg").classList.remove("open");toast("已填入 "+ks.length+" 個構面");if(state.mode==="host")render()}},"自動拆到十個構面"),msg)));
+  setTimeout(()=>ta.focus(),50);
+})}
+function buildRivals(g,ro){
+  const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
+  RIVAL_SLOTS.forEach(([sl,label,ri])=>{
+    const picked=Store.cell(docId("pick",g),"r"+ri+"c0");
+    const card=h("div",{style:"border:1px solid var(--line);border-radius:12px;padding:14px 16px"});
+    card.append(live(h("h4",{style:"margin:0 0 10px;font-size:16px"}),el=>el.append(label+"：",Store.cell(id,sl+".name")||Store.cell(docId("pick",g),"r"+ri+"c0")||"（尚未在「競爭者選擇」填寫）")));
+    if(ro){
+      card.append(h("div",{style:"display:grid;grid-template-columns:8em 1fr;gap:4px 12px;font-size:14px"},RIVAL_FIELDS.map(([k,l])=>{const v=Store.cell(id,sl+"."+k);return [h("b",null,l),k==="url"&&v?h("a",{href:v,target:"_blank",rel:"noopener"},v):h("span",{style:"white-space:pre-wrap"},v||"—")]})));
+    }else{
+      const msg=h("div",{style:"font-size:13px;min-height:1.3em;color:var(--muted)"});
+      const say=(t,bad)=>{msg.textContent=t;msg.style.color=bad?"var(--danger)":"var(--muted)"};
+      const pickFile=(accept,multi,fn)=>{const f=h("input",{type:"file",accept,style:"display:none"});if(multi)f.multiple=true;f.addEventListener("change",()=>{if(f.files.length)fn([...f.files]);f.remove()});document.body.append(f);f.click()};
+      const uploadFiles=async files=>{for(const file of files){if(file.size>10*1024*1024){say("「"+file.name+"」超過 10MB，無法上傳",1);continue}
+        say("上傳中："+file.name+"…");try{const j=await backendPost({action:"upload",name:file.name,mime:file.type,data:await fileB64(file)});
+          Store.write(id,"items",uid(),{slot:sl,name:j.name,url:j.url,by:getMe(),t:Date.now()});say("已上傳："+file.name)}catch(e){say(e.message,1)}}};
+      const btnParse=h("button",{class:"btn",onclick:()=>pickFile("image/*",false,async([file])=>{
+        say("辨識中，約 5–15 秒…");try{const data=await shrinkImage(file,1800);const j=await backendPost({action:"parse",mime:"image/jpeg",data});
+          let n=0;RIVAL_FIELDS.forEach(([k])=>{const v=j.fields&&j.fields[k];if(v&&String(v).trim()){Store.write(id,"cells",sl+"."+k,String(v).trim());n++}});
+          say("已自動填入 "+n+" 個欄位，請核對");uploadFiles([file]);if(state.mode==="host")renderHostForms(MEETINGS.find(x=>x.id===state.meeting));else render()}catch(e){say(e.message,1)}})},"📷 上傳登記截圖・自動填入");
+      const btnUp=h("button",{class:"btn",onclick:()=>pickFile("*/*",true,uploadFiles)},"📎 上傳附件");
+      const btnAI=h("button",{class:"btn",onclick:async()=>{const p=aiPrompt(Store.cell(id,sl+".name")||picked,Store.cell(id,sl+".ubn"),Store.cell(id,sl+".url"));
+        try{await navigator.clipboard.writeText(p);say("已複製 AI 查詢提示，貼到 ChatGPT／Gemini／Claude 即可；AI 回覆可在「競爭者分析」按「貼上 AI 回覆」自動拆欄位")}catch(e){openDialog("AI 查詢提示（請全選複製）",b=>b.append(h("textarea",{style:"grid-column:1/-1;width:100%;min-height:240px"},p)))}}},"🤖 複製 AI 查詢提示");
+      card.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px"},btnParse,btnUp,btnAI,
+        h("a",{class:"btn",href:"https://findbiz.nat.gov.tw/fts/query/QueryBar/queryInit.do",target:"_blank",rel:"noopener",style:"text-decoration:none"},"🔎 商工登記查詢"),
+        h("a",{class:"btn",href:"https://chatgpt.com/",target:"_blank",rel:"noopener",style:"text-decoration:none"},"ChatGPT"),
+        h("a",{class:"btn",href:"https://gemini.google.com/app",target:"_blank",rel:"noopener",style:"text-decoration:none"},"Gemini"),
+        h("a",{class:"btn",href:"https://claude.ai/new",target:"_blank",rel:"noopener",style:"text-decoration:none"},"Claude")),msg);
+      card.append(h("div",{class:"rfields",style:"display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px 14px"},RIVAL_FIELDS.map(([k,l,multi])=>{
+        const key=sl+"."+k;const el=multi?h("textarea",{"data-doc":id,"data-key":key,rows:3}):h("input",{"data-doc":id,"data-key":key,type:k==="url"?"url":"text",placeholder:k==="name"?(picked||""):k==="url"?"https://":""});
+        el.value=Store.cell(id,key);el.addEventListener("input",()=>{Store.write(id,"cells",key,el.value)});
+        el.setAttribute("style","width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--field)");
+        return h("label",{style:"display:grid;gap:4px;font-size:13px;font-weight:700"+(multi?";grid-column:1/-1":"")},l,el)})));
+    }
+    card.append(live(h("div",{style:"margin-top:10px"}),el=>{const atts=Store.items(id).filter(([k,v])=>v.slot===sl&&v.url).sort(byT);
+      if(!atts.length){if(ro)el.append(h("small",{style:"color:var(--muted)"},"無附件"));return}
+      el.append(h("div",{style:"font-size:13px;font-weight:700;margin-bottom:4px"},"附件（"+atts.length+"）"),h("div",{class:"tlist"},atts.map(([k,v])=>h("span",{class:"tchip"},h("a",{href:v.url,target:"_blank",rel:"noopener"},"📄 "+v.name),ro?null:h("button",{"aria-label":"移除附件",title:"從清單移除",onclick:()=>Store.write(id,"items",k,null)},"×")))))}));
+    wrap.append(card);
+  });
+  return wrap;
 }
 function swRow(id,k,v){
   const cur=()=>Object.assign({},Store.body(id).items[k]||v);
@@ -1224,6 +1296,7 @@ const Deck={
       const f=FORMS[s.f];let struct=[],extra=null;
       if(f.type==="sw"){struct=["① 列出優勢（S）／劣勢（W）","② 標記重要性、急迫性","③ 下一階段再歸類七大面向"];extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅"),h("div",{style:"display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 12px 12px"},
           h("div",null,h("b",null,"優勢（S）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.S.map(x=>h("li",null,x)))),h("div",null,h("b",null,"劣勢（W）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.W.map(x=>h("li",null,x))))))}
+      else if(f.type==="rivals"){struct=RIVAL_FIELDS.map(x=>x[1])}
       else if(f.type==="classify"){struct=DIM7;extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅（依七大面向整理）"),example7Table())}
       else if(f.type==="list"){struct=f.examples;extra=null}
       else if(f.type==="board"){const pool=tagPool();struct=Object.entries(CATS).map(([c,[nm]])=>nm+" "+pool.filter(t=>t.cat===c).length+" 項")}
@@ -1293,6 +1366,7 @@ function exportRows(){
     if(f.type==="grid"){(f.topFields||[]).forEach(([k,l])=>b.cells[k]&&rows.push([f.title,gn,l,"",b.cells[k]]));
       gridRows(f).forEach((r,ri)=>f.cols.forEach((c,ci)=>{const v=b.cells["r"+ri+"c"+ci];if(v)rows.push([f.title,gn,(r.glabel?r.glabel+"／":"")+r.label,(f.editableCols&&f.editableCols.includes(ci)&&b.cells["col"+ci])||c,v])}))}
     else if(f.type==="sw")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,v.dim||"未分類",(v.side==="W"?"劣勢":"優勢")+(v.imp?"・"+v.imp:"")+(v.urg?"・"+v.urg:""),v.text]));
+    else if(f.type==="rivals"){RIVAL_SLOTS.forEach(([sl,lab])=>{RIVAL_FIELDS.forEach(([k,l])=>{const v=b.cells[sl+"."+k];if(v)rows.push([f.title,gn,lab,l,v])});Store.items(id).filter(([k,v])=>v.slot===sl&&v.url).forEach(([k,v])=>rows.push([f.title,gn,lab,"附件",v.name+" "+v.url]))})}
     else if(f.type==="list")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,"","",v.text]));
     else if(f.type==="traits8"){const all=Store.items(id);all.filter(([k,v])=>v.kind==="trait").sort(byT).forEach(([k,v])=>{const ns=all.filter(([nk,nv])=>nv.kind==="nom"&&nv.trait===k).map(([nk,nv])=>nv.name);rows.push([f.title,gn,v.text,"代表人物",ns.join("、")])})}
     else if(f.type==="board"){const rs=gridRows(f);Store.items(id).forEach(([k,v])=>{const mm=/^r(\d+)c(\d+)$/.exec(v.cell||"");if(!mm)return;const r=rs[+mm[1]];rows.push([f.title,gn,r.glabel+"／"+r.label,f.cols[+mm[2]],(v.star?"★ ":"")+v.text])})}
