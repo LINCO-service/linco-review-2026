@@ -226,6 +226,9 @@ table.sheet td.sel{padding:6px 10px}
 .slide .ex .cap{padding:8px 12px;font-size:13px;color:#5E6B78}
 @media (max-width:800px){.slide .rolesall{grid-template-columns:1fr}}
 table.sheet.att td{min-width:44px}
+table.board tr.armed:hover td,table.board tr.hot td{background:var(--saffron-soft)}
+.pool.armed{outline:1px dashed var(--saffron)}
+.pool.hot{background:var(--saffron-soft)}
 .empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:8px;font-size:14px;display:none;z-index:60}
 
@@ -366,7 +369,7 @@ const ARTIFACT_URL = "https://claude.ai/artifact/BQVTzja7PmnxVJvGa8Exnc";
 const SELFEVAL_URL = "https://linco-selfeval-335998383755.asia-east1.run.app";
 // 主持人密碼（只存雜湊值，網頁原始碼看不到密碼本身）
 const HOST_HASH = "97ea148d14234fad349ec701be3a350c8e830de4fea7d87c580a9728466b56fa";
-const LATE_MIN = 10;          // 開始後超過幾分鐘報到算遲到
+const LATE_MIN_DEFAULT = 10;  // 預設：開始後超過幾分鐘報到算遲到（主持人可在「會議設定」調整）
 const OPEN_BEFORE_MIN = 30;   // 開始前幾分鐘開放報到
 const LEAVE_DEADLINE = "12:00"; // 會議當天幾點前可請假
 
@@ -386,7 +389,7 @@ const COMP10 = ["損益：收入/利潤；產品/區域","總體策略","市場/
 const PESTC_ROWS = ["P 政策","E 經濟","S 社會","T 技術","C 競爭者"];
 const SWOT_EXT = ["P 政策","E 經濟","S 社會","T 技術","C 產業（競爭者）"];
 const SWOT_IN = ["財務（營運目標）","市場（外部機會）","組織（人/渠道）","系統/設備"];
-const ROLE_MEETINGS = [["m1","10/6"],["m2","10/13"],["m3","10/20"],["m4","10/27"],["m5","11/3"]];
+const ROLE_MEETINGS = [["m1","10/6"],["m2","10/13"],["m3","10/20"],["m4","10/27"],["m5","11/3"]];  // 標籤會依會議設定自動更新
 const STRAT_COLS = ["傳統盤","專案代工","後勤行政","生產製造","設備管理","庫存管理","研發技術部","品質部","財務","採購","資訊/HR"];
 const DEPT_UNITS = {"業務部":[0,1,2],"廠務部":[3,4,5],"研發技術部":[6],"品質部":[7],"管理部":[8,9,10]};
 const CATS = {S:["強勢 S","#2E8B6A"],W:["弱勢 W","#C0392B"],O:["機會 O","#2F6FB2"],T:["威脅 T","#C98F0A"],K:["百鮮競爭力","#7A55B0"],R:["競爭者","#6B7A89"],U:["自訂","#34495E"]};
@@ -394,11 +397,13 @@ const CATS = {S:["強勢 S","#2E8B6A"],W:["弱勢 W","#C0392B"],O:["機會 O","#
 const FORMS = {
   roles:{title:"分組角色分工",short:"角色分工",type:"roles",desc:"決定組長，並排定每次會議的記錄人與報告人。"},
   sw:{title:"內部能力分析",short:"內部能力分析",type:"sw",
-    desc:"先列出百鮮的強勢（S）與弱勢（W），再把每一項歸到七大面向，並標記重要性與急迫性。",
+    desc:"第一階段：列出百鮮的優勢（S）與劣勢（W），並標記重要性與急迫性。歸類七大面向在下一階段進行。",
     seed:{S:[["在代工市場上有一定知名度","市場/品牌"],["可少量接單（彈性較大）","生產"]],W:[["連鎖餐飲領域尚未發展","通路/銷售"],["產能不足，交貨期長","生產"]]},
     example:{name:"康師傅",S:["品牌信賴度高","茶市場份額擴大，持續運用產品細分化及差異化策略","生產基地分佈廣貼近市場，具規模生產優勢，有成本競爭力","全面通路精耕，市場分級管理，布點廣","各功能組織架構完整，執行力強","集團財務健全，信譽高，融資額度取得較容易","人力資源投入持續加大，學習環境良好"],
       W:["產品外觀有待精進","城郊／外埠／直營通路的經營仍不足","產銷協調不精準，物流管理系統尚未完善","研發資源投入相對主要競爭者不足","配套群供貨品質不穩定，交期長，影響生產品質及效率","組織急速擴充，幹部培育速度趕不上發展","基層幹部管理能力不足"]},
     example7:[["品牌信賴度高；茶市場份額擴大","產品外觀有待精進"],["持續運用產品細分化及差異化策略","研發資源投入相對主要競爭者不足"],["生產基地分佈廣、貼近市場","配套群供貨品質不穩定，交期長"],["具規模生產優勢，有成本競爭力","配套供貨不穩，影響生產品質及效率"],["全面通路精耕，市場分級管理，布點廣","城郊／外埠／直營通路的經營仍不足"],["集團財務健全，信譽高，融資額度取得較容易","產銷協調不精準，物流管理系統尚未完善"],["組織架構完整、執行力強；人力資源投入持續加大","組織急速擴充，幹部培育趕不上發展；基層幹部管理能力不足"]]},
+  sw_class:{title:"內部能力分析：歸類七大面向",short:"歸類七大面向",type:"classify",
+    desc:"第二階段：把上一階段列出的優勢、劣勢，拖到對應的七大面向（手機：先點項目，再點面向）。放錯了可以再拖到別的面向，或拖回上方。"},
   self10:{title:"百鮮的競爭力分析",short:"百鮮競爭力",type:"grid",desc:"用與競爭者相同的十個構面，先把百鮮自己看清楚。",rows:COMP10,cols:["百鮮企業有限公司"],example:"xmf"},
   pick:{title:"競爭者選擇",short:"競爭者選擇",type:"grid",desc:"Who is 競爭者？各組列出 3 個競爭者：傳統盤、專案代工、未來目標各一。",rows:["傳統盤","專案代工","未來目標"],cols:["競爭者名稱","選擇理由"]},
   compare:{title:"競爭者分析比較",short:"競爭者分析",type:"grid",desc:"選兩家競爭者與百鮮並列比較，表頭的競爭者名稱可直接修改。10/20 各組上台報告 10 分鐘。",rows:COMP10,cols:["競爭者1","競爭者2","百鮮企業有限公司"],editableCols:[0,1],example:"xmf"},
@@ -433,11 +438,12 @@ const MEETINGS = [
    {t:"決定每次記錄人、報告人",forms:["roles"]},
    {t:"下次議題說明：內部能力分析",preview:["sw"]}],
   next:{topic:"內部能力分析",when:"10/6（二）16:00"}},
- {id:"m1",no:"第一次會議",date:"2026-10-06",time:"16:00",theme:"內部能力分析",pforms:["sw"],
+ {id:"m1",no:"第一次會議",date:"2026-10-06",time:"16:00",theme:"內部能力分析",pforms:["sw","sw_class"],
   agenda:[
    {t:"掃碼報到",checkin:true},
-   {t:"討論主題說明：內部能力分析",sub:"先列出強勢／弱勢，再歸到七大面向",topic:["sw"]},
-   {t:"分組討論",min:10,sub:"掃碼進入分組頁面填寫",forms:["sw"]},
+   {t:"討論主題說明：內部能力分析",sub:"第一階段列出優勢／劣勢，第二階段再歸類到七大面向",topic:["sw"]},
+   {t:"分組討論①：列出優勢、劣勢",min:10,sub:"掃碼進入分組頁面填寫",forms:["sw"]},
+   {t:"分組討論②：歸類七大面向",min:10,sub:"把每一項拖到對應的面向",forms:["sw_class"]},
    {t:"分組報告",sub:"每組 5 分鐘",report:["sw"],repMin:5},
    {t:"下次議題說明：百鮮競爭力分析、競爭者選擇",preview:["self10","pick"]}],
   next:{topic:"百鮮競爭力分析、競爭者選擇",when:"10/13（二）16:00"}},
@@ -475,7 +481,7 @@ const MEETINGS = [
    {t:"2026 自評表",hidden:true,selfeval:true},
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
- {id:"m6",no:"11/4 管理月會",date:"2026-11-04",time:"全天",start:"09:00",theme:"管理月會＆年度策略展開",pforms:["strategy"],
+ {id:"m6",no:"管理月會",date:"2026-11-04",time:"全天",start:"09:00",theme:"管理月會＆年度策略展開",pforms:["strategy"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"上午：管理月會"},
@@ -485,15 +491,15 @@ const MEETINGS = [
   next:{topic:"年度計劃工作坊",when:"11/20（五）–11/21（六）"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",dateEnd:"2026-11-21",time:"兩天",start:"09:00",theme:"年度計劃工作坊",pforms:["strategy"],
   agenda:[
-   {day:"第一天・11/20（五）",date:"2026-11-20"},
-   {t:"掃碼報到",checkin:true,date:"2026-11-20"},
+   {day:"第一天",dayIdx:0},
+   {t:"掃碼報到",checkin:true,dayIdx:0},
    {t:"開場：2027 營運目標與策略重點",report:["strategy"]},
    {t:"業務部年度計劃報告",sub:"傳統盤／專案代工／後勤行政",dept:"業務部",min:40},
    {t:"廠務部年度計劃報告",sub:"生產製造／設備管理／庫存管理",dept:"廠務部",min:40},
    {t:"研發技術部年度計劃報告",dept:"研發技術部",min:30},
    {t:"第一天總結與回饋"},
-   {day:"第二天・11/21（六）",date:"2026-11-21"},
-   {t:"掃碼報到",checkin:true,date:"2026-11-21"},
+   {day:"第二天",dayIdx:1},
+   {t:"掃碼報到",checkin:true,dayIdx:1},
    {t:"品質部年度計劃報告",dept:"品質部",min:30},
    {t:"管理部年度計劃報告",sub:"財務／採購／資訊・HR",dept:"管理部",min:40},
    {t:"Q1 沙盤推演",sand:"Q1",min:60},
@@ -656,7 +662,7 @@ const Att={
 const ST_COLOR={"出席":"var(--gB)","遲到":"var(--saffron)","請假":"var(--gA)","缺席":"var(--danger)","未報到":"var(--muted)","未開始":"var(--muted)"};
 function attStatus(m,d,name){
   const r=Att.rec(d,name);if(r.override)return r.override;
-  if(r.checkin)return isoMin(r.checkin)>hm2min(startOf(m))+LATE_MIN?"遲到":"出席";
+  if(r.checkin)return isoMin(r.checkin)>hm2min(startOf(m))+lateMin(m)?"遲到":"出席";
   if(r.leave)return "請假";
   const t=todayStr();if(t<d)return "未開始";if(t===d)return "未報到";return "缺席";
 }
@@ -664,6 +670,7 @@ function attCounts(m,d){const c={"出席":0,"遲到":0,"請假":0,"未到":0};AL
 function allForms(m){const s=[];const add=f=>{if(f&&!s.includes(f))s.push(f)};m.agenda.forEach(a=>{(a.forms||[]).forEach(add);(a.topic||[]).forEach(add);(a.live||[]).forEach(add);(a.report||[]).forEach(add)});(m.pforms||[]).forEach(add);return s}
 function fillCount(fid,g){
   const f=FORMS[fid];const id=docId(fid,g);const b=Store.body(id);
+  if(f.type==="classify"){const xs=Store.items(docId("sw",g)).filter(([k,v])=>(v.text||"").trim());return xs.filter(([k,v])=>v.dim).length+"/"+xs.length}
   if(["sw","list","traits8","board"].includes(f.type))return Store.items(id).length+" 項";
   if(f.type==="roles"){let n=0;if(b.cells.leader)n++;ROLE_MEETINGS.forEach(([m])=>{if(b.cells["rec_"+m])n++;if(b.cells["rep_"+m])n++});return n+"/"+(1+ROLE_MEETINGS.length*2)}
   const rows=gridRows(f).length,cols=f.cols.length;let n=0;
@@ -674,8 +681,45 @@ function fillCount(fid,g){
 const minLabel=(a,short)=>a.min?a.min+(short?" 分":" 分鐘"):a.repMin?"每組 "+a.repMin+(short?" 分":" 分鐘"):"";
 function live(el,draw){el.setAttribute("data-live","");el._draw=()=>{el.innerHTML="";draw(el)};draw(el);return el}
 
+/* ================= 會議設定（主持人可調整日期、時間、遲到判定） ================= */
+const CFG_ID="config__X";
+MEETINGS.forEach(m=>{m._o={date:m.date,dateEnd:m.dateEnd,time:m.time,start:m.start}});
+const cfg=k=>Store.cell(CFG_ID,k);
+function lateMin(m){const v=cfg(m.id+".late")||cfg("late");const n=parseInt(v,10);return isNaN(n)?LATE_MIN_DEFAULT:n}
+function applyConfig(){
+  MEETINGS.forEach(m=>{const o=m._o;
+    m.date=cfg(m.id+".date")||o.date;
+    if(o.dateEnd)m.dateEnd=cfg(m.id+".dateEnd")||o.dateEnd;
+    const st=cfg(m.id+".start");
+    if(/^\d\d:\d\d$/.test(o.time)){m.time=st||o.time;m.start=undefined}else{m.time=o.time;m.start=st||o.start}
+  });
+  MEETINGS.forEach((m,i)=>{const nx=MEETINGS[i+1];if(m.next&&nx)m.next.when=mWhen(nx)});
+  ROLE_MEETINGS.forEach(r=>{const m=MEETINGS.find(x=>x.id===r[0]);if(m)r[1]=md(m.date)});
+  const w=MEETINGS.find(x=>x.id==="m7");if(w)w.agenda.forEach(a=>{if(a.dayIdx!=null){const d=a.dayIdx?w.dateEnd:w.date;a.date=d;if(a.day)a.dayLabel=a.day+"・"+fmtDate(d)}});
+}
+applyConfig();
+let cfgSig="";
+Store.subs.add(()=>{const sig=JSON.stringify(Store.body(CFG_ID).cells);if(sig!==cfgSig){cfgSig=sig;applyConfig();
+  const a=document.activeElement;if(!(a&&a.closest&&a.closest("#rosterDlg")))render()}});
+function openSettings(){openDialog("會議設定",b=>{
+  const inp=(key,type,ph)=>{const x=h("input",{type,value:cfg(key)||(type==="number"?"":ph||""),placeholder:ph||"","aria-label":key,style:"border:1px solid var(--line);border-radius:6px;padding:4px 6px;background:var(--field);width:100%"});
+    x.addEventListener("change",()=>Store.write(CFG_ID,"cells",key,x.value.trim()));return x};
+  b.append(h("div",{style:"grid-column:1/-1"},
+    h("p",{style:"margin:0 0 10px;font-size:13px;color:var(--muted)"},"修改後會立即套用到時程、簡報、報到與遲到判定。空白表示使用預設值。"),
+    h("div",{style:"display:flex;gap:10px;align-items:center;margin-bottom:14px;font-weight:700"},"遲到判定（全部會議預設）：開始後",h("span",{style:"width:80px"},inp("late","number",String(LATE_MIN_DEFAULT))),"分鐘以後報到算遲到"),
+    h("div",{class:"tablewrap"},h("table",{class:"sheet att",style:"min-width:760px;font-size:14px"},
+      h("thead",null,h("tr",null,h("th",null,"會議"),h("th",null,"日期"),h("th",null,"第二天（工作坊）"),h("th",null,"開始時間"),h("th",null,"遲到判定（分鐘）"),h("th",null,""))),
+      h("tbody",null,MEETINGS.map(m=>h("tr",null,h("th",{class:"rowh"},m.no),
+        h("td",{style:"padding:6px"},inp(m.id+".date","date",m._o.date)),
+        h("td",{style:"padding:6px"},m._o.dateEnd?inp(m.id+".dateEnd","date",m._o.dateEnd):"—"),
+        h("td",{style:"padding:6px"},inp(m.id+".start","time",m._o.start||m._o.time)),
+        h("td",{style:"padding:6px;width:120px"},inp(m.id+".late","number","同預設")),
+        h("td",{style:"padding:6px"},h("button",{class:"btn",style:"padding:2px 10px;font-size:12px",onclick:()=>{["date","dateEnd","start","late"].forEach(k=>Store.write(CFG_ID,"cells",m.id+"."+k,""))}},"還原"))))))),
+    h("p",{style:"margin:10px 0 0;font-size:13px;color:var(--muted)"},"提醒：會議改期後，舊日期已有的報到紀錄不會搬移；請在改期前確認。")));
+});$("#rosterDlg .card").style.maxWidth="1000px"}
+
 /* ================= 狀態 ================= */
-const state={mode:"participant",meeting:currentMeeting().id,form:null,group:"A",pMeeting:null,pForm:null,selTag:null,poolCat:{}};
+const state={selItem:null,mode:"participant",meeting:currentMeeting().id,form:null,group:"A",pMeeting:null,pForm:null,selTag:null,poolCat:{}};
 try{state.mode=localStorage.getItem("linco-mode")||"participant"}catch(e){}
 if(state.mode==="host"&&HOST_HASH&&!window.claude&&!hostOK())state.mode="participant";
 
@@ -711,6 +755,7 @@ function buildForm(fid,g,ro,opts){
   const f=FORMS[fid];
   if(f.type==="grid")return buildGrid(fid,g,ro);
   if(f.type==="sw")return buildSW(fid,g,ro);
+  if(f.type==="classify")return buildClass(g,ro);
   if(f.type==="roles")return buildRoles(fid,g,ro,opts&&opts.compact);
   if(f.type==="list")return buildList(fid,g,ro);
   if(f.type==="traits8")return buildTraits8(ro);
@@ -757,28 +802,53 @@ function buildSW(fid,g,ro){
   const wrap=h("div");
   const listBox=live(h("div"),el=>{
     const all=Store.items(id).sort(byT);
-    [["S","強勢"],["W","弱勢"]].forEach(([side,label])=>{
+    [["S","優勢"],["W","劣勢"]].forEach(([side,label])=>{
       const list=all.filter(([k,v])=>v.side===side);
       const sec=h("div",{class:"swsec"},h("h4",null,h("span",{style:"font-family:var(--serif);font-weight:900;background:var(--ink);color:var(--paper);border-radius:6px;padding:0 8px"},side),label+"（"+side+"）"));
       list.forEach(([k,v])=>sec.append(swRow(id,k,v)));
       const addItem=(text,dim)=>{const k=uid();Store.write(id,"items",k,{side,text:text||"",dim:dim||"",imp:"",urg:"",t:Date.now()});setTimeout(()=>{const ta=wrap.querySelector('[data-item="'+k+'"] textarea');if(ta&&!text)ta.focus()},30)};
       sec.append(h("button",{class:"add",onclick:()=>addItem()},"＋ 新增"+label+"要項"));
       const unused=f.seed[side].filter(([x])=>!list.some(([k,v])=>v.text===x));
-      if(unused.length)sec.append(h("div",{class:"hints",style:"margin-top:8px"},h("span",{class:"lbl"},"百鮮起手例（點選帶入）："),unused.map(([x,d])=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>addItem(x,d)},x))));
+      if(unused.length)sec.append(h("div",{class:"hints",style:"margin-top:8px"},h("span",{class:"lbl"},"百鮮起手例（點選帶入）："),unused.map(([x,d])=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>addItem(x)},x))));
       el.append(sec);
     });
   });
-  wrap.append(listBox,h("div",{class:"sumtitle"},"依七大面向彙整（報告時使用）"),live(h("div"),el=>el.append(sw7Table(g))));
+  wrap.append(listBox);
   return wrap;
+}
+function buildClass(g,ro){
+  const id=docId("sw",g);
+  if(ro)return live(h("div"),el=>el.append(sw7Table(g)));
+  const setDim=(k,dim)=>{state.selItem=null;const v=Store.body(id).items[k];if(v)Store.write(id,"items",k,Object.assign({},v,{dim}))};
+  return live(h("div"),el=>{
+    const all=Store.items(id).filter(([k,v])=>(v.text||"").trim()).sort(byT);
+    const chip=([k,v])=>{const c=h("span",{role:"button",tabindex:"0",class:"tag"+(state.selItem===k?" sel":""),draggable:"true",title:v.side==="S"?"優勢":"劣勢",
+        onclick:e=>{e.stopPropagation();state.selItem=state.selItem===k?null:k;el._draw()}},
+      h("i",{class:"cd",style:"background:"+(v.side==="S"?CATS.S[1]:CATS.W[1])}),v.text,swMarks(v),
+      v.dim?h("span",{class:"x",role:"button","aria-label":"移回待分類",title:"移回待分類",onclick:e=>{e.stopPropagation();setDim(k,"")}},"×"):null);
+      c.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",k);e.dataTransfer.effectAllowed="move"});return c};
+    const target=(node,dim)=>{
+      node.addEventListener("dragover",e=>{e.preventDefault();node.classList.add("hot")});
+      node.addEventListener("dragleave",()=>node.classList.remove("hot"));
+      node.addEventListener("drop",e=>{e.preventDefault();node.classList.remove("hot");const k=e.dataTransfer.getData("text/plain");if(k)setDim(k,dim)});
+      node.addEventListener("click",()=>{if(state.selItem)setDim(state.selItem,dim)});
+      if(state.selItem)node.classList.add("armed");return node};
+    const pending=all.filter(([k,v])=>!v.dim);
+    el.append(target(h("div",{class:"pool"},
+      h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"待分類（"+pending.length+" 項）　",h("i",{class:"cd",style:"display:inline-block;width:8px;height:8px;border-radius:50%;background:"+CATS.S[1]})," 優勢　",h("i",{class:"cd",style:"display:inline-block;width:8px;height:8px;border-radius:50%;background:"+CATS.W[1]})," 劣勢"),
+      h("div",{class:"tags"},pending.length?pending.map(chip):h("span",{style:"font-size:13px;color:var(--muted)"},all.length?"全部都分類好了 👍":"第一階段還沒有列出優勢、劣勢")),
+      h("div",{class:"hintline"},state.selItem?"已選取一項，點下方任一面向放入":"電腦：直接把項目拖到下方面向｜手機：先點項目，再點面向")),""));
+    const rowsEl=DIM7.map(d=>{const cell=side=>h("td",null,h("div",{class:"drop"},all.filter(([k,v])=>v.dim===d&&v.side===side).map(chip)));
+      return target(h("tr",{style:"cursor:"+(state.selItem?"copy":"default")},h("th",{class:"rowh"},d),cell("S"),cell("W")),d)});
+    el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet board"},h("thead",null,h("tr",null,h("th",null,"七大面向"),h("th",null,"內部能力（優勢）"),h("th",null,"內部能力（劣勢）"))),h("tbody",null,rowsEl))));
+  });
 }
 function swRow(id,k,v){
   const cur=()=>Object.assign({},Store.body(id).items[k]||v);
   const ta=h("textarea",{"aria-label":"要項內容",placeholder:"輸入要項…"});ta.value=v.text||"";
   ta.addEventListener("input",()=>Store.write(id,"items",k,Object.assign(cur(),{text:ta.value})));
-  const dim=h("select",{"aria-label":"七大面向"},h("option",{value:""},"歸到哪個面向？"),DIM7.map(d=>h("option",{value:d},d)));dim.value=v.dim||"";
-  dim.addEventListener("change",()=>Store.write(id,"items",k,Object.assign(cur(),{dim:dim.value})));
   const seg=(label,field,opts)=>h("div",{class:"seg",role:"group","aria-label":label},h("span",null,label),opts.map(o=>h("button",{"aria-pressed":String(v[field]===o),onclick:()=>{const nv=cur()[field]===o?"":o;Store.write(id,"items",k,Object.assign(cur(),{[field]:nv}))}},o)));
-  return h("div",{class:"item","data-item":k},ta,dim,seg("重要性","imp",["重要","普通"]),seg("急迫性","urg",["急需","普通"]),
+  return h("div",{class:"item","data-item":k},ta,seg("重要性","imp",["重要","普通"]),seg("急迫性","urg",["急需","普通"]),
     h("button",{class:"del","aria-label":"刪除這一項",title:"刪除",onclick:()=>Store.write(id,"items",k,null)},"×"));
 }
 function buildRoles(fid,g,ro,compact){
@@ -862,7 +932,7 @@ function buildBoard(fid,g,ro){
         return h("button",{"aria-pressed":String(cats.includes(c)),onclick:()=>{const i=cats.indexOf(c);i>=0?cats.splice(i,1):cats.push(c);el._draw()}},h("i",{class:"cd",style:"width:8px;height:8px;border-radius:50%;background:"+col}),nm+" "+n)})));
       const shown=pool.filter(t=>cats.includes(t.cat));
       el.append(h("div",{class:"tags"},shown.length?shown.map(t=>{
-        const chip=h("button",{class:"tag"+(state.selTag&&state.selTag.key===t.key?" sel":"")+(used.has(t.key)?" used":""),draggable:"true",title:t.sub||"",
+        const chip=h("span",{role:"button",tabindex:"0",class:"tag"+(state.selTag&&state.selTag.key===t.key?" sel":"")+(used.has(t.key)?" used":""),draggable:"true",title:t.sub||"",
           onclick:()=>{state.selTag=state.selTag&&state.selTag.key===t.key?null:t;el._draw();armCells()}},
           h("i",{class:"cd",style:"background:"+CATS[t.cat][1]}),t.text,t.sub?h("small",null,t.sub):null,h("span",{class:"gdots"},[...t.groups].map(x=>h("i",{style:"background:"+GROUPS[x].color}))));
         chip.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",JSON.stringify({tag:t}));e.dataTransfer.effectAllowed="copy"});
@@ -914,8 +984,10 @@ function example7Table(){return h("div",{class:"tablewrap"},h("table",{class:"sh
   h("tbody",null,DIM7.map((r,i)=>h("tr",null,h("th",{class:"rowh"},r),FORMS.sw.example7[i].map(v=>h("td",null,h("div",{class:"cellro"},v))))))))}
 function xmfTable(){return h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("tbody",null,COMP10.map((r,i)=>h("tr",null,h("th",{class:"rowh"},r),h("td",null,h("div",{class:"cellro"},XMF[i])))))))}
 function examplesFor(fid){
+  if(FORMS[fid].type==="classify")return [h("details",{class:"example"},h("summary",null,"參考案例：康師傅（依七大面向整理）"),example7Table())];
   const f=FORMS[fid];const out=[];
-  if(f.type==="sw")out.push(h("details",{class:"example"},h("summary",null,"參考案例：康師傅（依七大面向整理）"),example7Table()));
+  if(f.type==="sw")out.push(h("details",{class:"example"},h("summary",null,"參考案例：康師傅的優勢／劣勢"),h("div",{style:"display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px"},
+    h("div",null,h("b",null,"優勢（S）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.S.map(x=>h("li",null,x)))),h("div",null,h("b",null,"劣勢（W）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.W.map(x=>h("li",null,x)))))));
   if(f.example==="xmf")out.push(h("details",{class:"example"},h("summary",null,"參考範例：小磨坊國際貿易股份有限公司"),xmfTable()));
   if(f.hints)out.push(h("div",{class:"hints"},h("span",{class:"lbl"},"討論提示："),f.hints.map(x=>h("span",{class:"chip"},x))));
   return out;
@@ -930,7 +1002,7 @@ function renderHost(){
   const wrap=h("div",{class:"wrap"});
   const exportBtn=h("button",{class:"btn",onclick:exportCSV},"匯出 CSV");
   wrap.append(h("header",{class:"top"},h("div",{class:"brand"},h("h1",null,"百鮮 2026 年度檢討・週會工作台"),h("p",null,"主持人畫面｜會議流程、簡報與各組表格")),
-    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",onclick:()=>{try{localStorage.removeItem("linco-host")}catch(e){}setMode("participant")}},"登出"))));
+    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",onclick:()=>{try{localStorage.removeItem("linco-host")}catch(e){}setMode("participant")}},"登出"))));
   const t=todayStr();
   wrap.append(h("nav",{class:"timeline","aria-label":"會議時程"},MEETINGS.map(x=>{
     const cls=["tl-item"];const last=x.dateEnd||x.date;if(last<t)cls.push("past");if(meetingDates(x).includes(t))cls.push("today");if(x.id===m.id)cls.push("active");
@@ -940,7 +1012,7 @@ function renderHost(){
   if(!state.form||!forms.includes(state.form))state.form=forms[0]||null;
   const ckDates=m.agenda.filter(a=>a.checkin).map(a=>a.date||m.date);
   const ag=h("aside",{class:"agenda"},h("h2",null,"2026 年度檢討　"+m.no),h("div",{class:"when"},mWhen(m)),
-    h("ol",null,m.agenda.filter(a=>!a.hidden).map(a=>a.day?h("li",{class:"dayhead"},a.day):h("li",null,h("span",{class:"t"},a.t),h("span",{class:"min"},minLabel(a)),a.sub?h("span",{class:"sub"},a.sub):null,
+    h("ol",null,m.agenda.filter(a=>!a.hidden).map(a=>a.day?h("li",{class:"dayhead"},a.dayLabel||a.day):h("li",null,h("span",{class:"t"},a.t),h("span",{class:"min"},minLabel(a)),a.sub?h("span",{class:"sub"},a.sub):null,
       [...new Set([...(a.forms||[]),...(a.live||[])])].length?h("span",{class:"jump"},[...new Set([...(a.forms||[]),...(a.live||[])])].map(f=>h("button",{onclick:()=>{state.form=f;renderHostForms(m)}},"表格："+FORMS[f].short))):null))),
     ckDates.map(d=>live(h("div",{class:"checkbar"}),el=>{const c=attCounts(m,d);el.append(h("span",null,(ckDates.length>1?md(d)+" ":"")+"出席 ",h("b",null,c["出席"])," 遲到 ",h("b",null,c["遲到"])," 請假 ",h("b",null,c["請假"])," 未到 ",h("b",null,c["未到"])),h("button",{class:"btn",style:"padding:3px 10px",onclick:()=>openAttendance(m,d)},"名單"))})),
     m.next?h("div",{class:"next"},h("b",null,"下次議題"),m.next.topic,h("br"),h("span",{style:"color:var(--muted)"},"時間："+m.next.when)):null,
@@ -1034,7 +1106,7 @@ function refreshLive(){
     if(!typing)el._draw();
   });
   if(Deck.isOpen)Deck.refresh();
-  if($("#rosterDlg").classList.contains("open"))$("#rosterDlg")._draw&&$("#rosterDlg")._draw();
+  if($("#rosterDlg").classList.contains("open")){const da=document.activeElement,dl=$("#rosterDlg");if(!(da&&dl.contains(da)&&["INPUT","SELECT","TEXTAREA"].includes(da.tagName)))dl._draw&&dl._draw()}
 }
 Store.subs.add(refreshLive);
 
@@ -1047,9 +1119,12 @@ function openRoster(){openDialog("分組名單",b=>{
   ["A","B","C"].forEach(g=>{const lead=Store.cell(docId("roles",g),"leader");
     b.append(h("div",null,h("h3",null,h("span",{class:"dot",style:"width:10px;height:10px;border-radius:50%;display:inline-block;background:"+GROUPS[g].color}),GROUPS[g].name),
       h("ul",null,members(g).map(([n,u])=>h("li",null,h("span",null,n,n===lead?h("span",{class:"lead"}," 組長"):null),h("small",null,u))))))});
-  const u=undrawn();
-  if(u.length)b.append(h("div",null,h("h3",null,"總經理室（待抽籤）"),h("ul",null,u.map(([n,d])=>h("li",null,h("span",null,n),h("small",null,d)))),
-    h("button",{class:"btn primary",style:"margin-top:10px",onclick:doDraw},"抽籤分組")));
+  b.append(h("div",{style:"grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px"},h("h3",{style:"margin:0 0 8px"},"總經理室分組（手動調整）"),
+    h("div",{style:"display:flex;flex-wrap:wrap;gap:16px;align-items:center"},GM.map(([n])=>{
+      const sel=h("select",{"aria-label":n+" 組別"},h("option",{value:""},"未分組"),["A","B","C"].map(g=>h("option",{value:g},GROUPS[g].name)));sel.value=gmGroup(n)||"";
+      sel.addEventListener("change",()=>Store.write(DRAW_ID,"cells",n,sel.value));
+      return h("label",{style:"display:flex;gap:8px;align-items:center;font-weight:700"},n,sel)}),
+      undrawn().length===GM.length?h("button",{class:"btn",onclick:doDraw},"隨機抽籤"):null)));
 })}
 function openAttendance(m,d){openDialog(md(d)+" 出缺席名單",b=>{
   const row=([n])=>{const st=attStatus(m,d,n),r=Att.rec(d,n);
@@ -1069,7 +1144,7 @@ function openAttSummary(){openDialog("出缺席總表",b=>{
         const tds=cols.map(([m,d])=>{const st=attStatus(m,d,n);if(c[st]!=null)c[st]++;return h("td",{style:"text-align:center;padding:6px;color:"+(ST_COLOR[st]||"inherit")},short[st])});
         return h("tr",null,h("th",{class:"rowh"},n),tds,["出席","遲到","請假","缺席"].map(k=>h("td",{style:"text-align:center;padding:6px"},c[k])))}))))));
 });$("#rosterDlg .card").style.maxWidth="1200px"}
-$("#rosterDlg").addEventListener("click",e=>{if(e.target.id==="rosterDlg"||e.target.hasAttribute("data-close"))$("#rosterDlg").classList.remove("open")});
+$("#rosterDlg").addEventListener("click",e=>{if(e.target.id==="rosterDlg"||e.target.hasAttribute("data-close")){$("#rosterDlg").classList.remove("open");if(state.mode==="host")render()}});
 
 /* ================= 簡報 ================= */
 function pageURL(){return (window.claude?ARTIFACT_URL:location.href.split("#")[0])}
@@ -1081,7 +1156,7 @@ const Deck={
   build(m){
     const S=[{k:"cover"},{k:"flow"}],seen=new Set();let curDate=m.date;
     m.agenda.forEach(a=>{
-      if(a.day){curDate=a.date;S.push({k:"day",a});return}
+      if(a.day){curDate=a.date||m.date;S.push({k:"day",a});return}
       if(a.checkin)S.push({k:"checkin",date:a.date||curDate});
       if(a.selfeval){S.push({k:"selfeval"});return}
       if(a.roadmap)S.push({k:"road"});
@@ -1108,11 +1183,11 @@ const Deck={
     if(s.k==="cover")add(kick("百鮮企業有限公司"),h("h1",null,m.id==="m7"?"2027 年度計劃工作坊":"2026 年度檢討",h("br"),m.id==="m7"?"11/20–11/21":m.no),h("p",{class:"lead"},"日期："+mWhen(m)+"　｜　主題："+m.theme));
     if(s.k==="flow"){
       const items=m.agenda;
-      if(items.some(a=>a.day)){const days=[];items.forEach(a=>{if(a.day)days.push({d:a.day,xs:[]});else if(!a.checkin&&!a.hidden)days[days.length-1].xs.push(a)});
+      if(items.some(a=>a.day)){const days=[];items.forEach(a=>{if(a.day)days.push({d:a.dayLabel||a.day,xs:[]});else if(!a.checkin&&!a.hidden)days[days.length-1].xs.push(a)});
         add(kick(m.no),h("h2",null,"兩天流程"),h("div",{class:"twocol"},days.map(d=>h("div",null,h("h3",null,d.d),h("ol",{class:"flow"},d.xs.map(a=>h("li",null,a.t,minLabel(a,1)?h("small",null,minLabel(a,1)):null)))))));
       }else add(kick(m.no),h("h2",null,"會議流程"),h("ol",{class:"flow"},items.filter(a=>!a.checkin&&!a.hidden).map(a=>h("li",null,a.t,minLabel(a)?h("small",null,minLabel(a)):null))),m.next?h("p",{class:"lead"},"下次會議："+m.next.when):null);
     }
-    if(s.k==="day")add(kick(m.no),h("div",{class:"daybig"},s.a.day));
+    if(s.k==="day")add(kick(m.no),h("div",{class:"daybig"},s.a.dayLabel||s.a.day));
     if(s.k==="checkin"){
       const qr=h("div",{class:"code"});let ok=false;try{if(window.QRCode){new QRCode(qr,{text:pageURL(),width:200,height:200});ok=true}}catch(e){}
       const codeEl=h("div",{class:"count",style:"letter-spacing:.12em"},"····");const leftEl=h("div",{style:"color:#9FB0C0;font-size:clamp(13px,1.3vw,18px)"},"");
@@ -1123,7 +1198,7 @@ const Deck={
         ["A","B","C"].forEach(g=>grid.append(h("div",null,h("h3",{style:"color:"+DARK_GC[g]},GROUPS[g].name),members(g).map(cell))));
         if(undrawn().length)grid.append(h("div",null,h("h3",null,"總經理室"),undrawn().map(cell)))};
       this.paintCheckin=paint;paint();
-      add(kick("掃碼報到"+(m.dateEnd?"・"+md(s.date):"")+"｜"+startOf(m)+" 開始，"+LATE_MIN+" 分鐘後報到算遲到"),
+      add(kick("掃碼報到"+(m.dateEnd?"・"+md(s.date):"")+"｜"+startOf(m)+" 開始，"+lateMin(m)+" 分鐘後報到算遲到"),
         h("div",{class:"qrbig"},ok?qr:null,h("div",null,h("div",{style:"font-size:clamp(18px,2vw,28px);margin-bottom:1vh"},"① 掃描 QR code　② 點選名字　③ 輸入報到碼"),codeEl,leftEl,cnt,ok?null:h("p",{class:"lead",style:"word-break:break-all;font-size:14px"},pageURL()))),grid);
       if(todayStr()!==s.date){codeEl.textContent="—";leftEl.textContent="報到碼只在會議當天顯示"}
       else{const tick=async()=>{try{const j=await Att.code(s.date);if(j.ok){codeEl.textContent=j.code;leftEl.textContent="報到碼每 "+SLOT+" 秒更新，剩 "+j.left+" 秒"}else{codeEl.textContent="—";leftEl.textContent=j.error||"無法取得報到碼"}}catch(e){leftEl.textContent="無法取得報到碼，請檢查網路"}};
@@ -1147,7 +1222,9 @@ const Deck={
     if(s.k==="xmf")add(kick("競爭者分析範例"),h("h2",null,"小磨坊國際貿易股份有限公司"),h("div",{class:"rep"},xmfTable()));
     if(s.k==="topic"){
       const f=FORMS[s.f];let struct=[],extra=null;
-      if(f.type==="sw"){struct=["① 列出強勢（S）／弱勢（W）","② 歸到七大面向","③ 標記重要性、急迫性"];extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅（依七大面向整理）"),example7Table())}
+      if(f.type==="sw"){struct=["① 列出優勢（S）／劣勢（W）","② 標記重要性、急迫性","③ 下一階段再歸類七大面向"];extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅"),h("div",{style:"display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 12px 12px"},
+          h("div",null,h("b",null,"優勢（S）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.S.map(x=>h("li",null,x)))),h("div",null,h("b",null,"劣勢（W）"),h("ul",{style:"margin:4px 0;padding-left:18px"},f.example.W.map(x=>h("li",null,x))))))}
+      else if(f.type==="classify"){struct=DIM7;extra=h("div",{class:"ex"},h("div",{class:"cap"},"參考案例：康師傅（依七大面向整理）"),example7Table())}
       else if(f.type==="list"){struct=f.examples;extra=null}
       else if(f.type==="board"){const pool=tagPool();struct=Object.entries(CATS).map(([c,[nm]])=>nm+" "+pool.filter(t=>t.cat===c).length+" 項")}
       else struct=f.rowGroups?f.rowGroups.map(g=>g.label):(f.rows||[]);
@@ -1155,7 +1232,7 @@ const Deck={
         f.type==="list"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"例如："):null,
         h("div",{class:"chips"},struct.map(x=>h("span",null,x))),
         f.hints?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"提示："+f.hints.join("、")):null,
-        f.type==="sw"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"百鮮起手例：強勢－"+f.seed.S.map(x=>x[0]).join("、")+"；弱勢－"+f.seed.W.map(x=>x[0]).join("、")):null,
+        f.type==="sw"?h("p",{class:"lead",style:"font-size:clamp(14px,1.5vw,21px)"},"百鮮起手例：優勢－"+f.seed.S.map(x=>x[0]).join("、")+"；劣勢－"+f.seed.W.map(x=>x[0]).join("、")):null,
         extra);
     }
     if(s.k==="timer"){
