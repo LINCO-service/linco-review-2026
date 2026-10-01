@@ -365,6 +365,14 @@ button.lt{cursor:pointer}
 .lt.on,span.lt{opacity:1}
 .lt.on{border-color:#1E2B3A}
 table.plan td.cur{background:#FFF3C4!important}
+/* V2.1 分頁（類似瀏覽器分頁） */
+.apptabs{display:flex;gap:2px;align-items:flex-end;border-bottom:1px solid var(--line);margin:12px 0 14px;padding:0 4px;overflow-x:auto}
+.apptab{display:flex;align-items:center;gap:8px;min-width:150px;padding:9px 18px 8px;border:1px solid var(--line);border-bottom:none;border-radius:12px 12px 0 0;background:var(--mist);color:var(--muted);font-size:15px;position:relative;top:1px;cursor:pointer;white-space:nowrap}
+.apptab .ic{font-size:17px}
+.apptab:hover{color:var(--ink)}
+.apptab[aria-selected="true"]{background:var(--paper);color:var(--ink);font-weight:700;border-color:var(--line);box-shadow:0 -2px 0 var(--saffron) inset}
+ol.pts{margin:4px 0 8px;padding-left:1.6em;line-height:1.7}
+.trk{display:inline-block;margin-left:8px;background:#FFF3C4;color:#7A5A00;border-radius:4px;padding:0 6px;font-size:12px}
 .empty{padding:30px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
 .toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:8px;font-size:14px;display:none;z-index:60}
 
@@ -737,9 +745,10 @@ const Store={
   },
   async poll(force){
     if(!force&&document.hidden) return;
-    const tk=LS("linco-tok");if(!tk){this.setStatus("","請先登入");return}
+    const tk=LS("linco-tok")||LS("linco-gtok");if(!tk){this.setStatus("","請先登入");return}
     try{const r=await fetch(BACKEND_URL+(BACKEND_URL.includes("?")?"&":"?")+"t="+Date.now()+"&tk="+encodeURIComponent(tk));const j=await r.json();
       if(j.ok){this.server=j.docs||{};if(j.roster){const had=!!this.roster;applyRoster(j.roster);if(j.me){LS("linco-role",j.me.role);LS("linco-me",j.me.name)}if(!had)render()}if(!nonEmpty(this.pending))this.setStatus("","已同步");this.notify()}
+      else if(j.auth&&j.guest){["linco-gtok","linco-gscope","linco-gname"].forEach(k=>LS(k,""));toast(j.error);render()}
       else if(j.auth&&LS("linco-tok"))authLost()}
     catch(e){this.setStatus("local","連線中斷，自動重試中")}
   },
@@ -843,7 +852,7 @@ const Att={
   device(){let x="";try{x=localStorage.getItem("linco-dev")||"";if(!x){x=uid()+uid();localStorage.setItem("linco-dev",x)}}catch(e){x="nodev"}return x},
   hostKey(){try{return localStorage.getItem("linco-hostkey")||""}catch(e){return ""}},
   canCheckin(m,d){return todayStr()===d&&nowMin()>=hm2min(startOf(m))-OPEN_BEFORE_MIN},
-  canLeave(d){const t=todayStr();return t<d||(t===d&&nowMin()<hm2min(LEAVE_DEADLINE))},
+  canLeave(d,start){return leaveDeadlineOk(d,start)},
   localCode(d,slot){return String(fnv("linco-local|"+d+"|"+slot)%10000).padStart(4,"0")},
   async code(d){
     const now=Math.floor(Date.now()/1000);return {ok:true,code:Att.localCode(d,Math.floor(now/SLOT)),left:SLOT-now%SLOT};
@@ -861,7 +870,7 @@ const Att={
       if(other)return {ok:false,error:"這支手機已經幫「"+other[0]+"」報到過了，每支手機只能幫一個人報到"};
       rec.checkin=iso;rec.dev=p.device;
     }else if(action==="leave"){
-      if(!Att.canLeave(p.date))return {ok:false,error:"已超過請假期限（會議當天中午 12:00 前）"};
+      if(!Att.canLeave(p.date,p.start))return {ok:false,error:"已超過請假期限（最晚需在會議開始前 4 小時提出）"};
       if(p.cancel){rec.leave=null;rec.reason=""}else{rec.leave=iso;rec.reason=p.reason||"";rec.leaveDev=p.device}
     }else if(action==="override"){rec.override=p.status||null}
     Store.write(id,"items",p.name,rec);return {ok:true};
@@ -979,7 +988,7 @@ function loginForm(){
   [id,pw].forEach(x=>x.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click()}));
   return h("div",{class:"pick",style:"max-width:420px;margin:24px auto;display:grid;gap:12px"},h("h2",{style:"margin:0"},"登入"),
     h("p",{style:"margin:0;color:var(--muted);font-size:14px"},"帳號為工號，預設密碼為生日月日 4 碼（例如 3 月 21 日為 0321），第一次登入後請修改密碼。同一台裝置 180 天內不用重新登入。"),id,pw,btn,msg,
-    h("p",{style:"margin:0;color:var(--muted);font-size:13px"},"忘記密碼請找管理員重設。"))}
+    h("p",{style:"margin:0;color:var(--muted);font-size:13px"},"忘記密碼請找管理員重設。列席人員請掃描會議現場的 QR code 簽到。"))}
 function changePwDialog(force){openDialog(force?"第一次登入，請設定新密碼":"修改密碼",b=>{
   const p1=h("input",{class:"pin",type:"password",placeholder:"新密碼（至少 6 個字元）",autocomplete:"new-password"}),p2=h("input",{class:"pin",type:"password",placeholder:"再輸入一次",autocomplete:"new-password"});
   const msg=h("div",{style:"color:var(--danger);font-size:13px;min-height:1.3em"});
@@ -1034,7 +1043,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V2.0";
+const VERSION="V2.1";
 const LOGO_PNG="data:image/png;base64,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";
 function loadPdfLibs(){const L=(srcs)=>new Promise((res,rej)=>{const t=(i)=>{if(i>=srcs.length)return rej(new Error("無法載入 PDF 元件，請檢查網路"));const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>res();sc.onerror=()=>{sc.remove();t(i+1)};document.head.append(sc)};t(0)});
   return Promise.all([window.html2canvas?1:L(["https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js","https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"]),
@@ -1060,16 +1069,20 @@ function noticeHtml(o){return DOC_CSS+'<div style="position:relative;padding:56p
   '<div class="row"><span class="lab">受文者：</span>'+esc(o.to)+'</div><div class="row"><span class="lab">開會日期：</span>'+esc(adDate(o.date))+'</div><div class="row"><span class="lab">開會時間：</span>'+esc(o.time)+'</div><div class="row"><span class="lab">開會地點：</span>'+esc(o.place)+'</div>'+
   (o.host?'<div class="row"><span class="lab">主持人：</span>'+esc(o.host)+'　　記錄人：'+esc(o.recorder||"")+'</div>':'')+
   (o.agenda&&o.agenda.length?'<div class="sec">會議議程</div><table><tr><th style="width:90px">時間</th><th>議程</th><th style="width:80px">時間（分）</th></tr>'+o.agenda.map(a=>'<tr><td>'+esc(a[0])+'</td><td>'+esc(a[1])+'</td><td style="text-align:center">'+esc(a[2]||"")+'</td></tr>').join("")+'</table>':'')+
-  (o.note?'<div class="row" style="margin-top:18px">'+nl(o.note)+'</div>':'')+'<div class="code">2-M-003-01</div></div>'}
-function minutesHtml(o){const sigRows=[];const names=o.signers&&o.signers.length?o.signers:Array(12).fill("");for(let i=0;i<names.length;i+=3)sigRows.push(names.slice(i,i+3));
+  (o.note||o.qr?'<div style="display:flex;gap:18px;align-items:center;margin-top:22px">'+(o.qr?'<img src="'+qrDataURL(o.qr,150)+'" style="width:120px;height:120px">':'')+'<div class="row" style="margin:0">'+nl(o.note||"")+(o.qr?'<div style="font-size:12px;color:#444;margin-top:6px;word-break:break-all">'+esc(o.qr)+'</div>':'')+'</div></div>':'')+'<div class="code">2-M-003-01</div></div>'}
+function minutesHtml(o){const depts=[...new Set((Store.roster||[]).map(u=>u.dept).filter(d=>d&&d!=="總經理室"))];const sig=depts.length?depts:["業務部","研發技術部","廠務部","品質部","管理部"];
+  const roc=d=>{if(!d)return "";const [y,m,dd]=d.split("-").map(Number);return (y-1911)+"年"+pad2(m)+"月"+pad2(dd)+"日("+"日一二三四五六"[new Date(Date.UTC(y,m-1,dd)).getUTCDay()]+")"};
+  const sec=(t,b)=>b?'<div class="sec">'+t+'</div><div class="box">'+nl(b)+'</div>':'';
   return DOC_CSS+'<div style="position:relative;padding:48px 56px 80px;min-height:1000px">'+
-  '<div class="hd"><div class="co" style="letter-spacing:10px">百 鮮 企 業 有 限 公 司</div><div class="en" style="letter-spacing:6px">LINCO ENTERPRISE CO.,LTD.</div><div class="tt" style="margin:16px 0 18px"><u>&nbsp;'+esc(o.title)+'&nbsp;</u> 會議記錄</div></div>'+
-  '<div class="row"><span class="lab">會議時間：</span>'+esc(rocDate(o.date))+(o.time?"　"+esc(o.time):"")+'</div><div class="row"><span class="lab">會議地點：</span>'+esc(o.place||"")+'</div>'+
-  '<div class="row"><span class="lab">出席者：</span>'+esc(o.present||"")+'</div><div class="row"><span class="lab">缺席者：</span>'+esc(o.absent||"")+'</div><div class="row"><span class="lab">記錄：</span>'+esc(o.recorder||"")+'</div>'+
-  '<div class="sec">追蹤事項：</div><div class="box">'+nl(o.track||"")+'</div><div class="sec">開會內容：</div><div class="box">'+nl(o.content||"")+'</div><div class="sec">臨時動議：</div><div class="box">'+nl(o.adhoc||"")+'</div>'+
-  '<div class="row"><span class="lab">下次開會時間：</span>'+esc(o.next||"")+'</div><div class="row"><span class="lab">呈核主管：</span>＿＿＿＿＿＿＿＿＿＿</div>'+
-  '<div class="sec">與會人員簽名</div><table>'+sigRows.map(r=>'<tr>'+[0,1,2].map(i=>'<td style="height:40px;width:33%"><span style="font-size:12px;color:#555">'+esc(r[i]||"")+'</span></td>').join("")+'</tr>').join("")+'</table>'+
-  '<div class="pass">請　　傳　　閱</div><div class="code">2-M-003-02</div></div>'}
+  '<div class="hd"><div class="tt" style="font-size:24px;font-weight:700;margin:6px 0 22px">'+esc(o.title)+(/會議$/.test(o.title)?'記錄':'會議記錄')+'</div></div>'+
+  '<div class="row">◆　會議時間：'+esc(roc(o.date))+(o.time?" "+esc(o.time):"")+'</div><div class="row">◆　會議地點：'+esc(o.place||"")+'</div>'+
+  '<div class="row">◆　出席者：'+esc(o.present||"")+'</div>'+(o.absent?'<div class="row">◆　缺席／請假：'+esc(o.absent)+'</div>':'')+'<div class="row">◆　記錄：'+esc(o.recorder||"")+'</div>'+
+  (o.track?'<div class="row">◆　追蹤事項（優先確認）：</div><div class="box" style="margin-left:2em">'+nl(o.track)+'</div>':'')+
+  '<div class="row">◆　開會內容：</div><div class="box" style="margin-left:2em">'+nl(o.content||"")+'</div>'+
+  sec("臨時動議",o.adhoc)+sec("總結",o.summary)+
+  '<div class="row">下次會議時間：'+esc(o.next||"")+'</div><div class="row">呈核主管：</div>'+
+  '<div class="pass">請　　傳　　閱</div><table style="margin-top:6px"><tr>'+sig.map(d=>'<th>'+esc(d)+'</th>').join("")+'</tr><tr>'+sig.map(()=>'<td style="height:56px"></td>').join("")+'</tr></table>'+
+  '<div class="code">2-M-003-02</div></div>'}
 
 /* ================= 管理月會 ================= */
 const MR_SECS=[["p1","P1 前期問題點追蹤"],["p2","P2 本期工作成果"],["p3","P3 專案追蹤"],["p4","P4 DPI 推移圖"],["p5","P5 下期工作計畫"],["p6","P6 專案立案書"]];
@@ -1082,12 +1095,12 @@ function curYm(){const t=todayStr().replace(/-/g,"");const ym=t.slice(0,6);retur
 function mmCell(ym,k){return Store.cell(mmId(ym),k)}
 function deptOrder(ym){const o=(mmCell(ym,"order")||"").split(",").filter(c=>deptByCode(c));return o.length===DEPTS.length?o:DEPTS.map(d=>d.code)}
 const monthClosed=ym=>mmCell(ym,"closed")==="1";
-const isMonthHost=ym=>!!getMe()&&getMe()===mmCell(ym,"host");
-const canHostTools=ym=>state.mode==="host"||isMonthHost(ym);
+const isMonthHost=ym=>!!getMe()&&(getMe()===mmCell(ym,"host")||cohostsOf(ym).includes(getMe()));
+const canHostTools=ym=>state.mode==="host"||isAdmin()||isMonthHost(ym);
 function monthMeeting(ym){const date=mmCell(ym,"date")||"",time=mmCell(ym,"time")||"14:00",mins=+mmCell(ym,"mins")||15;
   return {id:"mm"+ym,no:ymLabel(ym)+"管理月會",date:date||ym.slice(0,4)+"-"+ym.slice(4)+"-01",time,theme:"管理月會",isMonthly:true,ym,
     agenda:[{t:"掃碼報到",checkin:true}].concat(deptOrder(ym).map(c=>({t:deptByCode(c).name+"月會報告",dur:mins}))).concat([{t:"主管評論・顧問回饋",dur:15},{t:"臨時動議・決議事項確認",dur:10}]),next:null}}
-function canRecord(ym){const me=getMe();return !monthClosed(ym)&&(state.mode==="host"||me===mmCell(ym,"host")||me===mmCell(ym,"recorder"))}
+function canRecord(ym){const me=getMe();return !monthClosed(ym)&&(state.mode==="host"||isAdmin()||isMonthHost(ym)||me===mmCell(ym,"recorder"))}
 /* 各區塊列資料 */
 function p1Rows(ym,c){const prev=Store.items(mmId(prevYm(ym))).filter(([k,v])=>v.kind==="dec"&&v.dept===c).sort(byT).map(([k,v])=>({k,auto:true,issue:v.issue,measure:v.measure}));
   return prev.concat(Store.items(mrId(ym,c)).filter(([k,v])=>v.kind==="p1").sort(byT).map(([k,v])=>Object.assign({k},v)))}
@@ -1157,7 +1170,7 @@ function kpiChart(T,L,A){const W=280,H=150,P=24;const vals=[...T,...L,...A].map(
   const d=h("div");d.innerHTML=svg;return d}
 function attLists(ym){const mp=monthMeeting(ym),d=mp.date,P=[],A=[],L=[];ALL_PEOPLE.forEach(([n])=>{const st=attStatus(mp,d,n);if(st==="出席"||st==="遲到")P.push(n+(st==="遲到"?"（遲到）":""));else if(st==="請假")L.push(n);else if(st==="缺席"||st==="未報到")A.push(n)});return {P,A,L}}
 function minutesPrompt(ym){const mp=monthMeeting(ym),id=mmId(ym),C=Store.body(id).cells,al=attLists(ym),m=+ym.slice(4);
-  const L=["你是公司的會議記錄人員。請依下列資料，彙整「"+mp.no+"」正式會議記錄的三個段落，語氣精簡、條列清楚，使用繁體中文；只使用資料中的內容，不要自行補充或推測。","","請依下列格式輸出（保留【】標題）：","【追蹤事項】","（上月決議事項與本月執行結果，逐條列出）","【開會內容】","一、各部門報告重點與主管評論（依部門分段）","二、顧問回饋","三、決議事項（含負責部門、負責人、期限）","【臨時動議】","（沒有就寫「無」）","","＝＝＝ 資料 ＝＝＝",
+  const L=["你是公司的會議記錄人員。請依下列資料，彙整「"+mp.no+"」正式會議記錄的三個段落，語氣精簡、條列清楚，使用繁體中文；只使用資料中的內容，不要自行補充或推測。","","請依下列格式輸出（保留【】標題）：","【追蹤事項】","（上月決議事項與本月執行結果，逐條列出）","【開會內容】","一、各部門報告重點與主管評論（依部門分段）","二、顧問回饋","三、決議事項（含負責部門、負責人、期限）","【臨時動議】","（沒有就寫「無」）","【總結】","（主管總結重點；資料中沒有就寫「無」）","","＝＝＝ 資料 ＝＝＝",
     "會議時間："+adDate(mp.date)+" "+mp.time+"　地點："+(C.place||"")+"　主持人："+(C.host||"")+"　記錄："+(C.recorder||""),"出席："+al.P.join("、"),"請假："+(al.L.join("、")||"無")+"　缺席："+(al.A.join("、")||"無"),"","【上月決議與本月執行結果】"];
   deptOrder(ym).forEach(c=>{const R=Store.body(mrId(ym,c)).cells;p1Rows(ym,c).filter(r=>r.auto).forEach(r=>L.push("- "+deptByCode(c).name+"："+r.issue+"／對策："+r.measure+"／執行結果："+(R["p1."+r.k+".a"]||"未填")))});
   L.push("","【各部門報告摘要】");
@@ -1174,7 +1187,7 @@ function minutesDocData(ym){const mp=monthMeeting(ym),C=Store.body(mmId(ym)).cel
   const track=C["final.track"]||deptOrder(ym).flatMap(c=>{const R=Store.body(mrId(ym,c)).cells;return p1Rows(ym,c).filter(r=>r.auto).map(r=>deptByCode(c).name+"："+r.issue+" → "+(R["p1."+r.k+".a"]||"未填"))}).join("\n");
   const content=C["final.content"]||[C.summary||"",DEPTS.filter(d=>C["cmt."+d.code]).map(d=>d.name+"（主管評論）："+C["cmt."+d.code]).join("\n"),C.consultant?"顧問回饋："+C.consultant:"",
     Store.items(mmId(ym)).filter(([k,v])=>v.kind==="dec").map(([k,v],i)=>"決議 "+(i+1)+"："+(deptByCode(v.dept)||{}).name+"｜"+(v.issue||"")+" → "+(v.measure||"")+(v.owner?"（"+v.owner+(v.due?"，"+v.due:"")+"）":"")).join("\n")].filter(Boolean).join("\n\n");
-  return {title:ymLabel(ym)+"管理月會",date:mp.date,time:mp.time,place:C.place||"",present:al.P.join("、"),absent:[al.A.join("、"),al.L.length?"（請假："+al.L.join("、")+"）":""].filter(Boolean).join(" "),
+  return {title:(+ym.slice(4))+"月份管理月會",summary:C["final.sum"]||"",date:mp.date,time:mp.time,place:C.place||"",present:al.P.join("、"),absent:[al.A.join("、"),al.L.length?"（請假："+al.L.join("、")+"）":""].filter(Boolean).join(" "),
     recorder:C.recorder||"",track,content,adhoc:C["final.adhoc"]||C.adhoc||"",next:nx&&mmCell(nx,"date")?rocDate(mmCell(nx,"date"))+" "+(mmCell(nx,"time")||""):"",signers:al.P.map(x=>x.replace("（遲到）",""))}}
 function buildMinutes(ym,ro){const id=mmId(ym);ro=ro||!canRecord(ym);
   const top=live(h("div"),el=>{const decs=Store.items(id).filter(([k,v])=>v.kind==="dec").sort(byT);const al=attLists(ym);
@@ -1191,14 +1204,15 @@ function buildMinutes(ym,ro){const id=mmId(ym);ro=ro||!canRecord(ym);
   const fin=h("div");const fa=(...xs)=>fin.append(...xs.filter(Boolean));fa(h("div",{class:"sumtitle",style:"margin-top:16px"},"正式會議記錄（彙整版，用於下載列印）"),
       ro?null:promptBoxDyn("AI 指令：請 AI 彙整成正式會議記錄（格式同 2-M-003-02 會議記錄表）",()=>minutesPrompt(ym)),
       ro?null:h("button",{class:"btn",style:"margin:8px 0",onclick:()=>pasteDialog("貼上 AI 彙整結果","貼上 AI 的回覆（需含【追蹤事項】【開會內容】【臨時動議】）",t=>{const sec=n=>{const m=new RegExp("【"+n+"】([\\s\\S]*?)(?=【|$)").exec(t);return m?m[1].trim():null};
-        const a=sec("追蹤事項"),b=sec("開會內容"),c2=sec("臨時動議");if(a==null&&b==null)return "找不到【追蹤事項】【開會內容】標題";if(a!=null)Store.write(id,"cells","final.track",a);if(b!=null)Store.write(id,"cells","final.content",b);if(c2!=null)Store.write(id,"cells","final.adhoc",c2)})},"貼上 AI 彙整結果"),
-      h("label",{class:"pgl"},"追蹤事項",mrCellIn(id,"final.track",ro,"空白時會自動以上月決議與執行結果帶入",1)),h("label",{class:"pgl"},"開會內容",mrCellIn(id,"final.content",ro,"空白時會自動以筆記、主管評論、顧問回饋與決議事項帶入",1)),h("label",{class:"pgl"},"臨時動議",mrCellIn(id,"final.adhoc",ro,"",1)),
+        const a=sec("追蹤事項"),b=sec("開會內容"),c2=sec("臨時動議"),c3=sec("總結");if(c3!=null)Store.write(id,"cells","final.sum",c3);if(a==null&&b==null)return "找不到【追蹤事項】【開會內容】標題";if(a!=null)Store.write(id,"cells","final.track",a);if(b!=null)Store.write(id,"cells","final.content",b);if(c2!=null)Store.write(id,"cells","final.adhoc",c2)})},"貼上 AI 彙整結果"),
+      h("label",{class:"pgl"},"追蹤事項",mrCellIn(id,"final.track",ro,"空白時會自動以上月決議與執行結果帶入",1)),h("label",{class:"pgl"},"開會內容",mrCellIn(id,"final.content",ro,"空白時會自動以筆記、主管評論、顧問回饋與決議事項帶入",1)),h("label",{class:"pgl"},"臨時動議",mrCellIn(id,"final.adhoc",ro,"",1)),h("label",{class:"pgl"},"總結",mrCellIn(id,"final.sum",ro,"",1)),
       h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;margin-top:10px"},h("button",{class:"btn primary",onclick:e=>{e.target.disabled=true;renderDoc(minutesHtml(minutesDocData(ym)),ymLabel(ym)+"管理月會_會議記錄","pdf").catch(x=>toast(x.message)).finally(()=>e.target.disabled=false)}},"🖨 下載會議記錄 PDF（含簽名欄）")));
   return h("div",null,top,fin)}
 
 function assignSettings(ym){const id=mmId(ym);
   const sel=(key,label)=>{const x=h("select",{class:"pin"},h("option",{value:""},"—"),DEPT_LIST.map(dn=>h("optgroup",{label:dn},ALL_PEOPLE.filter(p=>p[1]===dn).map(p=>h("option",{value:p[0]},p[0])))));x.value=mmCell(ym,key);x.addEventListener("change",()=>Store.write(id,"cells",key,x.value));return h("label",{class:"pgl"},label,x)};
-  return h("div",null,h("div",{class:"pgrid"},sel("host","本次主持人"),sel("recorder","本次記錄人")),
+  const co=new Set(cohostsOf(ym));const cobox=h("div",{style:"display:flex;flex-wrap:wrap;gap:4px"},ALL_PEOPLE.map(([n])=>h("button",{class:"mchip"+(co.has(n)?" on":""),style:"width:auto;padding:0 8px",onclick:()=>{co.has(n)?co.delete(n):co.add(n);Store.write(id,"cells","cohosts",[...co].join(","))}},n)));
+  return h("div",null,h("div",{class:"pgrid"},sel("host","主要主持人"),sel("recorder","記錄人")),h("details",{style:"margin-top:6px"},h("summary",{style:"cursor:pointer;font-size:13px"},"協同主持人（選填，"+(co.size?[...co].join("、"):"未設定")+"）"),cobox),
     mmCell(ym,"hostDept")?h("p",{style:"font-size:13px;color:var(--muted);margin:6px 0"},"本月輪值部門：主持 "+mmCell(ym,"hostDept")+"、記錄 "+mmCell(ym,"recDept")):null,
     h("button",{class:"btn",style:"margin:6px 0 12px",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="會依部門順序填入 12 個月的輪值部門，確定？";return}
       ymList().forEach((y,i)=>{Store.write(mmId(y),"cells","hostDept",DEPTS[i%DEPTS.length].name);Store.write(mmId(y),"cells","recDept",DEPTS[(i+1)%DEPTS.length].name)});toast("已排定各月輪值部門")}},"依部門輪替排定 12 個月的主持／記錄部門"))}
@@ -1212,14 +1226,15 @@ function hostTools(ym){return live(h("div"),el=>el.append(hostToolsInner(ym)))}
 function hostToolsInner(ym){const id=mmId(ym),mp=monthMeeting(ym),closed=monthClosed(ym),date=mmCell(ym,"date");
   const days=date?Math.round((Date.parse(date)-Date.parse(todayStr()))/864e5):null;const ok=mmCell(ym,"flowOk");
   const wrap=h("div");
-  if(state.mode==="host")wrap.append(h("div",{class:"sumtitle"},"指派主持人與記錄人（管理員）"),assignSettings(ym));
+  leaveAlerts(ym).forEach(t=>wrap.append(h("div",{class:"refbox",style:"border-color:var(--danger);color:var(--danger);font-weight:700"},"⚠ "+t)));
+  if(isAdmin()||state.mode==="host")wrap.append(h("div",{class:"sumtitle"},"指派主持人與記錄人（管理員）"),assignSettings(ym));
   wrap.append(h("div",{class:"sumtitle"},"會議設定"),monthSettings(ym));
   wrap.append(h("div",{class:"sumtitle",style:"margin-top:14px"},"會議流程"),tbl(["時間","議程","分鐘"],flowTable(ym).map(r=>h("tr",null,r.map(x=>h("td",null,String(x)))))),
     h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px"},
       h("span",{style:"font-size:13px;color:"+(days!=null&&days<=5&&days>=0&&!ok?"var(--danger)":"var(--muted)")},date?(days>0?"距離會議還有 "+days+" 天":days===0?"今天開會":"會議已結束")+"；請在會議前 5 天內確認流程並發送通知單":"請先設定會議日期"),
       ok?h("span",{style:"color:var(--gB);font-weight:700"},"✅ 流程已確認（"+ok.split("|")[1]+"）"):(closed?null:h("button",{class:"btn primary",onclick:()=>{if(!mmCell(ym,"date")){toast("請先設定會議日期");return}Store.write(id,"cells","flowOk",new Date().toISOString()+"|"+(getMe()||"管理員"))}},"✅ 確認會議流程")),
       ok&&!closed?h("button",{class:"linkbtn",onclick:()=>Store.write(id,"cells","flowOk","")},"重新調整"):null));
-  const nt=()=>({title:ymLabel(ym)+"管理月會",to:mmCell(ym,"to")||"各部門主管及相關同仁",date:mmCell(ym,"date"),time:monthMeeting(ym).time,place:mmCell(ym,"place")||"會議室",host:mmCell(ym,"host"),recorder:mmCell(ym,"recorder"),agenda:flowTable(ym),note:"請各部門於會議前完成月會報告上傳。不克出席請於會議當天中午 12:00 前於平台請假。"});
+  const nt=()=>({title:ymLabel(ym)+"管理月會",to:mmCell(ym,"to")||"各部門主管及相關同仁",date:mmCell(ym,"date"),time:monthMeeting(ym).time,place:mmCell(ym,"place")||"會議室",host:mmCell(ym,"host"),recorder:mmCell(ym,"recorder"),agenda:flowTable(ym),note:"請各部門於會議前完成月會報告上傳。不克出席者，最晚請於會議開始前 4 小時掃描右方 QR code 或至平台請假。",qr:baseURL()+"?mm="+ym});
   wrap.append(h("div",{class:"sumtitle",style:"margin-top:14px"},"會議通知單"),h("div",{style:"display:flex;flex-wrap:wrap;gap:8px"},
     h("button",{class:"btn",onclick:e=>{if(!mmCell(ym,"flowOk")){toast("請先確認會議流程");return}e.target.disabled=true;renderDoc(noticeHtml(nt()),ymLabel(ym)+"管理月會_通知單","pdf").catch(x=>toast(x.message)).finally(()=>e.target.disabled=false)}},"⬇ 通知單 PDF"),
     h("button",{class:"btn",onclick:e=>{if(!mmCell(ym,"flowOk")){toast("請先確認會議流程");return}e.target.disabled=true;renderDoc(noticeHtml(nt()),ymLabel(ym)+"管理月會_通知單","png").catch(x=>toast(x.message)).finally(()=>e.target.disabled=false)}},"⬇ 通知單圖檔（傳群組用）"),
@@ -1239,14 +1254,15 @@ function editProjDialog(c,k){const id=docId("dproj",c);const v=Object.assign({},
 function statusBoard(ym){return live(h("div"),el=>{el.append(tbl(["部門"].concat(MR_SECS.slice(0,5).map(x=>x[1])).concat(["附件"]),deptOrder(ym).map(c=>deptByCode(c)).map(d=>{const st=mrStatus(ym,d.code),atts=Store.items(mrId(ym,d.code)).filter(([k,v])=>v.kind==="att").length;
   return h("tr",null,h("th",{class:"rowh"},d.name),["p1","p2","p3","p4","p5"].map(k=>h("td",{style:"text-align:center;color:"+(stOk(st[k])?"var(--gB)":"var(--danger)")},(stOk(st[k])?"✓ ":"△ ")+stTxt(st[k]))),h("td",{style:"text-align:center"},atts||""))})),
   h("div",{style:"font-size:12px;color:var(--muted);margin-top:6px"},"✓ 已完成；△ 尚未補齊（數字為已填／應填）。會議前請主持人確認各部門資料都已補齊。"))})}
-function monthNav(){return h("div",{class:"formtabs",style:"margin:12px 0"},[["plan","年度計劃"],["monthly","管理月會"],["routine","例行會議"]].map(([k,l])=>h("button",{class:"formtab","aria-selected":String((state.area||"plan")===k),onclick:()=>{state.area=k;render()}},l)))}
 function renderMonthly(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";const me=getMe();
   const ym=state.ym||curYm();state.ym=ym;const mp=monthMeeting(ym);const myc=myDeptCode();
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   const ms=h("select",{"aria-label":"月份"},ymList().map(x=>h("option",{value:x},ymLabel(x))));ms.value=ym;ms.addEventListener("change",()=>{state.ym=ms.value;render()});
-  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮2027年度計劃工作台　"+VERSION),h("h1",null,ymLabel(ym)+"管理月會"),h("div",{class:"dt"},(mmCell(ym,"date")?fmtDate(mmCell(ym,"date"))+"　"+(mmCell(ym,"time")||"14:00"):"日期未定")+"｜主持人："+(mmCell(ym,"host")||"未定")+"｜記錄人："+(mmCell(ym,"recorder")||"未定"))),
+  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮2027年度計劃工作台　"+VERSION),h("h1",null,ymLabel(ym)+"管理月會"),h("div",{class:"dt"},(mmCell(ym,"date")?fmtDate(mmCell(ym,"date"))+"　"+(mmCell(ym,"time")||"14:00"):"日期未定")+"｜主持人："+(mmCell(ym,"host")||"未定")+(cohostsOf(ym).length?"（協同："+cohostsOf(ym).join("、")+"）":"")+"｜記錄人："+(mmCell(ym,"recorder")||"未定"))),
     h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},ms,canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),monthNav());
   if(!host&&me&&mmCell(ym,"date")&&mp.date>=todayStr())wrap.append(live(h("div",{class:"meCard",style:"display:block"}),el=>attCard(el,mp,mp.date,me,groupOf(me))));
+  wrap.append(monthTimeline(ym));
+  if(!canHostTools(ym))leaveAlerts(ym).forEach(t=>wrap.append(h("div",{class:"refbox",style:"border-color:var(--danger);color:var(--danger)"},"⚠ "+t)));
   if(monthClosed(ym))wrap.append(h("div",{class:"refbox",style:"border-color:var(--danger)"},"🔒 本月會議已結束，月會報告與會議記錄已鎖定，僅供檢視。後續請在下個月的月會報告中更新。"));
   const tabs=[];if(canHostTools(ym))tabs.push(["tools","主持人工具"]);else if(isGM(me)||me===mmCell(ym,"recorder"))tabs.push(["status","各部門完成狀況"]);
   if(myc||isGM(me)||host)tabs.push(["report","部門月報"]);tabs.push(["minutes","會議記錄"]);
@@ -1263,39 +1279,130 @@ function renderMonthly(){const root=$("#app");root.innerHTML="";const host=state
   if(state.mtab==="minutes"){wrap.append(h("p",{style:"font-size:13px;color:var(--muted)"},canRecord(ym)?"你是本月的主持人／記錄人，可以編輯會議記錄。":"會議記錄由本月記錄人填寫。"),buildMinutes(ym))}
   if(!host)wrap.append(h("div",{class:"pfoot"},statusEl()));
   root.append(wrap)}
-/* ================= 例行會議 ================= */
-const RT_TYPES=["部門會議","產銷協調會","廠務部組長會議","其他"];
+/* ================= V2.1：分頁、列席者簽到、例行會議 ================= */
+function baseURL(){return window.claude?ARTIFACT_URL:(location.origin+location.pathname)}
+const APP_TABS=[["plan","📋","年度計劃"],["monthly","📅","管理月會"],["routine","🗂️","例行會議"]];
+function monthNav(){return h("div",{class:"apptabs",role:"tablist"},APP_TABS.map(([k,ic,l])=>h("button",{role:"tab",class:"apptab","aria-selected":String((state.area||"plan")===k),onclick:()=>{state.area=k;render()}},h("span",{class:"ic"},ic),l)))}
+function leaveDeadlineOk(d,start){const t=Date.parse(d+"T"+(start||"09:00")+":00+08:00");return Date.now()<t-4*3600e3}
+function qrDataURL(text,size){const div=document.createElement("div");try{new QRCode(div,{text,width:size||160,height:size||160})}catch(e){return ""}const c=div.querySelector("canvas");return c?c.toDataURL("image/png"):((div.querySelector("img")||{}).src||"")}
+function cohostsOf(ym){return (mmCell(ym,"cohosts")||"").split(",").filter(Boolean)}
+function leaveAlerts(ym){const mp=monthMeeting(ym),out=[];if(!mmCell(ym,"date"))return out;
+  [["host","主持人"],["recorder","記錄人"]].forEach(([k,l])=>{const n=mmCell(ym,k);if(n&&attStatus(mp,mp.date,n)==="請假")out.push(l+"「"+n+"」已請假，請管理員重新指派"+(isAdmin()?"":"（或口頭通知管理員）"))});return out}
+/* 管理月會時間軸 */
+function monthTimeline(ym){const t=todayStr();return h("nav",{class:"timeline","aria-label":"管理月會時程"},ymList().map((y,i)=>{const d=mmCell(y,"date"),cls=["tl-item"];if(d&&d<t)cls.push("past");if(d===t)cls.push("today");if(y===ym)cls.push("active");
+  const al=isAdmin()&&leaveAlerts(y).length;
+  return h("button",{class:cls.join(" "),onclick:()=>{state.ym=y;render()}},h("div",{class:"d"},d?(+d.slice(5,7))+"/"+(+d.slice(8)):(+y.slice(4))+" 月"),h("div",{class:"n"},"第 "+(i+1)+" 次"+(monthClosed(y)?"・已結束":"")),
+    h("div",{class:"s"},(mmCell(y,"hostDept")?mmCell(y,"hostDept")+"主持":"管理月會")+(al?" ⚠":"")))}))}
+/* ===== 列席者／例行會議簽到 ===== */
+function urlParam(k){try{return new URLSearchParams(location.search).get(k)||""}catch(e){return ""}}
+function guestScope(){const mm=urlParam("mm"),rt=urlParam("rt");return mm?"mm"+mm:(rt?"rt:"+rt:"")}
+function renderGuestEntry(scope){const root=$("#app");root.innerHTML="";const wrap=h("div",{class:"pwrap"});
+  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮2027年度計劃工作台　"+VERSION),h("h1",null,"會議簽到"))));
+  const box=h("div",{class:"pick",style:"max-width:460px;margin:16px auto;display:grid;gap:12px"},h("div",{style:"color:var(--muted)"},"讀取會議資訊中…"));wrap.append(box);root.append(wrap);
+  fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"gmeta",scope})}).then(r=>r.json()).then(j=>{box.innerHTML="";
+    if(!j.ok){box.append(h("h2",{style:"margin:0"},"無法簽到"),h("p",null,j.error),getMe()?null:h("button",{class:"btn",onclick:()=>{history.replaceState(null,"",baseURL());render()}},"前往登入"));return}
+    const me=getMe();let pick=me||"";const nameIn=h("input",{class:"pin",placeholder:"姓名",style:"font-size:18px;padding:10px"});nameIn.value=me||"";
+    const names=h("div",{class:"names"});const drawN=()=>{names.innerHTML="";(j.names||[]).forEach(n=>names.append(h("button",{"aria-pressed":String(pick===n),style:pick===n?"background:var(--ink);color:var(--paper)":"",onclick:()=>{pick=n;nameIn.value=n;drawN()}},n)))};drawN();
+    const code=h("input",{class:"pin",inputmode:"numeric",maxlength:4,placeholder:"螢幕上的簽到碼",style:"font-size:22px;letter-spacing:.2em;text-align:center;padding:10px"});
+    const msg=h("div",{style:"color:var(--danger);font-size:14px;min-height:1.3em"});
+    const go=h("button",{class:"bigbtn",style:"width:100%",onclick:async()=>{msg.textContent="簽到中…";go.disabled=true;
+      try{const r=await fetch(BACKEND_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"gcheckin",scope,name:nameIn.value.trim(),code:code.value.trim()})});const g=await r.json();
+        if(!g.ok){msg.textContent=g.error;go.disabled=false;return}LS("linco-gtok",g.token);LS("linco-gscope",g.scope);LS("linco-gname",g.name);toast("簽到完成");await Store.poll(true);render()}
+      catch(e){msg.textContent="連線失敗，請再試一次";go.disabled=false}}},"簽到");
+    box.append(h("h2",{style:"margin:0"},j.title),h("div",{style:"color:var(--muted)"},fmtDate(j.date)+(j.time?"　"+j.time:"")),
+      (j.names||[]).length?h("div",null,h("div",{class:"gl"},"點選你的名字"),names):null,h("label",{class:"pgl"},(j.names||[]).length?"或輸入姓名（列席者）":"姓名（列席者請輸入全名）",nameIn),code,go,msg,
+      h("p",{style:"margin:0;font-size:13px;color:var(--muted)"},"簽到後可在會議期間檢視本次會議資料。"))}).catch(()=>{box.innerHTML="";box.append(h("p",null,"連線失敗，請重新整理"))})}
+function renderGuestView(){const root=$("#app");root.innerHTML="";const scope=LS("linco-gscope"),name=LS("linco-gname");const wrap=h("div",{class:"pwrap"});
+  const quit=h("button",{class:"linkbtn",onclick:()=>{["linco-gtok","linco-gscope","linco-gname"].forEach(k=>LS(k,""));history.replaceState(null,"",baseURL());Store.server={};render()}},"離開");
+  if(scope.startsWith("mm")){const ym=scope.slice(2);
+    wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"列席檢視（限會議期間）"),h("h1",null,ymLabel(ym)+"管理月會"),h("div",{class:"dt"},"✓ "+name+" 已簽到")),quit));
+    const c=state.gDept||deptOrder(ym)[0];if(!state.msec)state.msec="p1";
+    wrap.append(h("div",{class:"formtabs"},deptOrder(ym).map(dc=>h("button",{class:"formtab","aria-selected":String(c===dc),onclick:()=>{state.gDept=dc;render()}},deptByCode(dc).name))),
+      h("div",{class:"formtabs",style:"margin-top:6px"},MR_SECS.map(([k,l])=>h("button",{class:"formtab","aria-selected":String(state.msec===k),onclick:()=>{state.msec=k;render()}},l))),buildMrSec(ym,c,state.msec,true))}
+  else{const key=scope.slice(3);wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"會議資料（限會議期間）"),h("h1",null,rtTitle(key)),h("div",{class:"dt"},"✓ "+name+" 已簽到")),quit),rtView(key,true))}
+  wrap.append(h("div",{class:"pfoot"},statusEl()));root.append(wrap)}
+/* ===== 例行會議 ===== */
+const RT_TYPES=["部門會議","產銷協調會","廠務部組長會議","專案會議","其他"];
+const rtAll=()=>Store.items("rt__X").filter(([k,v])=>v&&v.date);
+const rtSeriesKey=v=>v.type+(v.type==="部門會議"?"|"+v.dept:"")+(v.type==="其他"?"|"+(v.title||""):"");
+function rtSeq(k,v){const y=v.date.slice(0,4);const list=rtAll().filter(([k2,v2])=>rtSeriesKey(v2)===rtSeriesKey(v)&&v2.date.slice(0,4)===y).sort((a,b)=>(a[1].date+(a[1].time||"")+a[1].t).localeCompare(b[1].date+(b[1].time||"")+b[1].t));const i=list.findIndex(x=>x[0]===k);return i<0?list.length+1:i+1}
+function rtSeriesTitle(k,v){const roc=(+v.date.slice(0,4))-1911,n=rtSeq(k,v);
+  const base=v.type==="部門會議"?(v.dept||"")+"例行會議":v.type==="產銷協調會"?"產銷會議":v.type==="專案會議"?"專案會議":v.type==="廠務部組長會議"?"廠務部組長會議":(v.title||"會議");
+  return roc+"年第"+n+"次"+base}
+function rtTitle(k){const v=(Store.body("rt__X").items||{})[k];return v?(v.series||rtSeriesTitle(k,v)):"會議"}
+function rtPrev(k,v){const list=rtAll().filter(([k2,v2])=>k2!==k&&rtSeriesKey(v2)===rtSeriesKey(v)&&(v2.date+(v2.time||""))<(v.date+(v.time||""))).sort((a,b)=>(b[1].date+(b[1].time||"")).localeCompare(a[1].date+(a[1].time||"")));return list[0]||null}
+function rtAttend(k,v){const A=Store.body("rta__"+k).items||{};const parts=v.participants||[];const P=[],L=[],N=[];
+  parts.forEach(n=>{const r=A[n]||{};if(r.checkin)P.push(n);else if(r.leave)L.push(n);else N.push(n)});Object.keys(A).filter(n=>!parts.includes(n)&&A[n]&&A[n].checkin).forEach(n=>P.push(n+"（列席）"));return {P,L,N}}
+function rtView(k,ro){return live(h("div"),el=>{const v=(Store.body("rt__X").items||{})[k];if(!v){el.append(h("div",{class:"empty"},"找不到會議資料"));return}
+  const at=rtAttend(k,v);
+  el.append(h("div",{class:"refbox"},h("div",null,h("b",null,"日期："),fmtDate(v.date)+(v.time?"　"+v.time:"")+(v.place?"　｜　"+v.place:"")),h("div",null,h("b",null,"出席："),at.P.join("、")||"—"),at.L.length?h("div",null,h("b",null,"請假："),at.L.join("、")):null,h("div",null,h("b",null,"未簽到："),at.N.join("、")||"—")));
+  const prev=(v.points||[]).filter(p=>p.from);const cur=(v.points||[]).filter(p=>!p.from);
+  if(prev.length)el.append(h("div",{class:"sumtitle"},"優先確認議題（上次會議追蹤事項）"),h("ol",{class:"pts"},prev.map(p=>h("li",null,(p.done?"✅ ":"⬜ ")+p.t,p.due?h("small",null,"　追蹤日期 "+p.due):null))));
+  if(cur.length)el.append(h("div",{class:"sumtitle"},"會議內容"),h("ol",{class:"pts"},cur.map(p=>h("li",null,p.t,p.track?h("span",{class:"trk"},"追蹤"+(p.due?"・"+p.due:"")):null))));
+  if(v.content)el.append(h("div",{class:"sumtitle"},"補充說明"),h("div",{style:"white-space:pre-wrap"},v.content));
+  if((v.files||[]).length)el.append(h("div",{class:"sumtitle"},"附件"),h("div",{style:"display:flex;flex-wrap:wrap;gap:8px"},(v.files||[]).map(f=>{const a=Object.assign({fid:f.id},f);return isImg(a)&&a.fid?h("a",{href:f.url,target:"_blank",rel:"noopener"},h("img",{src:thumb(a),alt:f.name,style:"height:120px;border-radius:8px;border:1px solid var(--line);object-fit:cover"})):h("a",{class:"tchip",href:f.url,target:"_blank",rel:"noopener"},"📄 "+f.name)})));
+})}
+function rtDocData(k,v){const at=rtAttend(k,v);const pts=(v.points||[]);
+  return {title:(v.series||rtSeriesTitle(k,v)),date:v.date,time:v.time||"",place:v.place||"",present:at.P.join("、")||v.attendees||"",absent:[at.N.join("、")||v.absent||"",at.L.length?"（請假："+at.L.join("、")+"）":""].filter(Boolean).join(" "),recorder:v.by||"",
+    track:pts.filter(p=>p.from).map((p,i)=>(i+1)+". "+p.t+"　"+(p.done?"（已完成）":"（追蹤中）")).join("\n"),
+    content:pts.filter(p=>!p.from).map((p,i)=>(i+1)+". "+p.t+(p.track?"　【追蹤"+(p.due?"："+p.due:"")+"】":"")).join("\n")+(v.content?"\n\n"+v.content:""),adhoc:v.adhoc||"",summary:"",next:v.next||"",dept:v.dept}}
 function renderRoutine(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";const me=getMe();const id="rt__X";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
-  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮2027年度計劃工作台　"+VERSION),h("h1",null,"例行會議記錄"),h("div",{class:"dt"},"部門會議、產銷協調會、廠務部組長會議等，上傳記錄與附件")),
+  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮2027年度計劃工作台　"+VERSION),h("h1",null,"例行會議記錄"),h("div",{class:"dt"},"部門會議、產銷協調會、廠務部組長會議、專案會議等")),
     host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null)),monthNav());
   const fType=h("select",null,h("option",{value:""},"全部類型"),RT_TYPES.map(t=>h("option",{value:t},t)));fType.value=state.rtType||"";fType.addEventListener("change",()=>{state.rtType=fType.value;render()});
-  const fDept=h("select",null,h("option",{value:""},"全部部門"),DEPTS.concat([{code:"GM",name:"總經理室"}]).map(d=>h("option",{value:d.name},d.name)));fDept.value=state.rtDept||"";fDept.addEventListener("change",()=>{state.rtDept=fDept.value;render()});
-  wrap.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0"},fType,fDept,h("span",{style:"flex:1"}),me?h("button",{class:"btn primary",onclick:()=>rtDialog()},"＋ 新增會議記錄"):null));
-  wrap.append(live(h("div",{style:"display:grid;gap:10px"}),el=>{const list=Store.items(id).filter(([k,v])=>v.date&&(!state.rtType||v.type===state.rtType)&&(!state.rtDept||v.dept===state.rtDept)).sort((a,b)=>b[1].date.localeCompare(a[1].date));
-    if(!list.length){el.append(h("div",{class:"empty"},"尚無會議記錄"));return}
-    list.forEach(([k,v])=>{const mine=v.by===me||host||isAdmin();
-      el.append(h("div",{class:"pcard"},h("div",{style:"display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"},h("div",null,h("b",null,v.title||v.type),h("div",{style:"font-size:13px;color:var(--muted)"},fmtDate(v.date)+"｜"+v.type+"｜"+(v.dept||"")+"｜記錄："+(v.by||""))),
-        h("span",{style:"display:flex;gap:6px"},h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:e=>{e.target.disabled=true;renderDoc(minutesHtml({title:v.title||v.type,date:v.date,time:v.time||"",place:v.place||"",present:v.attendees||"",absent:v.absent||"",recorder:v.by||"",track:v.track||"",content:v.content||"",adhoc:v.adhoc||"",next:"",signers:(v.attendees||"").split(/[、,，\s]+/).filter(Boolean)}),v.date+"_"+(v.title||v.type)+"_會議記錄","pdf").catch(x=>toast(x.message)).finally(()=>e.target.disabled=false)}},"🖨 列印版 PDF"),mine?h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>rtDialog(k,v)},"編輯"):null,mine?h("button",{class:"btn",style:"padding:2px 10px;font-size:13px;color:var(--danger)",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="確定刪除？";return}Store.write(id,"items",k,null)}},"刪除"):null)),
-        v.content?h("div",{style:"white-space:pre-wrap;margin-top:6px;font-size:14px"},v.content):null,
-        (v.files||[]).length?h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;margin-top:8px"},(v.files||[]).map(f=>{const a=Object.assign({fid:f.id},f);return isImg(a)&&a.fid?h("a",{href:f.url,target:"_blank",rel:"noopener"},h("img",{src:thumb(a),alt:f.name,style:"height:90px;border-radius:8px;border:1px solid var(--line);object-fit:cover"})):h("a",{class:"tchip",href:f.url,target:"_blank",rel:"noopener"},"📄 "+f.name)})):null))})}));
+  const fDept=h("select",null,h("option",{value:""},"全部部門"),DEPT_LIST.map(d=>h("option",{value:d},d)));fDept.value=state.rtDept||"";fDept.addEventListener("change",()=>{state.rtDept=fDept.value;render()});
+  wrap.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0"},fType,fDept,h("span",{style:"flex:1"}),me?h("button",{class:"btn primary",onclick:()=>rtDialog()},"＋ 新增會議"):null));
+  wrap.append(live(h("div",{style:"display:grid;gap:10px"}),el=>{const list=rtAll().filter(([k,v])=>(!state.rtType||v.type===state.rtType)&&(!state.rtDept||v.dept===state.rtDept)).sort((a,b)=>(b[1].date+(b[1].time||"")).localeCompare(a[1].date+(a[1].time||"")));
+    if(!list.length){el.append(h("div",{class:"empty"},"尚無會議"));return}
+    list.forEach(([k,v])=>{const mine=v.by===me||host||isAdmin();const today=v.date===todayStr();const at=rtAttend(k,v);
+      const pr=()=>renderDoc(minutesHtml(rtDocData(k,v)),v.date+"_"+(v.series||rtSeriesTitle(k,v))+"_會議記錄","pdf").catch(x=>toast(x.message));
+      el.append(h("div",{class:"pcard"},h("div",{style:"display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"},h("div",null,h("b",{style:"font-size:16px"},rtSeriesTitle(k,v)),v.title&&v.type!=="其他"?h("span",{style:"margin-left:8px;color:var(--muted)"},v.title):null,
+          h("div",{style:"font-size:13px;color:var(--muted)"},fmtDate(v.date)+(v.time?" "+v.time:"")+"｜"+v.type+"｜"+(v.dept||"")+"｜記錄："+(v.by||"")+"｜簽到 "+at.P.length+"／"+(v.participants||[]).length)),
+        h("span",{style:"display:flex;gap:6px;flex-wrap:wrap"},today&&mine?h("button",{class:"btn primary",style:"padding:2px 10px;font-size:13px",onclick:()=>Deck.openRt(k)},"▶ 開會（簽到碼）"):null,
+          h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:e=>{e.target.disabled=true;pr().finally(()=>e.target.disabled=false)}},"🖨 列印版 PDF"),
+          mine?h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>rtDialog(k,v)},"編輯"):null,
+          mine?h("button",{class:"btn",style:"padding:2px 10px;font-size:13px;color:var(--danger)",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="確定刪除？";return}Store.write(id,"items",k,null)}},"刪除"):null)),
+        h("details",null,h("summary",{style:"cursor:pointer;font-size:13px;color:var(--muted);margin-top:6px"},"檢視會議內容"),rtView(k,true))))})}));
   if(!host)wrap.append(h("div",{class:"pfoot"},statusEl()));
   root.append(wrap)}
-function rtDialog(k,v){const id="rt__X";v=Object.assign({type:"部門會議",dept:deptOf(getMe())||"",date:todayStr(),title:"",content:"",files:[]},v||{});const key=k||uid();
-  openDialog(k?"編輯會議記錄":"新增會議記錄",b=>{
+function rtDialog(k,v){const id="rt__X";const isNew=!k;v=Object.assign({type:"部門會議",dept:deptOf(getMe())||"",date:todayStr(),time:"",title:"",place:"",content:"",files:[],participants:[],points:[]},JSON.parse(JSON.stringify(v||{})));const key=k||uid();
+  openDialog(k?"編輯會議":"新增會議",b=>{
     const ty=h("select",{class:"pin"},RT_TYPES.map(t=>h("option",{value:t},t)));ty.value=v.type;
-    const dp=h("select",{class:"pin"},DEPTS.concat([{code:"GM",name:"總經理室"}]).map(d=>h("option",{value:d.name},d.name)));dp.value=v.dept;
-    const dt=h("input",{class:"pin",type:"date"});dt.value=v.date;const ti=h("input",{class:"pin",placeholder:"會議名稱，例如：業務部第 3 週週會"});ti.value=v.title;
-    const tm=h("input",{class:"pin",type:"time"});tm.value=v.time||"";const pl=h("input",{class:"pin",placeholder:"會議地點"});pl.value=v.place||"";
-    const at=h("input",{class:"pin",placeholder:"出席者（以頓號分隔）"});at.value=v.attendees||"";const ab=h("input",{class:"pin",placeholder:"缺席者"});ab.value=v.absent||"";
-    const ct=h("textarea",{class:"pin",rows:8,placeholder:"會議內容、決議事項、待辦"});ct.value=v.content;
+    const dp=h("select",{class:"pin"},DEPT_LIST.map(d=>h("option",{value:d},d)));dp.value=v.dept;
+    const dt=h("input",{class:"pin",type:"date"});dt.value=v.date;const tm=h("input",{class:"pin",type:"time"});tm.value=v.time||"";
+    const ti=h("input",{class:"pin",placeholder:"會議主題（例如專案名稱，選填）"});ti.value=v.title||"";const pl=h("input",{class:"pin",placeholder:"會議地點"});pl.value=v.place||"";
+    const seriesEl=h("div",{style:"font-weight:700;color:var(--saffron)"});const upd=()=>{const tmp={type:ty.value,dept:dp.value,date:dt.value||todayStr(),time:tm.value,title:ti.value,t:v.t||Date.now()};seriesEl.textContent="會議名稱（系統自動產生）："+rtSeriesTitle(key,tmp)};[ty,dp,dt,tm,ti].forEach(x=>x.addEventListener("change",()=>{upd();if(isNew)drawPts(true)}));upd();
+    // 參與者
+    const parts=new Set(v.participants||[]);const pbox=h("div",{style:"display:flex;flex-wrap:wrap;gap:4px;max-height:150px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:6px"});
+    const drawP=()=>{pbox.innerHTML="";DEPT_LIST.forEach(dn=>{const ppl=ALL_PEOPLE.filter(p=>p[1]===dn);if(!ppl.length)return;pbox.append(h("span",{style:"width:100%;font-size:12px;color:var(--muted)"},dn));
+      ppl.forEach(([n])=>pbox.append(h("button",{class:"mchip"+(parts.has(n)?" on":""),style:"width:auto;padding:0 8px",onclick:()=>{parts.has(n)?parts.delete(n):parts.add(n);drawP()}},n)))})};drawP();
+    const quick=h("button",{class:"linkbtn",onclick:()=>{ALL_PEOPLE.filter(p=>p[1]===dp.value).forEach(([n])=>parts.add(n));drawP()}},"＋ 加入本部門全員");
+    const extra=h("input",{class:"pin",placeholder:"名單外的參與者（以頓號分隔）"});extra.value=(v.participants||[]).filter(n=>!ALL_PEOPLE.some(p=>p[0]===n)).join("、");
+    // 會議內容（列點＋追蹤）
+    let pts=(v.points||[]).map(p=>Object.assign({},p));const ptBox=h("div",{style:"display:grid;gap:6px"});
+    const drawPts=(refreshPrev)=>{if(refreshPrev){const tmp={type:ty.value,dept:dp.value,date:dt.value||todayStr(),time:tm.value,title:ti.value};const pv=rtPrev(key,tmp);
+        pts=pts.filter(p=>!p.from);if(pv)pts=((pv[1].points||[]).filter(p=>(p.track&&!p.from)||(p.from&&!p.done)).map(p=>({t:p.t,due:p.due,from:pv[0],done:false}))).concat(pts)}
+      ptBox.innerHTML="";pts.forEach((p,i)=>{const t=h("input",{class:"pin",value:p.t||"",placeholder:"第 "+(i+1)+" 點"});t.value=p.t||"";t.addEventListener("input",()=>p.t=t.value);
+        const row=p.from?h("div",{style:"display:flex;gap:6px;align-items:center;background:var(--saffron-soft);border-radius:8px;padding:4px 8px"},h("label",{style:"display:flex;gap:4px;align-items:center;white-space:nowrap;font-size:13px"},(()=>{const c=h("input",{type:"checkbox"});c.checked=!!p.done;c.addEventListener("change",()=>p.done=c.checked);return c})(),"已完成"),h("span",{style:"flex:1"},"上次追蹤："+p.t),p.due?h("small",null,p.due):null)
+          :h("div",{style:"display:flex;gap:6px;align-items:center;flex-wrap:wrap"},h("span",{style:"width:1.6em;text-align:right;color:var(--muted)"},(pts.filter(x=>!x.from).indexOf(p)+1)+"."),h("div",{style:"flex:1 1 260px"},t),
+            h("label",{style:"display:flex;gap:4px;align-items:center;font-size:13px;white-space:nowrap"},(()=>{const c=h("input",{type:"checkbox"});c.checked=!!p.track;c.addEventListener("change",()=>{p.track=c.checked;drawPts()});return c})(),"需追蹤"),
+            p.track?(()=>{const d=h("input",{class:"pin",type:"date",style:"width:150px"});d.value=p.due||"";d.addEventListener("change",()=>p.due=d.value);return d})():null,h("button",{class:"del",onclick:()=>{pts.splice(i,1);drawPts()}},"×"));ptBox.append(row)})};
+    drawPts(isNew);
+    const ct=h("textarea",{class:"pin",rows:3,placeholder:"補充說明（選填）"});ct.value=v.content||"";
     const files=(v.files||[]).slice();const fl=h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"});const msg=h("span",{style:"font-size:12px;color:var(--muted)"});
     const drawF=()=>{fl.innerHTML="";files.forEach((f,i)=>fl.append(h("span",{class:"tchip"},"📄 "+f.name,h("button",{onclick:()=>{files.splice(i,1);drawF()}},"×"))))};drawF();
     const up=h("button",{class:"btn",onclick:()=>pickFiles("image/*,application/pdf,.xlsx,.xls,.docx,.pptx",true,async fs=>{for(const f of fs){if(f.size>10*1024*1024){msg.textContent=f.name+" 超過 10MB";continue}msg.textContent="上傳中："+f.name;
       try{const j=await backendPost({action:"upload",name:dt.value+"_"+ty.value+"_"+f.name,mime:f.type,data:await fileB64(f)});files.push({name:f.name,url:j.url,id:j.id,mime:f.type});drawF();msg.textContent="已上傳"}catch(e){msg.textContent=e.message}}})},"📎 上傳附件／照片");
-    const save=h("button",{class:"btn primary",onclick:()=>{if(!dt.value){dt.focus();return}Store.write(id,"items",key,{type:ty.value,dept:dp.value,date:dt.value,time:tm.value,place:pl.value,attendees:at.value,absent:ab.value,title:ti.value.trim(),content:ct.value,files,by:v.by||getMe(),t:v.t||Date.now()});$("#rosterDlg").classList.remove("open");render()}},"儲存");
-    b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px"},h("div",{class:"pgrid"},h("label",{class:"pgl"},"會議類型",ty),h("label",{class:"pgl"},"部門",dp),h("label",{class:"pgl"},"日期",dt),h("label",{class:"pgl"},"時間",tm),h("label",{class:"pgl"},"地點",pl)),h("label",{class:"pgl"},"會議名稱",ti),h("div",{class:"pgrid"},h("label",{class:"pgl"},"出席者",at),h("label",{class:"pgl"},"缺席者",ab)),h("label",{class:"pgl"},"內容",ct),h("div",{style:"display:flex;gap:8px;align-items:center"},up,msg),fl,h("div",null,save)))});
-  $("#rosterDlg .card").style.maxWidth="760px"}
+    const save=h("button",{class:"btn primary",onclick:()=>{if(!dt.value){dt.focus();return}
+      const ex=extra.value.split(/[、,，]+/).map(x=>x.trim()).filter(Boolean);const all=[...parts].concat(ex.filter(n=>!parts.has(n)));
+      const rec={type:ty.value,dept:dp.value,date:dt.value,time:tm.value,place:pl.value,title:ti.value.trim(),participants:all,points:pts.filter(p=>(p.t||"").trim()),content:ct.value,files,by:v.by||getMe(),t:v.t||Date.now()};
+      rec.series=rtSeriesTitle(key,rec);Store.write(id,"items",key,rec);$("#rosterDlg").classList.remove("open");render()}},"儲存");
+    b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px"},seriesEl,h("div",{class:"pgrid"},h("label",{class:"pgl"},"會議類型",ty),h("label",{class:"pgl"},"部門",dp),h("label",{class:"pgl"},"日期",dt),h("label",{class:"pgl"},"時間",tm),h("label",{class:"pgl"},"地點",pl)),
+      h("label",{class:"pgl"},"會議主題",ti),h("div",{class:"pgl"},h("span",null,"參與者（簽到時點選名字）　",quick),pbox,extra),
+      h("div",{class:"pgl"},"會議內容（逐點記錄；勾選「需追蹤」並填追蹤日期，下次同類會議會列為優先確認議題）",ptBox,h("button",{class:"add",onclick:()=>{pts.push({t:"",track:false});drawPts()}},"＋ 新增一點")),
+      h("label",{class:"pgl"},"補充說明",ct),h("div",{style:"display:flex;gap:8px;align-items:center"},up,msg),fl,h("div",null,save)))});
+  $("#rosterDlg .card").style.maxWidth="860px"}
 
 function personLogin(n){
   if(!PERSON_LOGIN||!(BACKEND_URL&&Store.mode==="remote")){setMe(n);render();return}
@@ -1867,7 +1974,9 @@ const pad2=n=>String(n).padStart(2,"0");
 const ymd=(y,m,d)=>y+"-"+pad2(m)+"-"+pad2(d);
 const dow=s=>{const [y,m,d]=s.split("-").map(Number);return new Date(Date.UTC(y,m-1,d)).getUTCDay()};
 const REP={none:"不重複",weekly:"每週",monthly:"每月（同日期）"};
-function calEvents(){return Store.items(docId("cal","X")).filter(([k,v])=>v&&v.date).sort((a,b)=>(a[1].date+(a[1].time||"")).localeCompare(b[1].date+(b[1].time||"")))}
+function calEvents(){const virt=[];ymList().forEach(ym=>{const d=mmCell(ym,"date");if(d)virt.push(["mm"+ym,{date:d,time:mmCell(ym,"time")||"14:00",title:ymLabel(ym).replace(/^\d+ 年 /,"")+"管理月會",dept:"CO",major:true,rep:"none",virtual:true}])});
+  rtAll().forEach(([k,v])=>{const dc=(deptByName(v.dept)||{}).code||"CO";virt.push(["rt"+k,{date:v.date,time:v.time||"",title:v.series||rtSeriesTitle(k,v),dept:dc,rep:"none",virtual:true}])});
+  return Store.items(docId("cal","X")).filter(([k,v])=>v&&v.date).concat(virt).sort((a,b)=>(a[1].date+(a[1].time||"")).localeCompare(b[1].date+(b[1].time||"")))}
 function occursOn(v,day){if(day<v.date)return false;if(v.until&&day>v.until)return false;if(!v.rep||v.rep==="none")return day===v.date;
   if(v.rep==="weekly")return dow(day)===dow(v.date);if(v.rep==="monthly")return day.slice(8)===v.date.slice(8);return false}
 function scopeName(c){return c==="CO"?"公司":(deptByCode(c)||{}).name||c}
@@ -1918,7 +2027,7 @@ function buildCal(ro){
     for(let i=0;i<first;i++)grid.append(h("div",{class:"md empty"}));
     for(let d=1;d<=days;d++){const day=ymd(2027,m,d),hol=HOLI_MAP[day],wk=[0,6].includes(dow(day));
       const cellEl=h("div",{class:"md"+(hol||wk?" off":""),onclick:()=>calEventDialog(day)},h("div",{class:"dn"},d,hol?h("span",{class:"hol"},hol):null));
-      ev.filter(([k,v])=>occursOn(v,day)).forEach(([k,v])=>cellEl.append(h("div",{class:"ev",style:"border-left-color:"+scopeColor(v.dept),title:scopeName(v.dept)+"："+v.title,onclick:e=>{e.stopPropagation();if(canEditScope(v.dept))calEventDialog(v.date,k,v)}},(v.time?v.time+" ":"")+v.title+(v.major?" ★":""))));
+      ev.filter(([k,v])=>occursOn(v,day)).forEach(([k,v])=>cellEl.append(h("div",{class:"ev",style:"border-left-color:"+scopeColor(v.dept),title:scopeName(v.dept)+"："+v.title,onclick:e=>{e.stopPropagation();if(v.virtual){toast(v.title+"（由管理月會／例行會議自動帶入）");return}if(canEditScope(v.dept))calEventDialog(v.date,k,v)}},(v.time?v.time+" ":"")+v.title+(v.major?" ★":""))));
       grid.append(cellEl)}
     el.append(grid,h("div",{style:"display:flex;flex-wrap:wrap;gap:10px;font-size:12px;margin-top:8px"},["CO"].concat(DEPT_CODES).map(c=>h("span",null,h("i",{style:"display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;background:"+scopeColor(c)}),scopeName(c))),h("span",{style:"color:var(--muted)"},"★＝年度大事")));
   })}
@@ -2303,7 +2412,11 @@ function examplesFor(fid){
 
 /* ================= 主持人頁 ================= */
 function statusEl(){return h("span",{class:"status "+Store.statusKind},h("i"),h("span",null,Store.statusText||"連線中…"))}
-function render(){if((state.area==="monthly"||state.area==="routine")&&(getMe()||state.mode==="host"||!BACKEND_URL)){state.area==="monthly"?renderMonthly():renderRoutine();return}state.mode==="host"?renderHost():renderParticipant()}
+function render(){if(BACKEND_URL&&!window.claude){const gs=guestScope();
+    if(LS("linco-gtok")&&LS("linco-gscope")&&(!gs||gs===LS("linco-gscope"))&&!getMe()){renderGuestView();return}
+    if(gs&&gs.startsWith("rt:")&&!(LS("linco-gtok")&&LS("linco-gscope")===gs)){renderGuestEntry(gs);return}
+    if(gs&&gs.startsWith("mm")){if(getMe()){state.area="monthly";state.ym=gs.slice(2);history.replaceState(null,"",baseURL())}else if(!LS("linco-gtok")){renderGuestEntry(gs);return}}}
+  if((state.area==="monthly"||state.area==="routine")&&(getMe()||state.mode==="host"||!BACKEND_URL)){state.area==="monthly"?renderMonthly():renderRoutine();return}state.mode==="host"?renderHost():renderParticipant()}
 function renderHost(){
   const root=$("#app");root.innerHTML="";
   const m=MEETINGS.find(x=>x.id===state.meeting);
@@ -2368,11 +2481,11 @@ function attCard(el,m,d,me,g){
       code.addEventListener("keydown",e=>{if(e.key==="Enter")btn.click()});
       el.append(h("div",{style:"display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap"},code,btn));
     }else if(todayStr()===d)el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-top:4px"},"會議開始前 "+OPEN_BEFORE_MIN+" 分鐘開放報到（"+startOf(m)+" 開始）"));
-    if(Att.canLeave(d)){
-      if(r.leave)el.append(h("button",{class:"btn",style:"margin-top:10px",onclick:async e=>{busy(e.target);const j=await Att.call("leave",{date:d,name:me,cancel:true,device:Att.device()}).catch(()=>({ok:false,error:"連線失敗"}));done(e.target);if(!j.ok)msg.textContent=j.error}},"取消請假"));
+    if(Att.canLeave(d,startOf(m))){
+      if(r.leave)el.append(h("button",{class:"btn",style:"margin-top:10px",onclick:async e=>{busy(e.target);const j=await Att.call("leave",{start:startOf(m),date:d,name:me,cancel:true,device:Att.device()}).catch(()=>({ok:false,error:"連線失敗"}));done(e.target);if(!j.ok)msg.textContent=j.error}},"取消請假"));
       else{const reason=h("input",{placeholder:"請假事由（選填）",style:"flex:1 1 180px;border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--field)","aria-label":"請假事由"});
-        const lb=h("button",{class:"btn",onclick:async()=>{busy(lb);const j=await Att.call("leave",{date:d,name:me,reason:reason.value.trim(),device:Att.device()}).catch(()=>({ok:false,error:"連線失敗"}));done(lb);if(j.ok)toast("已請假");else msg.textContent=j.error}},"請假");
-        el.append(h("details",{style:"margin-top:10px"},h("summary",{style:"cursor:pointer;font-size:14px;color:var(--muted)"},"不克出席？請假（會議當天 "+LEAVE_DEADLINE+" 前）"),h("div",{class:"addrow",style:"margin-top:8px"},reason,lb)));}
+        const lb=h("button",{class:"btn",onclick:async()=>{busy(lb);const j=await Att.call("leave",{start:startOf(m),date:d,name:me,reason:reason.value.trim(),device:Att.device()}).catch(()=>({ok:false,error:"連線失敗"}));done(lb);if(j.ok)toast("已請假");else msg.textContent=j.error}},"請假");
+        el.append(h("details",{style:"margin-top:10px"},h("summary",{style:"cursor:pointer;font-size:14px;color:var(--muted)"},"不克出席？請假（最晚在會議開始前 4 小時）"),h("div",{class:"addrow",style:"margin-top:8px"},reason,lb)));}
     }
   }
   el.append(msg);
@@ -2492,6 +2605,8 @@ function beep(){try{const C=new (window.AudioContext||window.webkitAudioContext)
 function pageURL(){return (window.claude?ARTIFACT_URL:location.href.split("#")[0])}
 const Deck={
   isOpen:false,slides:[],i:0,m:null,timer:null,repGroup:"A",animating:false,
+  openRt(key){const v=(Store.body("rt__X").items||{})[key];if(!v)return;this.m={id:"rt"+key,no:rtTitle(key),date:v.date,time:v.time||"09:00",theme:v.type,agenda:[],next:null,isRt:true};
+    this.slides=[{k:"rtcheckin",key},{k:"rtview",key}];this.editMode=false;this.showCode=false;this.i=0;this.isOpen=true;setTimeout(()=>this.startTick(),0);$("#deck").classList.add("open");this.show()},
   openMonth(ym){const mp=monthMeeting(ym);const mins=+mmCell(ym,"mins")||15;const S=[];if(mmCell(ym,"date"))S.push({k:"checkin",date:mp.date});S.push({k:"cover"},{k:"flow"});
     deptOrder(ym).map(c=>deptByCode(c)).forEach(d=>{const au={id:mp.id+":dept:"+d.code,min:mins,label:d.name+"月會報告"};["p1","p2","p3","p4","p5","p6"].forEach(sec=>S.push({k:"mrsec",c:d.code,sec,ym,auto:au}))});
     S.push({k:"mmin",ym});this.editMode=false;this.showCode=true;this.m=mp;this.slides=S;this.i=0;this.isOpen=true;setTimeout(()=>this.startTick(),0);$("#deck").classList.add("open");
@@ -2554,13 +2669,13 @@ const Deck={
     let cb=$("#dCodeBtn");if(!cb){cb=h("button",{id:"dCodeBtn",title:"顯示／隱藏右上角報到碼（鍵盤 C）",onclick:()=>{this.showCode=!this.showCode;this.tick()}},"報到碼");$("#dPrev").after(cb)}
     cb.style.display=this.editMode?"none":"";
     eb.style.display=this.editMode&&["cprof","cvs"].includes(s.k)?"":"none";eb.onclick=()=>{this.close();goEdit(s.k==="cprof"?"rivals":"compare",s.sl)};
-    if(s.k==="cover")add(kick("百鮮企業有限公司"),h("h1",null,m.isMonthly?ymLabel(m.ym)+"管理月會":m.id==="m6"?"2027 年度策略展開":m.deptMode?"2027 年度計劃工作坊":"2026 年度檢討",h("br"),m.deptMode||m.id==="m6"?mWhen(m).replace(/　.*$/,""):m.no),h("p",{class:"lead"},"日期："+mWhen(m)+"　｜　主題："+m.theme));
+    if(s.k==="cover")add(kick("百鮮企業有限公司"),h("h1",null,m.isMonthly?ymLabel(m.ym)+"管理月會":m.id==="m6"?"2027 年度策略展開":m.deptMode?"2027 年度計劃工作坊":"2026 年度檢討",m.isMonthly?null:h("br"),m.isMonthly?null:(m.deptMode||m.id==="m6"?mWhen(m).replace(/　.*$/,""):m.no)),h("p",{class:"lead"},"日期："+mWhen(m)+"　｜　主題："+m.theme));
     if(s.k==="flow"){const SC=sched(m);const rows=m.agenda.map((a,ai)=>[a,SC[ai]]).filter(([a])=>!a.hidden&&!a.day);
       add(kick(m.no+"｜"+mWhen(m).replace(/　.*$/,"")),h("h2",{style:"margin-bottom:1.5vh"},"會議流程"),h("div",{class:"sched"+(rows.length>7?" dense":"")},rows.map(([a,sc])=>h("div",{class:"srow"},h("span",{class:"st"},sc?sc.time:""),h("span",{class:"sn"},a.t),h("span",{class:"sd"},sc&&sc.pre?"開始前 "+OPEN_BEFORE_MIN+" 分":sc&&sc.dur?sc.dur+" 分":"")))),
         m.next&&m.next.when?h("p",{class:"lead",style:"font-size:clamp(13px,1.3vw,18px);margin-top:1.5vh"},"下次會議："+m.next.when):null)}
     if(s.k==="day")add(kick(m.no),h("div",{class:"daybig"},s.a.dayLabel||s.a.day));
     if(s.k==="checkin"){
-      const qr=h("div",{class:"code"});let ok=false;try{if(window.QRCode){new QRCode(qr,{text:pageURL(),width:200,height:200});ok=true}}catch(e){}
+      const qr=h("div",{class:"code"});let ok=false;try{if(window.QRCode){new QRCode(qr,{text:m.isMonthly?baseURL()+"?mm="+m.ym:pageURL(),width:200,height:200});ok=true}}catch(e){}
       const codeEl=h("div",{class:"count",style:"letter-spacing:.12em"},"····");const leftEl=h("div",{style:"color:#9FB0C0;font-size:clamp(13px,1.3vw,18px)"},"");
       const cnt=h("div",{style:"font-size:clamp(15px,1.6vw,22px);color:#C6D1DC;margin-top:1vh"});
       const grid=h("div",{class:"ckgrid"});
@@ -2686,6 +2801,13 @@ const Deck={
       add(box);
     }
     if(s.k==="dplan"){const d=deptByCode(s.c);add(h("div",{class:"kicker"},d.name+"｜2027 預計專案"),h("h2",{style:"margin:0 0 1.5vh"},"專案・目標・預期指標"),h("div",{class:"light",id:"repBox",style:"max-height:72vh"},projSimple(s.c,true)))}
+    if(s.k==="rtcheckin"){const key=s.key,url=baseURL()+"?rt="+key;const qr=h("div",{class:"code"});try{new QRCode(qr,{text:url,width:200,height:200})}catch(e){}
+      const codeEl=h("div",{class:"count",style:"letter-spacing:.12em"},"····"),leftEl=h("div",{style:"color:#9FB0C0"});const list=h("div",{class:"ckgrid"});
+      const paint=()=>{const slot=Math.floor(Date.now()/1000/SLOT);codeEl.textContent=String(fnv("rt|"+key+"|"+slot)%10000).padStart(4,"0");leftEl.textContent=(SLOT-Math.floor(Date.now()/1000)%SLOT)+" 秒後更新";
+        const v=(Store.body("rt__X").items||{})[key]||{};const at=rtAttend(key,v);list.innerHTML="";(v.participants||[]).forEach(n=>list.append(h("span",{class:"ck"+(at.P.includes(n)?" in":"")},n)));at.P.filter(n=>n.includes("（列席）")).forEach(n=>list.append(h("span",{class:"ck in"},n)))};
+      paint();this.codeTimer=setInterval(paint,1000);this.paintCheckin=paint;
+      add(kick(rtTitle(key)),h("div",{class:"qrbig"},qr,h("div",null,h("h2",{style:"margin-bottom:1vh"},"掃碼簽到"),h("p",{class:"lead",style:"margin:0"},"點選名字＋輸入簽到碼；列席者輸入姓名"),codeEl,leftEl)),list)}
+    if(s.k==="rtview")add(kick(s.key?rtTitle(s.key):""),h("h2",{style:"margin:0 0 1.5vh"},"會議資料"),h("div",{class:"light",id:"repBox",style:"max-height:74vh"},rtView(s.key,true)));
     if(s.k==="mrsec"){const d=deptByCode(s.c);add(h("div",{class:"kicker"},d.name+"｜"+ymLabel(s.ym)+"月會報告"),h("h2",{style:"margin:0 0 1.5vh"},MR_SECS.find(x=>x[0]===s.sec)[1]),h("div",{class:"light",id:"repBox",style:"max-height:72vh"},buildMrSec(s.ym,s.c,s.sec,true)))}
     if(s.k==="mmin")add(kick(ymLabel(s.ym)+"管理月會"),h("h2",{style:"margin:0 0 1.5vh"},"主管評論・顧問回饋・決議事項"),h("div",{class:"light",id:"repBox",style:"max-height:72vh"},buildMinutes(s.ym,!canRecord(s.ym))));
     if(s.k==="twodays"){const ms=MEETINGS.filter(x=>x.id==="m7"||x.id==="m8");
@@ -2731,7 +2853,7 @@ const Deck={
   refresh(){
     const s=this.slides[this.i];if(!s||this.animating)return;const el=$("#slide");const a=document.activeElement;
     if(s.k==="checkin"){if(this.paintCheckin)this.paintCheckin();return}
-    if(!["checkin","report","members","roles","live","dept","topic","cprof","cvs","fbqr","fbstats","fbcloud","tcloud","swotai","dtitle","dp1","dp2","dproj","dkpi","dorg","dfb","dfix","sum","selfeval","dplan","mrsec","mmin","goalfocus","stratall","dfixsum","ops","opsg","snap","twodays"].includes(s.k))return;
+    if(!["checkin","report","members","roles","live","dept","topic","cprof","cvs","fbqr","fbstats","fbcloud","tcloud","swotai","dtitle","dp1","dp2","dproj","dkpi","dorg","dfb","dfix","sum","selfeval","dplan","mrsec","mmin","rtcheckin","rtview","goalfocus","stratall","dfixsum","ops","opsg","snap","twodays"].includes(s.k))return;
     if(a&&el.contains(a)&&["SELECT","INPUT","TEXTAREA"].includes(a.tagName)){
       el.querySelectorAll("[data-doc][data-key]").forEach(x=>{if(x!==a){const v=Store.cell(x.dataset.doc,x.dataset.key);if(x.value!==v)x.value=v}});
       el.querySelectorAll("[data-live]").forEach(x=>{if(!x.contains(a)&&!(x.parentElement&&x.parentElement.closest("[data-live]")))x._draw()});return;
