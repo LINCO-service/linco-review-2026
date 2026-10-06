@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>百鮮年度計劃暨會議管理工作台</title>
+<title>【測試環境】百鮮年度計劃暨會議管理工作台</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
@@ -558,10 +558,11 @@ table.board td.armed:hover .drop{background:var(--saffron-soft)}
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<script>(function(){try{const P=Storage.prototype,g=P.getItem,s=P.setItem,r=P.removeItem,f=k=>String(k).indexOf("linco-")===0?"TEST:"+k:k;P.getItem=function(k){return g.call(this,f(k))};P.setItem=function(k,v){return s.call(this,f(k),v)};P.removeItem=function(k){return r.call(this,f(k))}}catch(e){}})();</script>
 <script>
 /* ================= 設定 ================= */
 // 放到 GitHub Pages 等外部網站時：填入 Google Apps Script 網頁應用程式網址（見部署說明）
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzpEhE4EZfIx_n2vvXbCNjxgEIx1IDUQjeemJNbjPBBzktsI1fwcb9AhiyWSrhBo2Wm/exec";
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzkIXd-GGYHAQG97dZW3oZghcZr0p10HjVwhCXkRZ3RdwO0n8v_Q-uCihJjQX3BdSroEA/exec";
 const ARTIFACT_URL = "https://claude.ai/artifact/BQVTzja7PmnxVJvGa8Exnc";
 const SELFEVAL_URL = "https://liff.line.me/2010620345-Pzhfcrbh";   // 員工年度工作自評表（LINE 登入）
 const SELFEVAL_DEADLINE_DEFAULT = "11/30（一）17:00";
@@ -1617,7 +1618,7 @@ function rtDialog(k,v){const id="rt__X";const isNew=!k;v=Object.assign({type:"�
   $("#rosterDlg .card").style.maxWidth="860px"}
 
 /* ================= V2.4：LINE 會議通知小卡（LIFF） ================= */
-const LIFF_ID="2010620345-4sn7aigE";
+const LIFF_ID="";
 const LIFF_URL="https://liff.line.me/"+LIFF_ID;
 let liffReady=null;
 function loadLiff(){if(liffReady)return liffReady;liffReady=new Promise((res,rej)=>{if(window.liff)return res(window.liff);const sc=document.createElement("script");sc.src="https://static.line-scdn.net/liff/edge/2/sdk.js";sc.onload=()=>res(window.liff);sc.onerror=()=>{liffReady=null;rej(new Error("無法載入 LINE 元件，請檢查網路"))};document.head.append(sc)})
@@ -3384,6 +3385,8 @@ async function exportCSV(){
 render();
 Store.init().then(()=>{render()});
 
+
+;(function(){const b=document.createElement("div");b.textContent="⚠ 測試環境：資料與正式版分開，可放心測試";b.style.cssText="position:sticky;top:0;z-index:99;background:#C0392B;color:#fff;text-align:center;font-weight:700;padding:6px 10px;font-size:14px";document.body.prepend(b)})();
 </script>
 </body>
 </html>
