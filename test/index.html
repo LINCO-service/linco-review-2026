@@ -153,6 +153,10 @@ table.sheet td.sel{padding:6px 10px}
 .dialog{position:fixed;inset:0;background:rgba(10,15,20,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:40}
 .dialog.open{display:flex}
 .dialog .card{background:var(--paper);border-radius:14px;max-width:960px;width:100%;max-height:90%;overflow:auto;padding:22px}
+.dialog.wide .card{max-width:1280px}
+.adminrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 10px;padding:8px 10px;border:1px dashed var(--line);border-radius:12px}
+.adminrow .adminlab{font-weight:700;font-size:13px;color:var(--muted)}
+.adminrow .top-actions{margin:0}
 .dialog h2{margin:0 0 14px;font-family:var(--serif);font-weight:900}
 .roster{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
 .roster h3{margin:0 0 6px;display:flex;align-items:center;gap:8px}
@@ -380,6 +384,7 @@ details.livepanel summary{cursor:pointer;font-weight:700}
 @media (max-width:640px){.apptabs{flex-wrap:nowrap;gap:2px;padding:4px 0 0}.apptab{flex:1 1 0;min-width:0;justify-content:center;padding:9px 4px;font-size:14px;gap:4px}.apptab .ic{font-size:15px}}
 .calbtn{margin-left:auto;align-self:center;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:14px;cursor:pointer;white-space:nowrap}
 .calbtn:hover{border-color:var(--saffron)}
+.calbtn+.calbtn{margin-left:8px}
 @media (max-width:640px){.calbtn{padding:6px 8px;font-size:13px}}
 .timeline.mtl{margin:12px 0 16px}
 .timeline.mtl .tl-item{flex:1 1 0;min-width:64px}
@@ -549,6 +554,123 @@ table.board td.armed:hover .drop{background:var(--saffron-soft)}
 .slide .kicker{color:#6B4300!important;font-weight:700}
 .hosthint{margin-top:1vh;font-size:clamp(13px,1.2vw,17px);color:#2E2A1E}
 .hosthint summary{cursor:pointer;color:#6B4300;font-weight:600}
+/* V2.5.0 組織圖 */
+.oc-wrap{--ocl:#B8C0C8;font-family:"Microsoft JhengHei","微軟正黑體","Noto Sans TC","PingFang TC",sans-serif}
+.oc-hint{font-size:13px;color:var(--muted);margin:0 0 8px}
+.oc-canvas{overflow-x:auto;border:1px solid var(--line);border-radius:14px;padding:24px 18px 28px;background:var(--paper)}
+.oc-chart{min-width:1120px;position:relative}
+.oc-chart>*:not(.oc-wires){position:relative}
+.oc-wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.oc-wires path{fill:none;stroke:var(--ocl);stroke-width:2}
+.oc-wires path.dot{stroke-dasharray:2 4;stroke-linecap:round}
+.oc-top{display:flex;flex-direction:column;align-items:center}
+.oc-node{border-radius:10px;padding:10px 22px;text-align:center;background:#1E2B3A;color:#fff;min-width:150px}
+.oc-node b{font-size:17px;letter-spacing:.06em}
+.oc-v{height:26px}
+.oc-gmrow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;width:100%}
+.oc-advw{justify-self:start;padding-left:48px}
+.oc-adv{background:transparent;color:var(--ink);border:1.5px dashed var(--ocl)}
+.oc-vps{display:flex;gap:120px;padding-top:34px}
+.oc-vp{width:220px;background:var(--paper);color:var(--ink);border:2px solid #1E2B3A}
+.oc-click{cursor:pointer;transition:transform .15s,box-shadow .15s}
+.oc-click:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,30,40,.14)}
+.oc-click:focus-visible{outline:3px solid #2F6DB5;outline-offset:3px}
+.oc-depts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:48px}
+.oc-dept{display:flex;flex-direction:column;gap:8px;min-width:0;border-radius:12px}
+.oc-dh{border-radius:10px;padding:9px 12px;color:#fff;text-align:center;background:var(--c)}
+.oc-dh b{font-size:18px;letter-spacing:.08em}
+.oc-dh small{display:block;font-size:12px;opacity:.92}
+.oc-unit{border-radius:8px;padding:9px 11px;border-left:4px solid var(--c);background:color-mix(in srgb,var(--c) 10%,var(--paper));min-width:0}
+.oc-unit h4{margin:0 0 4px;font-size:14.5px}
+.oc-who{font-size:12px;color:var(--c);font-weight:700;margin-bottom:3px}
+.oc-unit p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.55}
+.oc-groups{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.oc-groups span{font-size:12px;background:var(--paper);border:1px solid var(--c);color:var(--ink);border-radius:999px;padding:1px 8px}
+.oc-groups span.new{border:1.5px dashed #C98F0A}
+.oc-cross{grid-column:2/5;border-radius:10px;border:2px solid #3F5568;background:color-mix(in srgb,#3F5568 10%,var(--paper));padding:10px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.oc-cross b{font-size:16px}
+.oc-cross p{margin:0;color:var(--muted);font-size:12.5px;flex:1 1 320px}
+.oc-chips{display:flex;gap:5px}
+.oc-chips i{font-style:normal;font-size:12px;font-weight:700;color:#fff;border-radius:999px;padding:1px 9px}
+.oc-legend{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-top:8px}
+.oc-legend span{display:inline-flex;align-items:center;gap:6px}
+.oc-legend .sw{width:22px;height:14px;border-radius:3px;border:1px solid var(--line)}
+.oc-legend .sw.new{border:1.5px dashed #C98F0A}
+/* 視窗 */
+.oc-dlg{font-family:"Microsoft JhengHei","微軟正黑體","Noto Sans TC","PingFang TC",sans-serif;--ocl:#B8C0C8}
+.oc-mini{display:flex;flex-direction:column;align-items:center;padding:4px 0}
+.oc-mhead{border:2px solid var(--c);border-radius:10px;padding:6px 18px;text-align:center;font-weight:700;background:var(--paper)}
+.oc-mhead small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.oc-mv{width:2px;height:18px;background:var(--ocl)}
+.oc-mrow{display:flex;width:100%;justify-content:center}
+.oc-mc{flex:1 1 0;max-width:230px;min-width:0;position:relative;padding:18px 6px 0;display:flex}
+.oc-mc::before,.oc-mc::after{content:"";position:absolute;top:0;width:50%;height:18px;border-top:2px solid var(--ocl)}
+.oc-mc::before{right:50%}
+.oc-mc::after{left:50%;border-left:2px solid var(--ocl)}
+.oc-mc:first-child::before{border-top:0}
+.oc-mc:last-child::after{border-top:0}
+.oc-mu{flex:1;min-width:0;background:color-mix(in srgb,var(--c) 10%,var(--paper));border:2px solid transparent;border-top:4px solid var(--c);border-radius:10px;padding:8px 10px;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
+.oc-mu b{display:block;font-size:14.5px}
+.oc-mu small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.oc-mu:hover,.oc-mu[aria-pressed="true"]{border-color:var(--c)}
+.oc-mu[aria-pressed="true"]{background:var(--paper);box-shadow:0 4px 14px rgba(20,30,40,.14)}
+.oc-mu .oc-groups{justify-content:center}
+.oc-mcommon{flex:none;width:min(100%,560px);margin-top:14px}
+.oc-tools{display:flex;justify-content:center;margin-top:10px}
+.oc-all{font:inherit;font-size:13px;border:1px solid var(--c);color:var(--c);background:transparent;border-radius:999px;padding:3px 14px;cursor:pointer}
+.oc-panel{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.oc-empty{color:var(--muted);text-align:center;font-size:13px}
+.oc-u{margin-bottom:16px}
+.oc-u h4{margin:0 0 6px;font-size:16px;padding-left:10px;border-left:4px solid var(--c)}
+.oc-roles{margin:0 0 8px;padding:0;list-style:none;font-size:13px}
+.oc-roles li{display:block;text-align:left;border:0;padding:2px 0;margin:0}
+ul.oc-dd li{display:list-item;border:0;padding:1px 0;margin:0;text-align:left}
+.oc-roles b{color:var(--c)}
+.oc-duty{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--c) 8%,var(--paper))}
+.oc-dt{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
+.oc-dt b{font-size:14.5px}
+.oc-dt span{font-size:12px;color:var(--c);font-weight:700}
+.oc-dd{font-size:13px;color:var(--muted);margin:3px 0 6px}
+ul.oc-dd{padding-left:1.2em}
+.oc-kpi{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px;background:var(--paper);border-radius:8px;padding:7px 10px;margin:6px 0 0}
+.oc-kr{display:contents}
+.oc-kpi dt{color:var(--muted)}
+.oc-kpi dd{margin:0;font-weight:500;overflow-wrap:anywhere}
+.oc-ctag{margin-top:8px;font-size:12px;font-weight:700;color:var(--c)}
+.oc-nokpi{margin:4px 0 0;font-size:12px;color:var(--muted)}
+.oc-note{font-size:12px;color:var(--muted);margin-top:6px}
+.oc-lead{color:var(--muted);margin:0 0 10px}
+.oc-foot{font-size:12px;color:var(--muted);margin-top:8px}
+@media (max-width:640px){
+  .oc-mini{align-items:stretch}.oc-mhead{align-self:center}.oc-mv{align-self:flex-start;margin-left:15px}
+  .oc-mrow{flex-direction:column}
+  .oc-mc{max-width:none;padding:0 0 8px 34px}
+  .oc-mc::before{right:auto;left:16px;top:28px;width:18px;height:0;border-top:2px solid var(--ocl)}
+  .oc-mc::after{left:15px;top:0;width:0;height:100%;border-top:0;border-left:2px solid var(--ocl)}
+  .oc-mc:first-child::before{border-top:2px solid var(--ocl)}
+  .oc-mc:last-child::after{height:30px}
+  .oc-mu{text-align:left}.oc-mu .oc-groups{justify-content:flex-start}
+}
+/* 職務執掌編輯 */
+.oc-edit{display:grid;gap:8px}
+.oc-sec{margin:12px 0 2px;font-size:15px;padding-left:10px;border-left:4px solid var(--c)}
+.oc-help{margin:0;font-size:12.5px;color:var(--muted)}
+.oc-card{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--c) 6%,var(--paper));display:grid;gap:8px}
+.oc-card small{display:block;font-size:11.5px;color:var(--muted)}
+.oc-chead{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.oc-chead .grow{flex:1 1 240px}
+.oc-chead label{display:grid;gap:2px}
+.oc-chead b{font-size:15px;flex:1 1 auto}
+.oc-role{font-size:12.5px;color:var(--c);font-weight:700}
+.oc-desc textarea{width:100%;min-height:64px}
+.oc-kedit{display:grid;gap:6px}
+.oc-krow{display:grid;grid-template-columns:1.1fr 1.6fr .7fr .9fr 1.2fr auto;gap:6px;align-items:end;background:var(--paper);border-radius:8px;padding:6px 8px}
+.oc-krow label{display:grid;gap:2px;min-width:0}
+.oc-krow .pin{width:100%}
+.oc-common{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:13px}
+.oc-chk{display:inline-flex;gap:4px;align-items:center}
+.oc-chip{font-size:12px;border:1px solid var(--c);color:var(--c);border-radius:999px;padding:0 8px}
+@media (max-width:760px){.oc-krow{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
@@ -658,6 +780,7 @@ const FORMS = {
     rowGroups:[{label:"O 機會",rows:SWOT_EXT},{label:"S 優勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["S","O"],cats:["S","O"]},
   swot_wt:{title:"WT 分析：核心能力建構",short:"WT 分析",type:"board",board:"WT",desc:"克服內部的弱勢，並同時降低外部的威脅（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
     rowGroups:[{label:"T 威脅",rows:SWOT_EXT},{label:"W 弱勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["W","T"],cats:["W","T"]},
+  orgchart:{title:"百鮮企業有限公司 組織圖",short:"組織圖",type:"orgchart",scope:"company",desc:"點部門可看該部門的組織圖，再點課／組看職責與 KPI；點總經理、副總可看職責。各部門的職務執掌在「組織與人力」分頁編輯，這裡會即時更新。"},
   strategy:{title:"百鮮企業有限公司 2027 年度策略展開",short:"2027 策略展開",type:"grid",wide:true,scope:"company",
     desc:"全公司一份：先定營運目標與策略重點，再展開到各部門的專案與 KPI。",
     topFields:[["goal","營運目標"],["focus","策略重點"]],
@@ -667,7 +790,7 @@ const FORMS = {
   dstrat:{title:"本部門策略展開",short:"策略展開",type:"dstrat",scope:"dept",desc:"填寫本部門在全公司策略展開表中的「策略展開（專案）」與「KPI 指標」；簡報會匯整成全公司策略展開。"},
   dproj:{title:"2027 年度專案管理",short:"專案管理",type:"dproj",scope:"dept",desc:"每個專案填寫重要度、目標、行動計劃、執行月份、預算；跨部門專案請勾選配合部門。"},
   dkpi:{title:"部門重要管理指標（KPI／DPI）",short:"KPI 指標",type:"dkpi",scope:"dept",desc:"重要度合計為 100%；可展開填寫每月目標。"},
-  dorg:{title:"組織執掌與人力",short:"組織與人力",type:"dorg",scope:"dept",desc:"填寫部門職責與各崗位的現有人數、2027 編制；年度人力計劃會自動匯整。"},
+  dorg:{title:"組織執掌與人力",short:"組織與人力",type:"dorg",scope:"dept",desc:"上半部為本部門的職務執掌（職責、詳細描述、KPI，只能編輯自己部門）；下半部填各崗位的現有人數、2027 編制，年度人力計劃會自動匯整。"},
   dfb:{title:"部門記錄：主管回饋與修改",short:"部門記錄",type:"dfb",scope:"dept",desc:"部門自行記錄 11/20 報告時主管口頭提出的回饋，11/21 上午修改後更新狀態與說明（僅供部門記錄，不會放進簡報）。"},
   xproj:{title:"跨部門專案",short:"跨部門專案",type:"xproj",scope:"company",desc:"由各部門專案中勾選「配合部門」的專案自動匯整。"},
   hrsum:{title:"2027 年度人力計劃",short:"人力計劃",type:"hrsum",scope:"company",desc:"由各部門「組織與人力」自動匯整。"},
@@ -737,7 +860,7 @@ const MEETINGS = [
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
  {id:"m6",no:"年度策略展開",date:"2026-11-04",time:"13:00",theme:"2027 年度策略展開",deptMode:true,
-  tabs:["swot_so","swot_wt","strategy","dproj"],
+  tabs:["swot_so","swot_wt","orgchart","strategy","dproj"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"SO／WT 成果回顧",report:["swot_so","swot_wt"],dur:30},
@@ -746,7 +869,7 @@ const MEETINGS = [
    {t:"各部門發表預計專案",sub:"專案標題、目標與預期指標；各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
   next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
-  tabs:["strategy","p1","p2","dproj","dkpi","dorg","dfb","cal"],
+  tabs:["orgchart","strategy","p1","p2","dproj","dkpi","dorg","dfb","cal"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"說明兩天行程",twodays:true,dur:5},
@@ -763,7 +886,7 @@ const MEETINGS = [
    {t:"各部門自行討論",sub:"依今天的回饋準備修改",dur:40}],
   next:{topic:"年度計劃工作坊",when:"11/21（六）09:00"}},
  {id:"m8",no:"年度計劃工作坊",date:"2026-11-21",time:"09:00",theme:"Q1 沙盤推演・修改報告・年度總結",deptMode:true,
-  tabs:["strategy","p1","p2","dproj","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
+  tabs:["orgchart","strategy","p1","p2","dproj","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"各部門討論",sub:"依昨天的回饋整理修改方向",dur:50},
@@ -798,7 +921,7 @@ const Store={
     try{ if(window.claude&&claude.use) db=await claude.use("db"); }catch(e){db=null}
     if(db){
       this.db=db;this.mode="db";this.setStatus("","已同步");
-      db.collection("sheets").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});this.server=n;this.notify()},
+      db.collection("sheets").onSnapshot(snap=>{const n={};snap.docs.forEach(d=>{if(d.exists)n[d.id]=d.data()});this.server=n;this.loaded=true;this.notify()},
         err=>{console.warn(err);this.setStatus("local","同步中斷，請重新整理")});
       return;
     }
@@ -809,7 +932,7 @@ const Store={
       await this.poll(true);const loop=async()=>{await this.poll();const f=this.fails||0;const base=(window.Deck&&Deck.isOpen)?2500:4000;setTimeout(loop,f?Math.min(30000,base*Math.pow(2,f-1)):base)};setTimeout(loop,4000);
       document.addEventListener("visibilitychange",()=>{if(!document.hidden)this.poll(true)});return;
     }
-    this.mode="local";try{this.server=JSON.parse(localStorage.getItem(LS_KEY)||"{}")||{}}catch(e){this.server={}}
+    this.mode="local";this.loaded=true;try{this.server=JSON.parse(localStorage.getItem(LS_KEY)||"{}")||{}}catch(e){this.server={}}
     this.setStatus("local","僅存在這台裝置");this.notify();
   },
   async poll(force){
@@ -818,7 +941,7 @@ const Store={
     if(this.polling)return;this.polling=true;this.pn=(this.pn||0)+1;const inc=!force&&this.since&&this.pn%12!==0;
     try{const ctl=window.AbortController?new AbortController():null;const tmo=setTimeout(()=>ctl&&ctl.abort(),20000);
       const r=await fetch(BACKEND_URL+(BACKEND_URL.includes("?")?"&":"?")+"t="+Date.now()+"&tk="+encodeURIComponent(tk)+(inc?"&since="+this.since:""),{signal:ctl?ctl.signal:undefined});clearTimeout(tmo);const j=await r.json();this.polling=false;
-      if(j.ok){this.fails=0;if(j.now)this.since=j.now;if(inc&&j.partial)Object.assign(this.server,j.docs||{});else this.server=j.docs||{};if(j.roster){const had=!!this.roster;applyRoster(j.roster);if(j.me){LS("linco-role",j.me.role);LS("linco-me",j.me.name)}if(!had)render()}if(!nonEmpty(this.pending))this.setStatus("","已同步");this.notify()}
+      if(j.ok){this.fails=0;this.loaded=true;if(j.now)this.since=j.now;if(inc&&j.partial)Object.assign(this.server,j.docs||{});else this.server=j.docs||{};if(j.roster){const had=!!this.roster;applyRoster(j.roster);if(j.me){LS("linco-role",j.me.role);LS("linco-me",j.me.name)}if(!had)render()}if(!nonEmpty(this.pending))this.setStatus("","已同步");this.notify()}
       else if(j.auth&&j.guest){["linco-gtok","linco-gscope","linco-gname"].forEach(k=>LS(k,""));toast(j.error);render()}
       else if(j.auth&&LS("linco-tok"))authLost("伺服器回覆："+(j.error||"驗證失敗"))}
     catch(e){this.polling=false;this.fails=(this.fails||0)+1;if(this.fails>=3)this.setStatus("local","連線不穩，自動重試中（資料會先存在本機）")}
@@ -936,7 +1059,7 @@ const Att={
       if(todayStr()!==p.date)return {ok:false,error:"今天不是這場會議的日期"};
       const slot=Math.floor(Date.now()/1000/SLOT);
       if(p.code!==Att.localCode(p.date,slot)&&p.code!==Att.localCode(p.date,slot-1))return {ok:false,error:"報到碼錯誤或已過期，請輸入螢幕上最新的報到碼"};
-      if(rec.checkin)return {ok:true};
+      if(rec.checkin){toast("已於 "+new Date(rec.checkin).toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",hour12:false})+" 完成報到，不需重複報到");return {ok:true}}
       const other=Object.entries(all).find(([k,v])=>v&&v.checkin&&v.dev===p.device&&k!==p.name);
       if(other)return {ok:false,error:"這支手機已經幫「"+other[0]+"」報到過了，每支手機只能幫一個人報到"};
       rec.checkin=iso;rec.dev=p.device;
@@ -961,7 +1084,7 @@ function fillCount(fid,g){
   if(f.type==="feedback")return fbAll().length+" 人";
   if(f.type==="traitsubmit")return Store.items(docId("traits","X")).length+" 則";
   if(["dproj","dkpi","dorg","dfb"].includes(f.type))return Store.items(id).length+" 項";
-  if(["p1","p2","dstrat","xproj","hrsum","cal","ops"].includes(f.type))return "";
+  if(["p1","p2","dstrat","xproj","hrsum","cal","ops","orgchart"].includes(f.type))return "";
   if(f.type==="gdeck")return gdeckUse(g)?"已上傳":"自動";
   if(f.type==="compare3"){let n=0;RIVAL_SLOTS.forEach(([sl])=>COMP10.forEach((d,i)=>{if((b.cells[sl+".r"+i]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*COMP10.length}
   if(f.type==="rivals"){let n=0;RIVAL_SLOTS.forEach(([sl])=>RIVAL_FIELDS.forEach(([k])=>{if((b.cells[sl+"."+k]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*RIVAL_FIELDS.length}
@@ -1073,6 +1196,28 @@ function changePwDialog(force){openDialog(force?"第一次登入，請設定新�
     try{const j=await backendPost({action:"changepw",newpw:p1.value});if(j.ok){$("#rosterDlg").classList.remove("open");toast("密碼已更新")}}catch(e){msg.textContent=e.message}}},"儲存新密碼");
   b.append(h("div",{style:"grid-column:1/-1;display:grid;gap:10px;max-width:360px"},force?h("p",{style:"margin:0;font-size:14px;color:var(--muted)"},"為了帳號安全，請改成只有你知道的密碼。"):null,p1,p2,go,msg));
   setTimeout(()=>p1.focus(),50)})}
+
+/* ================= V2.5.0 操作記錄（系統管理員檢視） ================= */
+function logDocLabel(id){const [p,sfx]=String(id||"").split("__");if(!sfx)return id||"";
+  const SP={attn:"報到／請假",rta:"例行會議簽到",rt:"例行會議",cal:"行事曆",config:"系統設定",draw:"分組抽籤",snap:"第一天版本",dduty:"職務執掌",kact:"KPI 實際值",tags:"標籤",fb:"工作坊回饋",traits:"共事特質"};
+  let name=FORMS[p]?FORMS[p].title:SP[p]||(/^mm\d{6}$/.test(p)?"管理月會 "+p.slice(2,6)+"/"+p.slice(6):/^mr\d{6}$/.test(p)?"月會報告 "+p.slice(2,6)+"/"+p.slice(6):/^rt/.test(p)?"例行會議":p);
+  const who=sfx==="X"?"":deptByCode(sfx)?deptByCode(sfx).name:GROUPS[sfx]?GROUPS[sfx].name:sfx;return name+(who?"｜"+who:"")}
+function openAuditLog(){const st={q:"",rows:[],more:false,busy:false,err:""};
+  const load=async(append)=>{st.busy=true;draw();try{const j=await backendPost({action:"logs",q:st.q,offset:append?st.rows.length:0,limit:200});st.rows=append?st.rows.concat(j.rows||[]):(j.rows||[]);st.more=!!j.more;st.err=""}catch(e){st.err=e.message}st.busy=false;draw()};
+  let body=null;const draw=()=>{if(!body)return;body.innerHTML="";
+    const q=h("input",{class:"pin",placeholder:"搜尋人員、動作、資料或內容",style:"flex:1 1 260px"});q.value=st.q;
+    const go=()=>{st.q=q.value.trim();load(false)};q.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)go()});
+    body.append(h("div",{style:"display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"},q,h("button",{class:"btn primary",onclick:go},"搜尋"),h("button",{class:"btn",onclick:()=>load(false)},"重新整理")),
+      h("p",{style:"margin:0 0 8px;font-size:12.5px;color:var(--muted)"},"記錄登入、修改密碼、人員管理與所有資料寫入（含被拒絕的寫入）。最新的在最上面。"));
+    if(st.err)body.append(h("div",{style:"color:var(--danger);margin-bottom:8px"},st.err));
+    if(st.busy&&!st.rows.length){body.append(h("div",{class:"empty"},"載入中…"));return}
+    if(!st.rows.length){body.append(h("div",{class:"empty"},"沒有符合的記錄"));return}
+    body.append(h("div",{class:"tablewrap"},h("table",{class:"sheet plan"},h("thead",null,h("tr",null,["時間","人員","動作","資料","內容"].map(x=>h("th",null,x)))),
+      h("tbody",null,st.rows.map(r=>h("tr",null,h("td",{style:"white-space:nowrap;font-size:12.5px"},r.time),h("td",{style:"white-space:nowrap"},(r.name||"")+(r.id?"（"+r.id+"）":"")),
+        h("td",{style:"white-space:nowrap;"+(/拒絕|失敗/.test(r.action)?"color:var(--danger);font-weight:700":"")},r.action),h("td",{style:"font-size:13px"},logDocLabel(r.doc),r.doc?h("div",{style:"font-size:11px;color:var(--muted)"},r.doc):null),
+        h("td",{style:"font-size:12.5px;white-space:pre-wrap;max-width:520px;overflow-wrap:anywhere"},r.detail)))))));
+    if(st.more)body.append(h("button",{class:"btn",style:"margin-top:10px",disabled:st.busy?"":null,onclick:()=>load(true)},st.busy?"載入中…":"載入更早的記錄"))};
+  openDialog("操作記錄",b=>{body=h("div",{style:"grid-column:1/-1;min-width:0"});b.append(body);draw()},{static:true});load(false)}
 /* ================= 人員管理（管理員）：Excel 匯入／匯出、重設密碼 ================= */
 const PEOPLE_COLS=[["id","工號"],["name","姓名"],["dept","部門"],["unit","課別"],["title","職稱"],["role","角色"],["group","分組"],["active","在職"],["bday","生日"]];
 const PEOPLE_COL_LABEL={group:"年度計劃分組"};
@@ -1134,7 +1279,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V2.4.9";
+const VERSION="V2.5.1";
 const LOGO_PNG="data:image/png;base64,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";
 function loadPdfLibs(){const L=(srcs)=>new Promise((res,rej)=>{const t=(i)=>{if(i>=srcs.length)return rej(new Error("無法載入 PDF 元件，請檢查網路"));const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>res();sc.onerror=()=>{sc.remove();t(i+1)};document.head.append(sc)};t(0)});
   return Promise.all([window.html2canvas?1:L(["https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js","https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"]),
@@ -1368,7 +1513,7 @@ function renderMonthly(){const root=$("#app");root.innerHTML="";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   const ms=yearSel();
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,mmTitle(ym),mmSub(ym)?h("span",{class:"mmsub"},mmSub(ym)):null),h("div",{class:"dt"},(mmCell(ym,"date")?fmtDate(mmCell(ym,"date"))+"　"+(mmCell(ym,"time")||"14:00"):"日期未定")+"｜主持人："+(mmCell(ym,"host")||"未定")+(cohostsOf(ym).length?"（協同："+cohostsOf(ym).join("、")+"）":"")+"｜記錄人："+(mmCell(ym,"recorder")||"未定"))),
-    h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},yearSel(),canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),monthNav());
+    h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},yearSel(),canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
   if(!host&&me&&mmCell(ym,"date")&&mp.date>=todayStr())wrap.append(live(h("div",{class:"meCard",style:"display:block"}),el=>attCard(el,mp,mp.date,me,groupOf(me))));
   wrap.append(monthTimeline(ym));
   if(!canHostTools(ym))leaveAlerts(ym).forEach(t=>wrap.append(h("div",{class:"refbox",style:"border-color:var(--danger);color:var(--danger)"},"⚠ "+t)));
@@ -1462,8 +1607,8 @@ const adminTabs=()=>isAdmin()&&state.mode==="host";
 const visibleTabs=()=>APP_TABS.filter(([k])=>adminTabs()||tabOpen(k));
 const closeOrCal=()=>{if(state.calDlg)openCalDialog();else $("#rosterDlg").classList.remove("open")};
 function openCalDialog(){openDialog("📅 "+rocY(2027)+" 年行事曆",b=>{const w=h("div",{style:"grid-column:1/-1"});w.append(buildCal(false));b.append(w)},{static:true,keepCal:true});state.calDlg=true;$("#rosterDlg .card").style.maxWidth="1100px"}
-function calBtn(){return getMe()||state.mode==="host"?h("button",{class:"calbtn",onclick:openCalDialog},"📅 行事曆"):null}
-function monthNav(){const tabs=visibleTabs();if(tabs.length<2){const cb=calBtn();return cb?h("div",{class:"apptabs",style:"justify-content:flex-end"},cb):h("span")}
+function calBtn(){return getMe()||state.mode==="host"?[h("button",{class:"calbtn",onclick:openOrgDialog},"🏢 組織圖"),h("button",{class:"calbtn",onclick:openCalDialog},"📅 行事曆")]:null}
+function monthNav(){const tabs=visibleTabs();if(tabs.length<2){const cb=calBtn();return cb?h("div",{class:"apptabs",style:"justify-content:flex-end;gap:8px"},cb):h("span")}
   return h("div",{class:"apptabs",role:"tablist"},...tabs.map(([k,ic,l])=>h("button",{role:"tab",class:"apptab","aria-selected":String((state.area||"plan")===k),onclick:()=>{state.area=k;render()}},h("span",{class:"ic"},ic),l,adminTabs()&&!tabOpen(k)?h("small",{style:"color:var(--danger);font-weight:400"},"（未開放）"):null)),calBtn())}
 function openTabSettings(){openDialog("分頁開放設定",b=>{
   b.append(h("p",{style:"grid-column:1/-1;margin:0 0 8px;font-size:14px;color:var(--muted)"},"關閉的分頁只有管理員看得到（會標示「未開放」），其他同仁只會看到年度計劃。只開放年度計劃時，同仁畫面不會顯示分頁列。"),
@@ -1536,7 +1681,7 @@ function rtDocData(k,v){const at=rtAttend(k,v);const pts=(v.points||[]);
 function renderRoutine(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";const me=getMe();const id="rt__X";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,"例行會議記錄"),h("div",{class:"dt"},"部門會議、產銷協調會、廠務部組長會議、專案會議等")),
-    h("div",{style:"display:flex;gap:8px;align-items:center"},yearSel(),host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),monthNav());
+    h("div",{style:"display:flex;gap:8px;align-items:center"},yearSel(),host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
   const fType=h("select",null,h("option",{value:""},"全部類型"),RT_TYPES.map(t=>h("option",{value:t},t)));fType.value=state.rtType||"";fType.addEventListener("change",()=>{state.rtType=fType.value;render()});
   const fDept=h("select",null,h("option",{value:""},"全部部門"),DEPT_LIST.map(d=>h("option",{value:d},d)));fDept.value=state.rtDept||"";fDept.addEventListener("change",()=>{state.rtDept=fDept.value;render()});
   wrap.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0"},fType,fDept,h("span",{style:"flex:1"}),me?h("button",{class:"btn primary",onclick:()=>rtDialog()},"＋ 新增會議"):null));
@@ -1762,6 +1907,7 @@ function buildForm(fid,g,ro,opts){
   if(f.type==="dproj")return buildDProj(g,ro);
   if(f.type==="dkpi")return buildDKpi(g,ro);
   if(f.type==="dorg")return buildDOrg(g,ro);
+  if(f.type==="orgchart")return buildOrgChart();
   if(f.type==="dfb")return buildDFb(g,ro);
   if(f.type==="xproj")return buildXProj();
   if(f.type==="hrsum")return buildHrSum();
@@ -2165,7 +2311,7 @@ function buildDProj(code,ro){if(activeMeetingId()==="m6")return projSimple(code,
 
 /* KPI 指標管理 */
 function buildDKpi(code,ro){const id=docId("dkpi",code);
-  return live(h("div"),el=>{const ks=Store.items(id).sort(byT);const calc=calcBox(el);
+  return live(h("div"),el=>{if(!ro&&!planClosed()&&Store.loaded&&!Store.cell(id,"seed"))setTimeout(()=>seedKpi(code),0);const ks=Store.items(id).sort(byT);const calc=calcBox(el);
     el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:8px"},"屬性：KPI＝公司列管指標；DPI＝部門內部管理指標。重要度合計：",calc(()=>{const t=Store.items(id).reduce((s,[k,v])=>s+num(v.w),0);return t+"%"+(t===100?" ✓":"（應為 100%）")})));
     const rows=ks.map(([k,v])=>{const cur=()=>Object.assign({},Store.body(id).items[k]||v);const set=(f,val)=>Store.write(id,"items",k,Object.assign(cur(),{[f]:val}));
       const inp=(f,ph,w)=>{if(ro)return h("span",null,v[f]||"");const x=h("input",{class:"pin",placeholder:ph||"",style:w?"width:"+w:""});x.value=v[f]||"";x.addEventListener("input",()=>set(f,x.value));return x};
@@ -2176,11 +2322,144 @@ function buildDKpi(code,ro){const id=docId("dkpi",code);
     if(!ro)el.append(h("button",{class:"add",onclick:()=>Store.write(id,"items",uid(),{name:"",attr:"KPI",w:"",last:"",target:"",def:"",t:Date.now()})},"＋ 新增指標"));
   })}
 
+const ORG_SEED={"SALES":{"rows":[{"kind":"common","name":"營業額達成率","f":"個人實際營業額 ÷ 個人目標營業額 × 100%","target":"","src":"NetSuite／每月","why":""},{"kind":"common","name":"逾期帳款比率","f":"個人負責客戶逾期應收金額 ÷ 個人負責客戶應收總額 × 100%","target":"","src":"財會／每月","why":""},{"kind":"common","name":"新客戶成交數","f":"個人年度新成交客戶家數","target":"","src":"業務月報／每月","why":""},{"kind":"common","name":"打樣成交率","f":"個人經手打樣轉量產品項數 ÷ 個人經手打樣品項數 × 100%","target":"","src":"開發追蹤系統／每季","why":""},{"unit":"業務一課（傳統盤）","role":"業務","resp":"傳統盤客戶經營與營收","desc":"經營既有經銷、盤商與傳統通路客戶，掌握叫貨週期與需求變化，持續開發新客戶，達成營業目標","kpis":[],"common":["營業額達成率","新客戶成交數"],"note":""},{"unit":"業務一課（傳統盤）","role":"業務","resp":"應收帳款回收","desc":"依收款條件跟催客戶付款，掌握客戶信用狀況，異常帳款即時回報","kpis":[],"common":["逾期帳款比率"],"note":""},{"unit":"業務二課（專案代工）","role":"業務","resp":"專案代工客戶開發","desc":"開發食品品牌、餐飲等 OEM／ODM 客戶，釐清需求後提案、報價與議約，推動成交","kpis":[],"common":["營業額達成率","新客戶成交數"],"note":""},{"unit":"業務二課（專案代工）","role":"業務","resp":"打樣轉量產","desc":"擔任客戶與研發、廠務之間的窗口，追蹤打樣進度與客戶回饋，推動樣品轉為量產訂單","kpis":[],"common":["打樣成交率"],"note":""},{"unit":"業務二課（專案代工）","role":"業務","resp":"應收帳款回收","desc":"依收款條件跟催客戶付款，掌握客戶信用狀況，異常帳款即時回報","kpis":[],"common":["逾期帳款比率"],"note":""},{"unit":"重點客戶","role":"總經理、副總","resp":"主責客戶經營","desc":"經營層各自負責重點客戶的關係維繫與商務談判；訂單成立後交由業務後勤處理後續作業","kpis":[{"name":"個別客戶營業額成長率","f":"（該客戶今年營業額 − 去年營業額）÷ 去年營業額 × 100%，逐一客戶計算","target":"","src":"NetSuite／每月","why":""}],"common":["營業額達成率","逾期帳款比率","新客戶成交數","打樣成交率"],"note":""},{"unit":"業務後勤","role":"業務助理","resp":"訂單後續處理","desc":"接單後確認品項、數量、規格與交期，與生產管理確認生產及出貨時間，備妥出貨規格、排板與出貨文件","kpis":[{"name":"訂單資料錯誤率","f":"資料錯誤訂單數 ÷ 總訂單數 × 100%","target":"","src":"出貨紀錄／每月","why":""}],"common":[],"note":""},{"unit":"業務後勤","role":"業務助理","resp":"客服與電話訂貨","desc":"受理客戶來電訂貨、詢問與抱怨，即時回覆或轉介相關部門並追蹤到結案","kpis":[{"name":"客訴回覆時效","f":"24 小時內回覆件數 ÷ 總件數 × 100%","target":"","src":"客服紀錄／每月","why":""}],"common":[],"note":""},{"unit":"業務後勤","role":"行銷設計助理","resp":"標籤標示與設計印刷","desc":"依法規及研發、品質提供的資料製作與修改包裝標籤、產品文件，並負責內部設計印刷品，確保內容正確","kpis":[{"name":"標籤錯誤件數","f":"每月標籤內容錯誤件數","target":"0 件","src":"品質部／每月","why":""}],"common":[],"note":""},{"unit":"業務後勤","role":"行銷設計助理","resp":"社群、官網與展覽","desc":"經營社群媒體與官網內容，規劃並執行年度食品展，彙整展會客戶名單交業務追蹤","kpis":[],"common":[],"note":""}],"roles":{"業務一課（傳統盤）":[["業務","經營傳統通路客戶、開發新客戶並負責收款"]],"業務二課（專案代工）":[["業務","OEM／ODM 客戶開發、提案報價，擔任打樣到量產的專案窗口"]],"重點客戶":[["總經理、副總","經營層各自負責的重點客戶，以主責客戶清單管理，營業額另列一類追蹤"]],"業務後勤":[["業務助理","訂單確認、生產與出貨協調、出貨文件、客服與電話訂貨"],["行銷設計助理","包裝標籤與產品文件、社群與官網、年度食品展、內部設計印刷"]]},"scope":"業務一課・業務二課・重點客戶・業務後勤；匯報時以個別業務計算，部門數字為加總"},"FAC":{"rows":[{"unit":"生產管理","role":"生管人員","resp":"生產排程","desc":"依訂單、交期與產能編排生產計畫，確認原物料與包材需求，排程異動時即時通知相關單位","kpis":[{"name":"排程達成率","f":"依排程完成工單數 ÷ 排程工單數 × 100%","target":"","src":"生產日報／每月","why":""}],"common":[],"note":""},{"unit":"生產管理","role":"生管人員","resp":"交期回覆","desc":"回覆業務後勤生產與出貨日期，交期有風險時提前預警並提出替代方案","kpis":[{"name":"準時出貨率","f":"準時出貨訂單數 ÷ 總出貨訂單數 × 100%","target":"","src":"出貨紀錄／每月","why":""}],"common":[],"note":""},{"unit":"生產製造課","role":"課長","resp":"現場生產管理","desc":"依生產排程調度各組人力與機台，掌握每日產出、品質與工安狀況，處理現場異常","kpis":[{"name":"計畫達成率","f":"實際產量 ÷ 計畫產量 × 100%","target":"","src":"生產日報／每月","why":""}],"common":[],"note":""},{"unit":"生產製造課","role":"課長","resp":"人力效率","desc":"規劃人員配置與多能工訓練，減少等待與重工，提升單位工時產出","kpis":[{"name":"人時產量","f":"產出量（kg）÷ 總投入工時","target":"","src":"生產日報／每月","why":""}],"common":[],"note":""},{"unit":"生產製造課－各組","role":"組長","resp":"該組產出與品質","desc":"帶領組員依標準作業完成該組（研磨／備料／混料／產線）生產任務，落實首件確認、製程記錄與現場 5S","kpis":[{"name":"該組不良率（或損耗率）","f":"不良（損耗）量 ÷ 產出量 × 100%","target":"","src":"生產日報／每月","why":""}],"common":[],"note":""},{"unit":"設備管理課","role":"課長／專員","resp":"設備維修與改善","desc":"設備故障即時搶修，分析故障原因並提出改善，降低非計畫停機","kpis":[{"name":"設備停機時數","f":"每月非計畫停機總時數","target":"","src":"設備紀錄／每月","why":""}],"common":[],"note":""},{"unit":"設備管理課","role":"課長／專員","resp":"預防保養","desc":"訂定年度設備保養計畫並依計畫執行，管理備品與保養紀錄","kpis":[{"name":"保養計畫達成率","f":"如期完成保養項目 ÷ 計畫保養項目 × 100%","target":"","src":"保養紀錄／每月","why":""}],"common":[],"note":""},{"unit":"庫存管理課","role":"人員","resp":"倉儲與進出","desc":"負責原物料、包材與成品的收貨、儲存、發料與出貨，落實先進先出與帳物一致","kpis":[{"name":"庫存準確率","f":"盤點相符品項數 ÷ 盤點品項數 × 100%","target":"","src":"盤點／每月","why":""}],"common":[],"note":""},{"unit":"庫存管理課","role":"人員","resp":"呆滯料管理","desc":"定期清查長期未動用庫存，提出轉用、退換或報廢建議","kpis":[],"common":[],"note":""}],"roles":{"部門":[["副理","統籌生管、生產、設備與庫存，確保產能、交期、品質與工安目標"]],"生產管理":[["生管人員","生產排程、物料需求確認、交期回覆與預警"]],"生產製造課":[["課長","依排程調度人力與機台，掌握產出、品質與工安"]],"生產製造課－各組":[["組長（固定）、組員（依排程調配）","帶領該組完成生產任務，落實標準作業、製程記錄與 5S"]],"設備管理課":[["課長、專員","設備維修與故障改善、預防保養、備品管理"]],"庫存管理課":[["人員","原物料、包材與成品收發儲存，先進先出、帳物一致、呆滯料清查"]]},"scope":""},"RD":{"rows":[{"unit":"部門","role":"研發專員","resp":"新產品與客製化開發","desc":"市場與客戶需求分析，客戶需求技術轉化與可行性評估\n新產品／客製（OEM／ODM）配方設計、試作與版本管理\n原料評估與應用測試；打樣、仿樣與修正建議\n實驗室試樣、試產與量產導入\n成本試算與產品定位建議；客戶技術問題回覆與支援","kpis":[{"name":"新案成交總件數","f":"年度研發新品轉為量產（成交）件數","target":"","src":"開發追蹤系統／每季","why":""},{"name":"新案開發數","f":"年度受理並完成開發的客製新案件數","target":"","src":"開發追蹤系統／每月","why":""}],"common":[],"note":""},{"unit":"部門","role":"研發專員","resp":"配方與製程優化、量產技術支援","desc":"既有產品風味、口感、即溶性改善；結塊、吸濕、分層問題改善\n原料替代與成本優化（農產品、辛香料及蛋白來源、甜味劑、香料、機能性原料）\n實驗室配方轉量產條件；混料順序、時間、轉速等製程工藝與噴霧乾燥／混粉參數確認\n製程 SOP 建立與修訂；量產異常問題分析與改善\n變更評估與紀錄管理","kpis":[],"common":[],"note":""},{"unit":"部門","role":"研發專員","resp":"產品穩定性與感官品評","desc":"保存期限測試規劃與執行（加速與常溫穩定性測試）\n產品物性與感官變化追蹤（吸濕、結塊、顏色變化）、包材相容性測試\n保存期限設定與文件化\n感官評估方法、品評表與感官標準制定，內部校正\n客戶測試（盲測）與結果分析，感官數據化與品質指標化","kpis":[],"common":[],"note":""},{"unit":"部門","role":"研發專員","resp":"規格、法規與技術文件","desc":"產品規格書、成品品質規格、配方表與製程文件建立\n新原料法規可行性評估、營養標示計算與資料提供\n功能性宣稱的可行性建議與技術資料整理\n試產紀錄、變更紀錄維護；技術資料與知識庫建立\n配合內外部稽核之技術說明","kpis":[],"common":[],"note":""},{"unit":"部門","role":"研發專員","resp":"跨部門技術支援","desc":"與業務、廠務、品質、採購部門協作，掌握研發專案進度\n產品異常與客訴技術分析\n新原料、新技術研究與測試\n提供內部教育訓練與技術說明","kpis":[],"common":[],"note":""}],"roles":{"部門":[["副理","確保研發技術部整體運作，分派與督導研發工作，並協助執行"],["研發專員","執行部門全部研發工作"]]},"scope":""},"QA":{"rows":[{"unit":"部門","role":"品管專員","resp":"檢驗與放行","desc":"IQC：原物料進料檢驗與判定\nPQC：製程品質管制與巡檢（與廠務部產線品檢人員合作）\nFQC：成品檢驗與放行，判定產品能否進入下一流程、能否出貨\n原料／半成品／成品實驗室檢驗","kpis":[{"name":"FQC 異常件數","f":"每月 FQC 檢驗異常件數","target":"","src":"檢驗紀錄／每月","why":""},{"name":"不良率","f":"不合格批數 ÷ 檢驗批數 × 100%","target":"","src":"檢驗紀錄／每月","why":""}],"common":[],"note":"7 月改成 FQC 納入統計，刪除 PQC"},{"unit":"部門","role":"品管專員","resp":"食安系統與文件管理","desc":"HACCP、ISO／FSSC 食品安全管理系統維持與法規符合性\n程序文件、規格表、COA 管理與追溯管理\n量測設備校正制度；儀器日常使用、點檢及校正執行／送校","kpis":[{"name":"外部稽核通過率","f":"外部稽核通過數 ÷ 稽核總次數 × 100%","target":"","src":"稽核紀錄／每季","why":""}],"common":[],"note":""},{"unit":"部門","role":"品管專員","resp":"異常、客訴與持續改善","desc":"客訴受理與原因分析\n品質異常分析與改善追蹤\n品質數據統計與分析","kpis":[{"name":"客訴件數","f":"每月品質相關客訴件數","target":"","src":"客訴紀錄／每月","why":""}],"common":[],"note":""},{"unit":"部門","role":"品管專員","resp":"稽核、衛生與風險管理","desc":"內外部稽核規劃、執行與缺失追蹤\n供應商品質管理\n廠區衛生環境檢驗（表面塗抹、落菌、過敏原殘留、水質等）\n食品安全事件應變\n食安教育與宣導","kpis":[{"name":"稽核缺失改善完成率","f":"如期改善缺失數 ÷ 缺失總數 × 100%","target":"","src":"稽核紀錄／每季","why":""},{"name":"教育訓練","f":"食安教育訓練完成人數 ÷ 應訓人數 × 100%（公式待確認）","target":"","src":"訓練紀錄／每季","why":""}],"common":[],"note":""}],"roles":{"部門":[["副理","確保品質部整體運作，督導品質系統並協助執行"],["品管專員","執行品管、品保與檢驗全部工作"]]},"scope":""},"ADM":{"rows":[{"unit":"財務組","role":"會計","resp":"帳務處理與結帳","desc":"審核銷貨單及驗收單等單據是否相符，確保金額和憑證無誤於系統立帳\n傳票製作及科目分類入帳；傳票與憑證掃描歸檔\n每月結帳，製作帳務明細表／帳齡表供主管審閱\n維護會計帳務資料、財務系統及客戶與廠商收付款資訊\n配合公司年度資產盤點","kpis":[{"name":"沖帳準時率","f":"每週實際完成沖銷與調節之筆數 ÷ 當週銀行實際收付款總筆數 × 100%","target":"≥ 90%","src":"","why":"核對現金、銀行與支票之收付款明細，提升帳務與系統的即時同步"}],"common":[],"note":""},{"unit":"財務組","role":"會計","resp":"應收應付與資金收付","desc":"處理內外部費用報支與繳費，控管零用金\n核對現金、銀行與支票收付款明細並沖銷帳款，確保帳實相符\n追蹤逾期帳款並協助催收，盤點預付／暫付款避免重複付款\n處理客戶及廠商交易異常衍生的進退貨與折讓","kpis":[{"name":"催收及核銷達成率","f":"應收：當月已催收的逾期客戶件數 ÷ 當月底總逾期客戶數 × 100%；應付：當月核銷缺件異常件數 ÷ 暫付款預付款之總件數 × 100%","target":"≥ 90%","src":"","why":"追蹤逾期應收帳款協助催收，盤點已付款帳務核銷追蹤，掌握整體資金進度與異常狀況"}],"common":[],"note":""},{"unit":"財務組","role":"會計","resp":"發票、稅務與銀行","desc":"營業稅、扣繳及各類稅務資料統整，配合會計師年度申報\n定期執行銀行帳與相關會計科目核對\n配合稅務查核並提供所需財務資料","kpis":[],"common":[],"note":""},{"unit":"採購組","role":"採購","resp":"供應商開發與管理","desc":"尋找、評估及開發新供應商，建立內部評分機制\n依品質、價格與配合度定期評核供應商，即時更新供應商資料\n維護供應商關係，爭取優先供貨與市場低價，掌握廠商產能、供貨與信用狀況\n建立合格供應商及替代來源，避免依賴單一供應商或斷鏈\n評估供應商潛在風險，簽訂採購合約及保密協議","kpis":[],"common":[],"note":""},{"unit":"採購組","role":"採購","resp":"採購執行與交期控管","desc":"依需求單位申請執行採購，辦理詢價、比價、議價與付款條件談判\n掌握原物料及包材市場價格變化，提供成本與價格異動資訊\n依安全庫存策略協調採購數量與到貨時程，兼顧供應穩定與庫存成本\n跟進產線排程異動與突發插單，控管物流與到貨交期\n統整採購合約、報價單及請購單據，提供財務付款","kpis":[{"name":"突發插單之採購應變達成率","f":"準時交貨的筆數 ÷ 總緊急叫貨筆數 × 100%（因排程異動／插單而產生的緊急叫貨）","target":"","src":"","why":""}],"common":[],"note":""},{"unit":"採購組","role":"採購","resp":"進貨品質與異常處理","desc":"索取及彙整原料、包材之規格、檢驗報告與證明文件\n掌握到貨驗收／進退貨，處理延遲交貨、品質異常等退換貨及索賠\n配合品質、廠務、業務需求，跨部門協調進／退貨之廠商處理\n追蹤異常處理結果，要求供應商提出改善並追蹤成效","kpis":[{"name":"食品相關文件缺件","f":"未收到文件件數 ÷ 總應收文件件數（公式待確認）","target":"< 10 件","src":"","why":""},{"name":"品質異常／退貨","f":"異常件數 ÷ 總進貨數 × 100%","target":"< 10 件","src":"","why":""}],"common":[],"note":""},{"unit":"人資組","role":"人資","resp":"招募任用與外籍移工","desc":"依營運及各部門需求確認人力並招募\n履歷篩選、面試、錄取、報到及任用作業\n經營 104 等招募平台，拓展招募管道\n追蹤新進人員試用期表現及留任狀況\n配合仲介辦理外籍移工招募、簽約、入職及管理協調","kpis":[{"name":"招募到職率","f":"報到人數 ÷ 總需求人數 × 100%","target":"≥ 80%","src":"","why":"補足各部門人力缺口，確保公司業務營運與生產不中斷"}],"common":[],"note":""},{"unit":"人資組","role":"人資","resp":"人事薪資與勞動法令","desc":"員工到職、離職、調任、異動及人事資料維護\n出勤、請假、加班資料管理及異常追蹤\n每月薪資、加班費、獎金計算核對；勞健保、勞退加退保\n人事制度、工作規則建立修訂與核備；追蹤勞動法令變化\n籌辦勞資會議、配合勞動檢查，降低人事管理風險","kpis":[],"common":[],"note":""},{"unit":"人資組","role":"人資","resp":"員工關係與績效薪酬","desc":"新人關懷、試用期面談；離職面談與流動分析\n員工溝通與申訴機制；性騷擾防治、職場不法侵害與友善職場宣導\n員工福利、關懷及活動規劃\n試用期、年度績效考核制度推動，協助各部門建立職務目標\n績效結果分析、市場薪資調查，建立職務薪資架構與人力成本分析","kpis":[],"common":[],"note":""},{"unit":"人資組","role":"人資","resp":"教育訓練與人才發展","desc":"規劃年度教育訓練需求與計畫，辦理內外部訓練\n建立新人訓練及部門培訓機制\n管理訓練紀錄與法定證照資料，建立回訓到期提醒\n評估及申請政府培訓補助計畫","kpis":[{"name":"法定教育訓練參與率","f":"參與人數 ÷ 應到人數 × 100%（例如職場霸凌、性騷擾、職業安全衛生等）","target":"≥ 90%","src":"","why":"落實法定普及宣導，提升全員合規意識並建立友善安全職場環境"}],"common":[],"note":""},{"unit":"人資組","role":"人資","resp":"職安衛與消防協助","desc":"配合職安主管：維護職安衛制度、守則與申報備查，推動職場四大計畫與問卷調查\n安排職安衛教育訓練、員工健康檢查與健康管理\n配合防火管理人：消防防護計畫書、自衛消防編組與申報備查\n籌備每半年自衛消防演練，追蹤防火管理人複訓效期與消防設備檢修申報\n巡查逃生通道，配合廠務追蹤職場安全衛生改善","kpis":[{"name":"法定證照按期回訓率","f":"完成回訓人數 ÷ 應回訓人數 × 100%","target":"= 100%","src":"","why":"確保關鍵技術與安衛人員具備合法資格，降低企業違法裁罰與工安風險"},{"name":"法定證照初訓取得率","f":"已取得證照人數 ÷ 應取證人數 × 100%","target":"> 90%","src":"","why":"確保關鍵技術與安衛人員具備合法資格，降低企業違法裁罰與工安風險"}],"common":[],"note":""}],"roles":{"財務組":[["會計","負責客戶及廠商帳務處理，執行進項銷項作業、內外部費用支出審核及票據管理；並負責編製相關財務報表、稅務申報與銀行往來等各項財務作業"]],"採購組":[["採購","供應商開發與風險評估、採購作業執行、進貨審核"]],"人資組":[["人資","負責人才招募、人事行政、勞動法令遵循、員工關係與教育訓練，建立完善的人資制度；協助推動職業安全衛生與消防防護業務，並負責外籍移工之管理與協調"]]},"scope":""}};
+const ORG_EXEC={"總經理":{"sum":"經營策略與年度目標、獲利與重大決策、品牌與對外關係、重點客戶與策略夥伴","duties":[{"resp":"經營策略與年度目標","desc":"訂定公司中長期發展方向與年度經營目標，核定年度計劃、預算與重大資源配置，帶領全公司朝同一目標前進","kpis":[{"name":"年度營收達成率","f":"實際營業額 ÷ 年度目標營業額 × 100%","target":"","src":"NetSuite／每月","why":""}]},{"resp":"獲利與重大決策","desc":"對重大投資、擴廠、組織調整、重要人事與價格政策做最終決策，確保公司獲利與永續經營","kpis":[{"name":"稅前淨利率","f":"稅前淨利 ÷ 營業額 × 100%","target":"","src":"財會月報／每月","why":""}]},{"resp":"品牌與對外關係","desc":"代表公司對外發言與出席活動，規劃媒體曝光與競賽參與，經營公協會、政府單位與產官學關係，提升百鮮品牌能見度","kpis":[{"name":"曝光／參賽次數","f":"年度活動＋比賽＋媒體曝光次數","target":"","src":"年度彙整／每季","why":""}]},{"resp":"重點客戶與策略夥伴","desc":"親自經營主責重點客戶與策略合作夥伴，建立高層關係、爭取長期合作","kpis":[{"name":"主責客戶營業額","f":"主責客戶年度出貨金額","target":"","src":"NetSuite／每月","why":""}]}]},"執行副總":{"sum":"營運管理與計劃追蹤、跨部門協調、資金與財務控管、人員關懷與管理制度","duties":[{"resp":"營運管理與計劃追蹤","desc":"將年度計劃展開為各部門目標與列管專案，主持管理月會與例行會議，追蹤進度並要求落後項目提出對策","kpis":[{"name":"年度列管專案準時完成率","f":"如期完成專案數 ÷ 年度列管專案數 × 100%","target":"","src":"工作台月會／每月","why":""}]},{"resp":"跨部門協調","desc":"統籌業務、廠務、管理部之間的流程銜接，處理跨部門爭議與瓶頸，確保接單到出貨順暢","kpis":[]},{"resp":"資金與財務控管","desc":"掌握公司現金流與資金調度，訂定收付款政策，監督應收帳款風險與重大支出","kpis":[]},{"resp":"人員關懷與管理制度","desc":"關注同仁工作狀況與組織氛圍，推動管理制度、作業流程與權責分工的建立與落實","kpis":[]}]},"研發副總":{"sum":"產品與技術策略、研發與品質技術督導、大型客戶技術對接與重點客戶、原料與擴廠技術規劃","duties":[{"resp":"產品與技術策略","desc":"依市場與客戶趨勢訂定新品、新技術開發方向與產品組合，決定研發資源優先順序並指導關鍵研發項目","kpis":[{"name":"新品量產上市數","f":"年度量產上市新品項數","target":"","src":"研發紀錄／每季","why":""}]},{"resp":"研發與品質技術督導","desc":"督導研發技術部與品質部，把關配方、產品規格與食品安全驗證（ISO 22000／HACCP／FSSC 22000）的技術面","kpis":[{"name":"外部稽核重大缺失數","f":"年度外部稽核（驗證、客戶稽核）重大缺失件數","target":"","src":"稽核報告／每次","why":""}]},{"resp":"大型客戶技術對接與重點客戶","desc":"負責連鎖餐飲、品牌等大型客戶的技術提案與需求對接，並親自經營主責客戶","kpis":[{"name":"大型客戶營業額成長率","f":"（今年 − 去年）÷ 去年 × 100%","target":"","src":"NetSuite／每月","why":""}]},{"resp":"原料與擴廠技術規劃","desc":"確認關鍵原料的規格與採購需求，規劃工廠擴充、新產線與設備導入的技術方案","kpis":[{"name":"擴廠計畫里程碑達成率","f":"如期完成里程碑數 ÷ 計畫里程碑數 × 100%","target":"","src":"專案進度／每季","why":""}]}]}};
+const ORG_CROSS={"name":"跨部門協作","depts":"廠務部・研發技術部・品質部","sum":"三個部門共同負責產品品質與產能提升：新品導入量產、製程異常與客訴的原因分析和矯正、損耗與良率改善","duties":[{"resp":"新品導入量產","desc":"研發移轉配方與規格 → 品質訂檢驗標準 → 廠務試量產與排程，三方共同確認後量產","kpis":[{"name":"試量產一次成功率","f":"一次成功試量產數 ÷ 試量產總數 × 100%","target":"","src":"試產紀錄／每季","why":""}]},{"resp":"異常與客訴矯正","desc":"製程異常、品質客訴由三部門共同做原因分析，訂矯正預防措施並追蹤","kpis":[{"name":"矯正措施如期結案率","f":"如期結案件數 ÷ 矯正案件總數 × 100%","target":"","src":"異常／客訴紀錄／每月","why":""}]},{"resp":"良率與產能改善","desc":"針對損耗高、產能瓶頸的品項或工段，共同提出改善專案","kpis":[{"name":"綜合損耗率","f":"（投入量 − 合格產出量）÷ 投入量 × 100%","target":"","src":"生產日報／每月","why":""}]}]};
+/* ================= V2.5.0 組織圖、職務執掌（各部門編輯）、KPI 帶入 ================= */
+const ORG_COLOR={SALES:"#2F6DB5",FAC:"#2E8B6A",RD:"#7A5BB5",QA:"#C98F0A",ADM:"#B5503F",X:"#3F5568"};
+const ORG_EN={SALES:"Sales & Marketing",FAC:"Operation",RD:"Research & Development",QA:"Quality",ADM:"Administration"};
+const ORG_MINI={
+  SALES:{units:[{k:["業務一課（傳統盤）"],n:"業務一課",r:"傳統盤・業務"},{k:["業務二課（專案代工）"],n:"業務二課",r:"專案代工・業務"},{k:["重點客戶"],n:"重點客戶",r:"總經理・副總主責"},{k:["業務後勤"],n:"業務後勤",r:"業務助理・行銷設計助理"}]},
+  FAC:{head:{n:"副理",s:"廠務部整體管理"},units:[{k:["生產管理"],n:"生產管理",r:"生管人員"},{k:["生產製造課","生產製造課－各組"],n:"生產製造課",r:"課長・組長（固定）・組員依排程",g:["研磨組","備料組","混料組","1樓產線組","2樓產線組","外倉產線組（待成立）"]},{k:["設備管理課"],n:"設備管理課",r:"課長・專員"},{k:["庫存管理課"],n:"庫存管理課",r:"人員"}]},
+  RD:{head:{n:"副理",s:"確保部門運作・督導並協助執行"},units:[{k:["部門"],n:"研發專員",r:"執行部門全部研發工作"}]},
+  QA:{head:{n:"副理",s:"確保部門運作・督導並協助執行"},units:[{k:["部門"],n:"品管專員",r:"檢驗放行・食安系統・異常改善・稽核衛生"}]},
+  ADM:{units:[{k:["財務組"],n:"財務組",r:"會計"},{k:["採購組"],n:"採購組",r:"採購"},{k:["人資組"],n:"人資組",r:"人資"}]}
+};
+const ORG_COLS={
+  SALES:[["業務一課","傳統盤・業務","經營傳統通路客戶、開發新客戶並負責收款"],["業務二課","專案代工・業務","OEM／ODM 客戶開發、提案報價，打樣到量產的專案窗口"],["重點客戶","總經理・副總主責","以主責客戶清單管理，營業額另列一類追蹤"],["業務後勤","業務助理・行銷設計助理","訂單確認、生產與出貨協調、出貨文件、客服與電話訂貨；包裝標籤、社群官網、年度食品展"]],
+  FAC:[["生產管理","生管","生產排程、物料需求確認、交期回覆與預警"],["生產製造課","課長・組長（固定）・組員依排程調配","依排程調度人力與機台，掌握產出、品質與工安",["研磨組","備料組","混料組","1樓產線組","2樓產線組","外倉產線組（待成立）"]],["設備管理課","課長・專員","設備維修與故障改善、預防保養、備品管理"],["庫存管理課","","原物料、包材與成品收發儲存，先進先出、帳物一致"]],
+  RD:[["研發技術","副理・研發專員","新產品與客製化（OEM／ODM）開發、配方與製程優化、量產技術支援、穩定性與感官品評、規格法規與技術文件"]],
+  QA:[["品質管理","副理・品管專員","IQC／PQC／FQC 檢驗與放行、食安系統與文件、異常客訴與持續改善、稽核衛生與風險管理"]],
+  ADM:[["財務組","","日常帳務與月結、應收應付與零用金、發票及稅務、財務報表與銀行往來"],["採購組","","供應商開發與風險評估、採購作業與成本控管、進貨審核與異常處理"],["人資組","","招募任用、人事薪資、勞動法令、員工關係、教育訓練、績效薪酬，協助職安衛與消防，外籍移工管理"]]
+};
+const ddutyId=c=>docId("dduty",c);
+/* 職務執掌資料：已帶入預設後以雲端資料為準，否則先顯示預設內容 */
+function orgRows(c){const id=ddutyId(c);if(Store.cell(id,"seed"))return Store.items(id).sort(byT).map(([k,v])=>Object.assign({_k:k},v));
+  return (ORG_SEED[c]?ORG_SEED[c].rows:[]).map((v,i)=>Object.assign({_k:"s"+String(i+1).padStart(2,"0"),t:i+1},v))}
+function orgCommon(c){return orgRows(c).filter(r=>r.kind==="common")}
+function orgDuties(c){return orgRows(c).filter(r=>r.kind!=="common")}
+function orgCanSeed(c){if(!Store.loaded||planClosed())return false;if(state.mode==="host"&&isAdmin())return true;const me=getMe();return isGM(me)||myDeptCode()===c}
+function seedOrg(c){const id=ddutyId(c);if(Store.cell(id,"seed")||!orgCanSeed(c)||!ORG_SEED[c])return;
+  if(Store.items(id).length){Store.write(id,"cells","seed","v1");return}
+  ORG_SEED[c].rows.forEach((v,i)=>Store.write(id,"items","s"+String(i+1).padStart(2,"0"),Object.assign({t:i+1},JSON.parse(JSON.stringify(v)))));
+  Store.write(id,"cells","seed","v1")}
+function seedKpi(c){const id=docId("dkpi",c);if(Store.cell(id,"seed")||!orgCanSeed(c)||!ORG_SEED[c])return;
+  const have=new Set(Store.items(id).map(([k,v])=>(v.name||"").trim()));const seen=new Set();let i=0;
+  const add=k=>{const n=(k.name||"").trim();if(!n||seen.has(n)||have.has(n))return;seen.add(n);i++;
+    Store.write(id,"items","s"+String(i).padStart(2,"0"),{name:n,attr:"KPI",w:"",last:"",target:k.target||"",def:k.f||"",t:i})};
+  ORG_SEED[c].rows.forEach(r=>{if(r.kind==="common")add(r);else(r.kpis||[]).forEach(add)});
+  Store.write(id,"cells","seed","v1")}
+function seedAllOrg(){DEPT_CODES.forEach(c=>{seedOrg(c);seedKpi(c)})}
+
+function ocKpi(k){const row=(a,b)=>b?h("div",{class:"oc-kr"},h("dt",null,a),h("dd",null,b)):null;
+  return h("dl",{class:"oc-kpi"},row("KPI",k.name),row("公式",k.f),row("目標",k.target),row("資料來源",k.src),row("目的",k.why))}
+function ocDuty(d,common){const lines=String(d.desc||"").split("\n").filter(x=>x.trim());
+  const own=(d.kpis||[]).filter(k=>(k.name||"").trim()),com=(d.common||[]).length&&common?common.filter(k=>d.common.includes(k.name)):[];
+  return h("div",{class:"oc-duty"},h("div",{class:"oc-dt"},h("b",null,d.resp||"（未命名職責）"),d.role?h("span",null,d.role):null),
+    lines.length>1?h("ul",{class:"oc-dd"},lines.map(x=>h("li",null,x))):lines.length?h("div",{class:"oc-dd"},lines[0]):null,
+    own.map(ocKpi),com.length?[h("div",{class:"oc-ctag"},"共同 KPI・以個別業務計算"),com.map(ocKpi)]:null,
+    (!own.length&&!com.length)?h("p",{class:"oc-nokpi"},"KPI 未設定"):null,
+    d.note?h("div",{class:"oc-note"},"備註："+d.note):null)}
+function ocUnitDetail(c,u){const roles=[];u.k.forEach(k=>((ORG_SEED[c]||{}).roles||{})[k]&&roles.push(...ORG_SEED[c].roles[k]));
+  const ds=orgDuties(c).filter(d=>u.k.includes(d.unit||"部門"));const com=orgCommon(c);
+  return h("div",{class:"oc-u"},h("h4",null,u.n),roles.length?h("ul",{class:"oc-roles"},roles.map(([r,s])=>h("li",null,h("b",null,r),s?"："+s:""))):null,
+    ds.length?ds.map(d=>ocDuty(d,com)):h("p",{class:"oc-nokpi"},"尚無職責資料"))}
+function ocCommonDetail(c){const com=orgCommon(c);
+  return h("div",{class:"oc-u"},h("h4",null,deptByCode(c).name+"共同 KPI"),h("ul",{class:"oc-roles"},h("li",null,h("b",null,"適用"),"：",(ORG_SEED[c]||{}).scope||"")),h("div",{class:"oc-duty"},com.map(ocKpi)))}
+function ocDeptDialog(c){const m=ORG_MINI[c],d=deptByCode(c);
+  openDialog(d.name+"　"+ORG_EN[c],b=>{const box=h("div",{class:"oc-dlg",style:"grid-column:1/-1;min-width:0;--c:"+ORG_COLOR[c]});
+    const panel=h("div",{class:"oc-panel"},h("p",{class:"oc-empty"},"點選上方單位查看職責與 KPI"));
+    const btns=[];const pick=(btn,fn)=>{const on=btn.getAttribute("aria-pressed")!=="true";btns.forEach(x=>x.setAttribute("aria-pressed","false"));panel.innerHTML="";
+      if(on){btn.setAttribute("aria-pressed","true");panel.append(fn())}else panel.append(h("p",{class:"oc-empty"},"點選上方單位查看職責與 KPI"))};
+    const row=h("div",{class:"oc-mrow"});
+    m.units.forEach(u=>{const bt=h("button",{class:"oc-mu","aria-pressed":"false"},h("b",null,u.n),h("small",null,u.r),u.g?h("span",{class:"oc-groups"},u.g.map(g=>h("span",{class:g.includes("待成立")?"new":""},g))):null);
+      bt.addEventListener("click",()=>pick(bt,()=>ocUnitDetail(c,u)));btns.push(bt);row.append(h("div",{class:"oc-mc"},bt))});
+    const mini=h("div",{class:"oc-mini"},h("div",{class:"oc-mhead"},m.head?m.head.n:d.name,m.head&&m.head.s?h("small",null,m.head.s):null),h("div",{class:"oc-mv"}),row);
+    if(orgCommon(c).length){const bt=h("button",{class:"oc-mu oc-mcommon","aria-pressed":"false"},h("b",null,d.name+"共同 KPI"),h("small",null,(ORG_SEED[c]||{}).scope||""));bt.addEventListener("click",()=>pick(bt,()=>ocCommonDetail(c)));btns.push(bt);mini.append(bt)}
+    const all=h("button",{class:"oc-all",onclick:()=>{btns.forEach(x=>x.setAttribute("aria-pressed","false"));panel.innerHTML="";if(orgCommon(c).length)panel.append(ocCommonDetail(c));m.units.forEach(u=>panel.append(ocUnitDetail(c,u)))}},"全部展開");
+    box.append(...[ocBack()].filter(Boolean),mini,h("div",{class:"oc-tools"},all),panel,h("p",{class:"oc-foot"},"職務執掌由各部門在「組織與人力」分頁編輯，這裡即時顯示最新內容。"));b.append(box)},{static:true,wide:!!OC_BACK})}
+function ocSimpleDialog(title,sub,sum,duties,foot){openDialog(title+"　"+sub,b=>{b.append(h("div",{class:"oc-dlg",style:"grid-column:1/-1;min-width:0;--c:"+ORG_COLOR.X},ocBack(),h("p",{class:"oc-lead"},sum),duties.map(d=>ocDuty(d)),h("p",{class:"oc-foot"},foot)))},{static:true})}
+let OC_BACK=null;
+function openOrgDialog(){OC_BACK=openOrgDialog;openDialog("百鮮企業有限公司　組織圖",b=>{b.append(h("div",{style:"grid-column:1/-1;min-width:0"},buildOrgChart(true)))},{static:true,wide:true})}
+function ocBack(){return OC_BACK?h("button",{class:"btn",style:"margin-bottom:10px",onclick:()=>OC_BACK()},"← 返回組織圖"):null}
+function buildOrgChart(inDlg){if(!inDlg)OC_BACK=null;
+  if(state.mode==="host"&&isAdmin())setTimeout(seedAllOrg,50);
+  const node=(t,cls,on)=>{const e=h("div",{class:"oc-node"+(cls?" "+cls:""),tabindex:on?"0":null,role:on?"button":null},h("b",null,t));if(on){e.addEventListener("click",on);e.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();on()}})}return e};
+  const ex=n=>()=>ocSimpleDialog(n,"經營層",ORG_EXEC[n].sum,ORG_EXEC[n].duties,"經營層職責為 2027 年度計劃草案。");
+  const chair=node("董事長"),gm=node("總經理","oc-click",ex("總經理")),adv=node("顧問","oc-adv"),evp=node("執行副總","oc-vp oc-click",ex("執行副總")),rvp=node("研發副總","oc-vp oc-click",ex("研發副總"));
+  const heads={};
+  const depts=h("div",{class:"oc-depts"},DEPTS.map(d=>{const c=d.code;const hd=h("div",{class:"oc-dh"},h("b",null,d.name),h("small",null,ORG_EN[c]));heads[c]=hd;
+    const sec=h("section",{class:"oc-dept oc-click",tabindex:"0",role:"button",style:"--c:"+ORG_COLOR[c]},hd,ORG_COLS[c].map(([n,who,p,g])=>h("div",{class:"oc-unit"},h("h4",null,n),who?h("div",{class:"oc-who"},who):null,h("p",null,p),g?h("div",{class:"oc-groups"},g.map(x=>h("span",{class:x.includes("待成立")?"new":""},x))):null)));
+    sec.addEventListener("click",()=>ocDeptDialog(c));sec.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();ocDeptDialog(c)}});return sec}),
+    (()=>{const x=h("div",{class:"oc-cross oc-click",tabindex:"0",role:"button"},h("b",null,"跨部門協作"),h("span",{class:"oc-chips"},[["廠務","FAC"],["研發技術","RD"],["品質","QA"]].map(([t,c])=>h("i",{style:"background:"+ORG_COLOR[c]},t))),h("p",null,"新品導入量產、異常與客訴矯正、良率與產能改善，三部門共同負責"));
+      x.addEventListener("click",()=>ocSimpleDialog(ORG_CROSS.name,ORG_CROSS.depts,ORG_CROSS.sum,ORG_CROSS.duties,"由三部門主管共同負責，建議在管理月會固定追蹤。"));return x})());
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("class","oc-wires");svg.setAttribute("aria-hidden","true");
+  const chart=h("div",{class:"oc-chart"},svg,h("div",{class:"oc-top"},chair,h("div",{class:"oc-v"}),h("div",{class:"oc-gmrow"},h("div"),h("div",null,gm),h("div",{class:"oc-advw"},adv)),h("div",{class:"oc-vps"},evp,rvp)),depts);
+  const draw=()=>{if(!chart.isConnected)return;const box=chart.getBoundingClientRect();if(!box.width)return;
+    const r=e=>{const b=e.getBoundingClientRect();return {l:b.left-box.left,r:b.right-box.left,t:b.top-box.top,b:b.bottom-box.top,cx:(b.left+b.right)/2-box.left,cy:(b.top+b.bottom)/2-box.top}};
+    const C=r(chair),G=r(gm),A=r(adv),E=r(evp),R=r(rvp),H=DEPT_CODES.map(c=>r(heads[c]));const yv=(G.b+E.t)/2,yd=H[0].t-22;
+    const p=["M"+C.cx+","+C.b+" V"+G.t,"M"+G.cx+","+G.b+" V"+yd,"M"+E.cx+","+yv+" H"+R.cx,"M"+E.cx+","+yv+" V"+E.t,"M"+R.cx+","+yv+" V"+R.t,"M"+H[0].cx+","+yd+" H"+H[4].cx].concat(H.map(x=>"M"+x.cx+","+yd+" V"+x.t));
+    svg.innerHTML='<path d="'+p.join(" ")+'"/><path class="dot" d="M'+G.r+","+G.cy+" H"+A.l+'"/>'};
+  if(window.ResizeObserver)new ResizeObserver(draw).observe(chart);requestAnimationFrame(()=>requestAnimationFrame(draw));setTimeout(draw,400);
+  return h("div",{class:"oc-wrap"},h("div",{class:"oc-canvas"},chart),
+    h("div",{class:"oc-legend"},h("span",null,h("i",{class:"sw"}),"現行單位"),h("span",null,h("i",{class:"sw new"}),"待成立")))}
+
+/* 組織與人力：職務執掌編輯（只能編輯自己部門；總經理室與管理員可協助） */
+function buildDDuty(c,ro0){const id=ddutyId(c);
+  return live(h("div",{class:"oc-edit",style:"--c:"+ORG_COLOR[c]}),el=>{
+    const rows=orgRows(c),seeded=!!Store.cell(id,"seed");const ro=ro0||!seeded;if(!ro0&&!seeded&&Store.loaded)setTimeout(()=>seedOrg(c),0);const com=rows.filter(r=>r.kind==="common");
+    const set=(r,f,val)=>{const cur=Object.assign({},Store.body(id).items[r._k]||{},{[f]:val});delete cur._k;Store.write(id,"items",r._k,cur)};
+    const units=[...new Set(ORG_MINI[c].units.flatMap(u=>u.k).concat(rows.filter(r=>r.kind!=="common").map(r=>r.unit||"部門")))];
+    const uLabel=u=>u==="部門"?(c==="FAC"?"部門主管":deptByCode(c).name+"（全體）"):u;
+    const inp=(r,f,ph,area)=>{if(ro)return h("span",null,r[f]||"");const x=h(area?"textarea":"input",{class:"pin",placeholder:ph||"",rows:area?Math.max(3,String(r[f]||"").split("\n").length):null});x.value=r[f]||"";x.addEventListener("input",()=>set(r,f,x.value));return x};
+    const kpiEd=(r,list,field)=>h("div",{class:"oc-kedit"},list.map((k,i)=>h("div",{class:"oc-krow"},["name","f","target","src","why"].map((f,j)=>{const lab=["KPI 指標","計算公式","2027 目標值","資料來源／頻率","目的"][j];
+        if(ro)return k[f]?h("div",null,h("small",null,lab),k[f]):null;const x=h("input",{class:"pin",placeholder:lab});x.value=k[f]||"";
+        x.addEventListener("input",()=>{const nl=(Store.body(id).items[r._k]||{})[field]||[];const cp=JSON.parse(JSON.stringify(nl));cp[i]=Object.assign({},cp[i]||{},{[f]:x.value});set(r,field,cp)});return h("label",null,h("small",null,lab),x)}),
+      ro?null:h("button",{class:"del",title:"刪除此 KPI",onclick:()=>{const nl=JSON.parse(JSON.stringify((Store.body(id).items[r._k]||{})[field]||[]));nl.splice(i,1);set(r,field,nl)}},"×"))),
+      ro?null:h("button",{class:"add",onclick:()=>{const nl=JSON.parse(JSON.stringify((Store.body(id).items[r._k]||{})[field]||[]));nl.push({name:"",f:"",target:"",src:"",why:""});set(r,field,nl)}},"＋ 新增 KPI"));
+    if(!seeded&&!ro0)el.append(h("div",{class:"oc-note"},Store.loaded?"正在帶入預設職務執掌…":"資料載入中…"));
+    if(com.length||c==="SALES"){
+      el.append(h("h4",{class:"oc-sec"},"部門共同 KPI"),h("p",{class:"oc-help"},"匯報時以個別業務計算，部門數字為加總；各職責可勾選適用的共同 KPI。"));
+      com.forEach(r=>el.append(h("div",{class:"oc-card"},h("div",{class:"oc-krow"},["name","f","target","src","why"].map((f,j)=>{const lab=["KPI 指標","計算公式","2027 目標值","資料來源／頻率","目的"][j];
+        if(ro)return r[f]?h("div",null,h("small",null,lab),r[f]):null;return h("label",null,h("small",null,lab),inp(r,f,lab))}),ro?null:h("button",{class:"del",onclick:()=>Store.write(id,"items",r._k,null)},"×")))));
+      if(!ro&&seeded)el.append(h("button",{class:"add",onclick:()=>Store.write(id,"items",uid(),{kind:"common",name:"",f:"",target:"",src:"",why:"",t:Date.now()})},"＋ 新增共同 KPI"));
+    }
+    units.forEach(u=>{const ds=rows.filter(r=>r.kind!=="common"&&(r.unit||"部門")===u);if(!ds.length&&ro)return;
+      el.append(h("h4",{class:"oc-sec"},uLabel(u)));
+      ds.forEach(r=>{const card=h("div",{class:"oc-card"},
+        h("div",{class:"oc-chead"},ro?h("b",null,r.resp||""):h("label",{class:"grow"},h("small",null,"主要職責"),inp(r,"resp","主要職責")),ro?h("span",{class:"oc-role"},r.role||""):h("label",null,h("small",null,"職務"),inp(r,"role","職務")),
+          ro?null:h("label",null,h("small",null,"課／組"),(()=>{const s=h("select",null,units.map(x=>h("option",{value:x},uLabel(x))));s.value=r.unit||"部門";s.addEventListener("change",()=>set(r,"unit",s.value));return s})()),
+          ro?null:h("button",{class:"del",title:"刪除此職責",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="確定刪除？";return}Store.write(id,"items",r._k,null)}},"×")),
+        ro?(r.desc?h("ul",{class:"oc-dd"},String(r.desc).split("\n").filter(Boolean).map(x=>h("li",null,x))):null):h("label",{class:"oc-desc"},h("small",null,"詳細描述（每項一行）"),inp(r,"desc","做什麼、產出什麼",true)),
+        kpiEd(r,r.kpis||[],"kpis"),
+        com.length?h("div",{class:"oc-common"},h("small",null,"適用共同 KPI："),com.filter(k=>(k.name||"").trim()).map(k=>{const on=(r.common||[]).includes(k.name);
+          if(ro)return on?h("span",{class:"oc-chip"},k.name):null;const cb=h("input",{type:"checkbox"});cb.checked=on;cb.addEventListener("change",()=>{const cur=new Set((Store.body(id).items[r._k]||{}).common||[]);cb.checked?cur.add(k.name):cur.delete(k.name);set(r,"common",[...cur])});return h("label",{class:"oc-chk"},cb,k.name)})):null);
+        el.append(card)});
+      if(!ro&&seeded)el.append(h("button",{class:"add",onclick:()=>Store.write(id,"items",uid(),{unit:u,role:"",resp:"",desc:"",kpis:[],common:[],t:Date.now()})},"＋ 新增職責（"+uLabel(u)+"）"));
+    });
+  })}
+
 /* 組織執掌與人力 */
 function deptRoles(code){return Store.items(docId("dorg",code)).sort(byT)}
 function buildDOrg(code,ro){const id=docId("dorg",code);const wrap=h("div");
-  wrap.append(h("label",{style:"display:grid;gap:4px;font-weight:700;margin-bottom:10px"},"部門主要職責",h("div",{style:"border:1px solid var(--line);border-radius:8px;overflow:hidden"},cellArea(id,"resp",ro,"部門的主要職責與詳細描述"))));
-  wrap.append(live(h("div"),el=>{const rs=deptRoles(code);const calc=calcBox(el);
+  const tab=state.dorgTab==="hr"?"hr":"duty";
+  const dutyBox=h("div",{style:tab==="duty"?"":"display:none"},h("p",{style:"margin:0 0 8px;font-size:13px;color:var(--muted)"},"依 2027 組織圖帶入，可直接修改；KPI 已同步帶入「KPI 指標」分頁。組織圖會即時顯示這裡的內容。"),buildDDuty(code,ro),
+    Store.cell(id,"resp")?h("label",{style:"display:grid;gap:4px;font-weight:700;margin-top:12px"},"先前填寫的部門主要職責（可整併到上方職務執掌後清空）",h("div",{style:"border:1px solid var(--line);border-radius:8px;overflow:hidden"},cellArea(id,"resp",ro,"部門的主要職責與詳細描述"))):null);
+  const hrBox=h("div",{style:tab==="hr"?"":"display:none"});
+  const tb=[["duty","職務執掌"],["hr","人力配置"]].map(([k,l])=>{const b=h("button",{class:"formtab",role:"tab","aria-selected":String(k===tab)},l);
+    b.addEventListener("click",()=>{state.dorgTab=k;tb.forEach((x,i)=>x.setAttribute("aria-selected",String(i===(k==="duty"?0:1))));dutyBox.style.display=k==="duty"?"":"none";hrBox.style.display=k==="hr"?"":"none"});return b});
+  wrap.append(h("div",{class:"formtabs",role:"tablist",style:"margin:4px 0 12px"},tb),dutyBox,hrBox);
+  hrBox.append(live(h("div"),el=>{const rs=deptRoles(code);const calc=calcBox(el);
     const rows=rs.map(([k,v])=>{const cur=()=>Object.assign({},Store.body(id).items[k]||v);const set=(f,val)=>Store.write(id,"items",k,Object.assign(cur(),{[f]:val}));
       const inp=(f,ph,w,n)=>{if(ro)return h("span",null,v[f]||"");const x=h("input",{class:"pin",placeholder:ph||"",style:w?"width:"+w:"",inputmode:n?"numeric":null});x.value=v[f]||"";x.addEventListener("input",()=>set(f,n?x.value.replace(/[^\d.]/g,""):x.value));return x};
       const msel=ro?h("span",null,v.month?v.month+"月":""):(()=>{const x=h("select",null,h("option",{value:""},"—"),M12.map(m=>h("option",{value:m},m+"月")));x.value=v.month||"";x.addEventListener("change",()=>set("month",x.value));return x})();
@@ -2459,7 +2738,7 @@ function diffList(code){const d=deptDiff(code);if(!d)return h("div",{class:"cell
   if(!d.length)return h("div",{class:"cellro"},"與第一天版本相比沒有修改");
   const col={"新增":"#2E8B6A","修改":"#C98F0A","刪除":"#C0392B"};
   return h("div",{style:"display:grid;gap:6px"},d.map(x=>h("div",{class:"chgrow",style:"border-left:5px solid "+col[x.t]},h("b",{style:"color:"+col[x.t]},"【"+x.t+"】"),h("span",{style:"color:#5E6B78"},x.sec+"｜"),h("b",null,x.name),x.what?h("span",{style:"margin-left:6px;background:#FFF3C4;padding:0 6px;border-radius:4px"},"改了："+x.what.join("、")):null)))}
-function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["dproj"];return ["dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["dstrat","dproj","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
+function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["dstrat","dproj","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
 
 function buildRivals(g,ro){
   const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
@@ -2869,13 +3148,15 @@ function render(){setTimeout(saveUI,0);if(BACKEND_URL&&!window.claude&&!state.rs
     if(gs&&gs.startsWith("rt:")&&!(LS("linco-gtok")&&LS("linco-gscope")===gs)){renderGuestEntry(gs);return}
     if(gs&&gs.startsWith("mm")){if(getMe()){state.area="monthly";state.ym=gs.slice(2);history.replaceState(null,"",baseURL())}else if(!LS("linco-gtok")){renderGuestEntry(gs);return}}}
   if((state.area==="monthly"||state.area==="routine")&&(getMe()||state.mode==="host"||!BACKEND_URL)){state.area==="monthly"?renderMonthly():renderRoutine();return}state.mode==="host"?renderHost():renderParticipant()}
+function adminBar(exportBtn,noMode){return h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn||h("button",{class:"btn",onclick:exportCSV},"匯出 CSV"),noMode?null:h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",style:planClosed()?"color:var(--danger)":"",onclick:e=>{if(!planClosed()&&!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="關閉後只能檢視，確定？";return}Store.write(CFG_ID,"cells","plan.closed",planClosed()?"":"1");toast(planClosed()?"年度計劃已關閉":"年度計劃已重新開放");setTimeout(render,300)}},planClosed()?"🔓 重新開放年度計劃":"🔒 關閉年度計劃"),h("button",{class:"btn",onclick:openPeople},"人員管理"),BACKEND_URL?h("button",{class:"btn",onclick:openAuditLog},"操作記錄"):null,h("button",{class:"btn",onclick:openTabSettings},"分頁開放"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"))}
+function adminRow(){return state.mode==="host"&&(isAdmin()||!BACKEND_URL)?h("div",{class:"adminrow"},h("span",{class:"adminlab"},"🛠 管理"),adminBar(null,true)):null}
 function renderHost(){
   const root=$("#app");root.innerHTML="";
   const m=MEETINGS.find(x=>x.id===state.meeting);
   const wrap=h("div",{class:"wrap"});
   const exportBtn=h("button",{class:"btn",onclick:exportCSV},"匯出 CSV");
   wrap.append(h("header",{class:"top"},h("div",{class:"brand"},h("h1",null,"百鮮年度計劃暨會議管理工作台"),h("p",null,"主持人畫面｜會議流程、簡報與各組表格　"+VERSION)),
-    h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn,h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",style:planClosed()?"color:var(--danger)":"",onclick:e=>{if(!planClosed()&&!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="關閉後只能檢視，確定？";return}Store.write(CFG_ID,"cells","plan.closed",planClosed()?"":"1");toast(planClosed()?"年度計劃已關閉":"年度計劃已重新開放");setTimeout(render,300)}},planClosed()?"🔓 重新開放年度計劃":"🔒 關閉年度計劃"),h("button",{class:"btn",onclick:openPeople},"人員管理"),h("button",{class:"btn",onclick:openTabSettings},"分頁開放"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"))));
+    adminBar(exportBtn)));
   wrap.append(monthNav());
   const t=todayStr();
   wrap.append(h("nav",{class:"timeline","aria-label":"會議時程"},MEETINGS.map(x=>{
@@ -3020,7 +3301,7 @@ Store.subs.add(refreshLive);
 /* ================= 名單／報到 對話框 ================= */
 function openDialog(title,draw,opts){
   if(!(opts&&opts.keepCal))state.calDlg=false;
-  const dlg=$("#rosterDlg");$("#rosterTitle").textContent=title;dlg._static=!!(opts&&opts.static);
+  const dlg=$("#rosterDlg");$("#rosterTitle").textContent=title;dlg._static=!!(opts&&opts.static);dlg.classList.toggle("wide",!!(opts&&opts.wide));
   dlg._draw=()=>{const b=$("#rosterBody");b.innerHTML="";draw(b)};dlg._draw();dlg.classList.add("open");$("#rosterDlg [data-close]").focus();
 }
 function openRoster(){openDialog("分組名單",b=>{
