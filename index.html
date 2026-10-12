@@ -678,6 +678,50 @@ ul.oc-dd{padding-left:1.2em}
 .oc-klab{font-size:12px;font-weight:700;color:var(--c)}
 .oc-kchip{font-size:12.5px;background:var(--paper);border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));border-radius:999px;padding:2px 10px}
 @media (max-width:760px){.oc-krow{grid-template-columns:1fr 1fr}.oc-krow.k1{grid-template-columns:1fr auto}}
+
+/* V2.6.0 便利貼 */
+.nhelp{font-size:13.5px;color:var(--muted);background:var(--mist,#F4F6F8);border-radius:10px;padding:10px 12px;margin-bottom:10px;line-height:1.6}
+.ncomp{position:sticky;top:0;z-index:5;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(20,30,40,.08);margin-bottom:14px}
+.ncomp-kinds{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.ncomp-kinds .lbl{font-size:13px;color:var(--muted)}
+.nkind{font:inherit;font-weight:700;border:2px solid var(--nc);color:var(--nc);background:var(--paper);border-radius:999px;padding:5px 16px;cursor:pointer}
+.nkind[aria-pressed="true"]{background:var(--nc);color:#fff}
+.ncomp-row{display:flex;gap:8px;align-items:stretch}
+.ncomp-ta{flex:1;min-width:0;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;resize:vertical;background:var(--field,#fff)}
+.ncomp-send{white-space:nowrap;font-size:16px;padding:0 18px}
+.nwall-sum{font-size:13px;color:var(--muted);margin:0 0 8px}
+.nwall-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.nwall-cols{grid-template-columns:1fr}}
+.ncol{border-radius:14px;background:color-mix(in srgb,var(--nb) 45%,var(--paper));border:1px solid color-mix(in srgb,var(--nc) 30%,var(--line));padding:10px}
+.ncol-h{font-weight:900;color:var(--nc);margin:0 0 8px;font-size:16px}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;align-items:start}
+.nempty{font-size:13px;color:var(--muted);padding:10px 4px}
+.sticky{position:relative;background:var(--nb);border-top:6px solid var(--nc);border-radius:4px 4px 10px 10px;padding:10px 10px 6px;box-shadow:0 3px 8px rgba(20,30,40,.14);min-height:96px;display:flex;flex-direction:column;justify-content:space-between;transform:rotate(-.6deg);color:#1E2B3A}
+.sticky:nth-child(2n){transform:rotate(.7deg)}
+.sticky:nth-child(3n){transform:rotate(-.2deg)}
+.sticky.star{box-shadow:0 0 0 2px #E0A800,0 3px 8px rgba(20,30,40,.18)}
+.sticky.sel{outline:3px solid var(--nc);outline-offset:2px}
+.sticky[draggable="true"]{cursor:grab}
+.sticky-txt{font-size:15px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.sticky-foot{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:8px;font-size:11.5px;color:#5E6B78}
+.sticky-foot .who{margin-right:auto}
+.sticky-foot .mk{color:#B7791F;font-weight:700}
+.sbtn{font:inherit;font-size:12px;border:1px solid rgba(30,43,58,.18);background:rgba(255,255,255,.7);color:#1E2B3A;border-radius:6px;padding:0 6px;line-height:20px;cursor:pointer}
+.sbtn.on{background:#E0A800;color:#fff;border-color:#E0A800}
+.sticky-ta{width:100%;min-height:80px;font:inherit;font-size:15px;border:1px solid rgba(30,43,58,.2);border-radius:6px;background:rgba(255,255,255,.85);padding:6px}
+.sticky-bar{display:flex;justify-content:flex-end;margin-top:6px}
+.ncat{font-size:11px;font-weight:700;background:var(--nc);color:#fff;border-radius:4px;padding:0 5px}
+.sticky.mini{min-height:0;padding:7px 8px 4px;transform:none}
+.sticky.mini .sticky-txt{font-size:13.5px}
+.sticky.legacy{opacity:.85;border-top-style:dashed}
+.ngrid.drop{min-height:56px;grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.tag.notechip{background:var(--nb);border:1px solid color-mix(in srgb,var(--nc) 40%,transparent);border-top:4px solid var(--nc);border-radius:4px 4px 8px 8px;box-shadow:0 2px 5px rgba(20,30,40,.12)}
+
+.trait-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+.sticky.trait{min-height:84px}
+.sticky.trait .sticky-txt{font-size:17px;font-weight:700;text-align:center;margin-top:6px}
+.sticky.trait.mine{box-shadow:0 0 0 2px var(--nc),0 3px 8px rgba(20,30,40,.16)}
+.tcount{color:var(--nc);font-size:13px}
 </style>
 </head>
 <body>
@@ -764,7 +808,7 @@ const CATS = {S:["優勢 S","#2E8B6A"],W:["劣勢 W","#C0392B"],O:["機會 O","#
 const FORMS = {
   roles:{title:"分組角色分工",short:"角色分工",type:"roles",desc:"決定組長，並排定每次會議的記錄人與報告人。"},
   sw:{title:"內部能力分析",short:"內部能力分析",type:"sw",
-    desc:"第一階段：列出百鮮的優勢（S）與劣勢（W），並標記重要性與急迫性。歸類七大面向在下一階段進行。",
+    desc:"便利貼討論：每個人想到一點就寫一張便利貼（優勢 S 或劣勢 W）送出，全組的便利貼會即時出現；討論時標記 ★ 重要、急需處理。歸類七大面向在下一階段進行。",
     seed:{S:[["在代工市場上有一定知名度","市場/品牌"],["可少量接單（彈性較大）","生產"]],W:[["連鎖餐飲領域尚未發展","通路/銷售"],["產能不足，交貨期長","生產"]]},
     example:{name:"康師傅",S:["品牌信賴度高","茶市場份額擴大，持續運用產品細分化及差異化策略","生產基地分佈廣貼近市場，具規模生產優勢，有成本競爭力","全面通路精耕，市場分級管理，布點廣","各功能組織架構完整，執行力強","集團財務健全，信譽高，融資額度取得較容易","人力資源投入持續加大，學習環境良好"],
       W:["產品外觀有待精進","城郊／外埠／直營通路的經營仍不足","產銷協調不精準，物流管理系統尚未完善","研發資源投入相對主要競爭者不足","配套群供貨品質不穩定，交期長，影響生產品質及效率","組織急速擴充，幹部培育速度趕不上發展","基層幹部管理能力不足"]},
@@ -777,9 +821,9 @@ const FORMS = {
   gdeck:{title:"本組報告簡報",short:"本組簡報",type:"gdeck",desc:"依本組 10/12 填好的競爭者資料自動產生的報告簡報。可以預覽、點「修改此頁」回到表格修改；想做更細的排版，可下載成 PPT 編輯後再上傳，主持人報告時就會播放上傳的版本。"},
   rivals:{title:"競爭者基本資料",short:"競爭者基本資料",type:"rivals",desc:"依「競爭者選擇」的三家公司，填入工商登記資料與公司網址，並可上傳附件（型錄、報導、截圖）。按「AI 自動帶入基本資料」即可依公司名稱查出工商登記資料，也可複製 AI 查詢提示，請 ChatGPT／Gemini／Claude 幫忙整理。"},
   compare:{title:"競爭者分析（三家）",short:"競爭者分析",type:"compare3",example:"xmf",desc:"傳統盤、專案代工、未來目標三家競爭者各一頁：填入對方十個構面的資料，右邊會帶出本組「百鮮競爭力分析」的內容，逐項判斷百鮮較強、相當或較弱。可上傳照片與附件，報告時會自動做成每家公司的簡報頁。"},
-  pestc:{title:"外部環境發展趨勢（PESTC）",short:"外部環境",type:"grid",desc:"從政策、經濟、社會、技術、競爭者五個面向，分別列出未來的機會與威脅。每一點換一行，之後會變成 SO／WT 的標籤。",
+  pestc:{title:"外部環境發展趨勢（PESTC）",short:"外部環境",type:"grid",desc:"便利貼討論：每個人想到一個外部變化就寫一張便利貼（機會或威脅）送出，全組的便利貼會即時出現；再一起把便利貼分類到政策、經濟、社會、技術、競爭者。分類好的內容之後會變成 SO／WT 的標籤。",
     rows:PESTC_ROWS,cols:["未來發展趨勢（機會）","未來發展趨勢（威脅）"],hints:["自動化設備","FSSC 認證","原物料取得成本增加","新創品牌增加","傳統產業難請人","混料分裝技術門檻低"]},
-  traits:{title:"想和什麼樣的人一起共事？",short:"共事特質",type:"traitsubmit",scope:"company",desc:"全公司一起寫，不分組。想到一個特質就送出一次，可以送出很多個；大螢幕會以文字雲即時飄出大家的答案。",
+  traits:{title:"想和什麼樣的人一起共事？",short:"共事特質",type:"traitsubmit",scope:"company",desc:"全公司一起寫，不分組。想到一個特質就貼一張便利貼，可以貼很多張；大螢幕會以文字雲即時飄出大家的答案。",
     examples:["主動積極","負責任","樂於分享","溝通順暢","團隊合作","誠信正直","解決問題","持續學習","細心嚴謹","正向樂觀"]},
   traits8:{title:"共事特質彙整與代表人物",short:"特質與代表人物",type:"traits8",scope:"company",desc:"先按「AI 彙整」把上週大家寫的特質整合為 8–10 大特質（每項 8 字內，可直接修改），再由大家主動提名代表人物。"},
   swot_so:{title:"SO 分析：核心能力建構",short:"SO 分析",type:"board",board:"SO",desc:"利用內部最大的優勢，來面對外部的機會（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
@@ -1087,6 +1131,7 @@ function attCounts(m,d){const c={"出席":0,"遲到":0,"請假":0,"未到":0};AL
 function allForms(m){if(m.tabs)return m.tabs.slice();const s=[];const add=f=>{if(f&&!s.includes(f))s.push(f)};m.agenda.forEach(a=>{(a.forms||[]).forEach(add);(a.topic||[]).forEach(add);(a.live||[]).forEach(add);(a.report||[]).forEach(add)});(m.pforms||[]).forEach(add);return s}
 function fillCount(fid,g){
   const f=FORMS[fid];const id=docId(fid,g);const b=Store.body(id);
+  if(fid==="pestc"||fid==="sw")return Store.items(id).filter(([k,v])=>(v.text||"").trim()).length+" 張";
   if(f.type==="feedback")return fbAll().length+" 人";
   if(f.type==="traitsubmit")return Store.items(docId("traits","X")).length+" 則";
   if(["dproj","dkpi","dorg","dfb"].includes(f.type))return Store.items(id).length+" 項";
@@ -1285,7 +1330,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V2.5.6";
+const VERSION="V2.6.1";
 const LOGO_PNG="data:image/png;base64,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";
 function loadPdfLibs(){const L=(srcs)=>new Promise((res,rej)=>{const t=(i)=>{if(i>=srcs.length)return rej(new Error("無法載入 PDF 元件，請檢查網路"));const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>res();sc.onerror=()=>{sc.remove();t(i+1)};document.head.append(sc)};t(0)});
   return Promise.all([window.html2canvas?1:L(["https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js","https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"]),
@@ -1903,8 +1948,9 @@ function hostLogin(){
 /* ================= 表格元件 ================= */
 function buildForm(fid,g,ro,opts){
   const f=FORMS[fid];if(planClosed()&&fid!=="feedback")ro=true;
+  if(fid==="pestc")return buildPestcNotes(fid,g,ro);
   if(f.type==="grid")return buildGrid(fid,g,ro);
-  if(f.type==="sw")return buildSW(fid,g,ro);
+  if(f.type==="sw")return buildSWNotes(fid,g,ro);
   if(f.type==="classify")return buildClass(g,ro);
   if(f.type==="rivals")return buildRivals(g,ro);
   if(f.type==="compare3")return buildCompare3(g,ro);
@@ -1991,7 +2037,7 @@ function buildClass(g,ro){
   const setDim=(k,dim)=>{state.selItem=null;const v=Store.body(id).items[k];if(v)Store.write(id,"items",k,Object.assign({},v,{dim}))};
   return live(h("div"),el=>{
     const all=Store.items(id).filter(([k,v])=>(v.text||"").trim()).sort(byT);
-    const chip=([k,v])=>{const c=h("span",{role:"button",tabindex:"0",class:"tag"+(state.selItem===k?" sel":""),draggable:"true",title:v.side==="S"?"優勢":"劣勢",
+    const chip=([k,v])=>{const nk=NOTE_KINDS.sw[v.side==="W"?1:0];const c=h("span",{role:"button",tabindex:"0",class:"tag notechip"+(state.selItem===k?" sel":""),style:"--nc:"+nk[2]+";--nb:"+nk[3],draggable:"true",title:(v.side==="S"?"優勢":"劣勢")+(v.by?"・"+v.by:""),
         onclick:e=>{e.stopPropagation();state.selItem=state.selItem===k?null:k;el._draw()}},
       h("i",{class:"cd",style:"background:"+(v.side==="S"?CATS.S[1]:CATS.W[1])}),v.text,swMarks(v),
       v.dim?h("span",{class:"x",role:"button","aria-label":"移回待分類",title:"移回待分類",onclick:e=>{e.stopPropagation();setDim(k,"")}},"×"):null);
@@ -2462,6 +2508,84 @@ function buildDDuty(c,ro0){const id=ddutyId(c);
     });
   })}
 
+/* ================= V2.6.0 便利貼討論板（內部能力、外部環境） ================= */
+const NOTE_KINDS={sw:[["S","優勢","#2E8B6A","#E3F4EA"],["W","劣勢","#C0392B","#FBE4E1"]],pestc:[["O","機會","#2F6FB2","#E2EDFA"],["T","威脅","#B7791F","#FDF0D5"]]};
+const PESTC_KEYS=["P","E","S","T","C"];
+/* 外部環境：舊表格文字＋分類好的便利貼 */
+function pestcLines(g,ri,col){const c=Store.body(docId("pestc",g)).cells;const side=col===0?"O":"T";
+  return splitLines(c["r"+ri+"c"+col]).concat(Store.items(docId("pestc",g)).filter(([k,v])=>v.side===side&&v.cat===PESTC_ROWS[ri]&&(v.text||"").trim()).sort(byT).map(([k,v])=>v.text.trim()))}
+function noteWho(v){return v.by==="AI"?"🤖 AI":(v.by||"")}
+function stickyEl(id,k,v,kinds,opts){const kd=kinds.find(x=>x[0]===v.side)||kinds[0];const ro=opts.ro;const editing=!ro&&state.noteEdit===k;
+  const cur=()=>Object.assign({},Store.body(id).items[k]||v);const set=(f,val)=>Store.write(id,"items",k,Object.assign(cur(),{[f]:val}));
+  const el=h("div",{class:"sticky"+(v.imp==="重要"?" star":""),style:"--nc:"+kd[2]+";--nb:"+kd[3],draggable:opts.drag&&!editing?"true":null,"data-k":k});
+  if(opts.drag&&!editing){el.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",k);e.dataTransfer.effectAllowed="move"});
+    el.addEventListener("click",e=>{if(e.target.closest("button"))return;e.stopPropagation();state.selItem=state.selItem===k?null:k;opts.redraw&&opts.redraw()});if(state.selItem===k)el.classList.add("sel")}
+  if(editing){const ta=h("textarea",{class:"sticky-ta"});ta.value=v.text||"";ta.addEventListener("input",()=>set("text",ta.value));setTimeout(()=>ta.focus(),20);
+    el.append(ta,h("div",{class:"sticky-bar"},h("button",{class:"sbtn",onclick:()=>{state.noteEdit=null;opts.redraw&&opts.redraw()}},"完成")));return el}
+  el.append(h("div",{class:"sticky-txt"},v.text||""),
+    h("div",{class:"sticky-foot"},h("span",{class:"who"},noteWho(v)),opts.extra?opts.extra(v):null,
+      opts.marks&&!ro?[h("button",{class:"sbtn"+(v.imp==="重要"?" on":""),title:"重要",onclick:()=>set("imp",v.imp==="重要"?"":"重要")},"★"),h("button",{class:"sbtn"+(v.urg==="急需"?" on":""),title:"急需處理",onclick:()=>set("urg",v.urg==="急需"?"":"急需")},"急")]:(v.imp==="重要"||v.urg==="急需")?h("span",{class:"mk"},[v.imp==="重要"?"★":"",v.urg==="急需"?"急":""].join(" ")):null,
+      ro?null:h("button",{class:"sbtn",title:"修改",onclick:()=>{state.noteEdit=k;opts.redraw&&opts.redraw()}},"✎"),
+      ro?null:h("button",{class:"sbtn",title:"刪除",onclick:e=>{const b=e.currentTarget;if(!b.dataset.c){b.dataset.c="1";b.textContent="刪除？";setTimeout(()=>{if(b.isConnected){b.dataset.c="";b.textContent="×"}},3000);return}Store.write(id,"items",k,null)}},"×")));
+  return el}
+/* 寫便利貼：上方輸入、送出就是一張；下方依類別排成便利貼牆 */
+function noteComposer(id,kinds,hints,extraFields){const kk="noteKind:"+id;if(!state[kk])state[kk]=kinds[0][0];
+  const box=h("div",{class:"ncomp"});const ta=h("textarea",{class:"ncomp-ta",rows:2,placeholder:"想到一點寫一張，按「貼上」送出"});
+  const kb=kinds.map(([k,l,c,b])=>{const x=h("button",{class:"nkind","aria-pressed":String(state[kk]===k),style:"--nc:"+c+";--nb:"+b},l);x.addEventListener("click",()=>{state[kk]=k;kb.forEach((y,i)=>y.setAttribute("aria-pressed",String(kinds[i][0]===k)));ta.focus()});return x});
+  const send=t=>{t=(t==null?ta.value:t).trim();if(!t)return;const v=Object.assign({side:state[kk],text:t,by:getMe()||"主持人",t:Date.now()},extraFields||{});Store.write(id,"items",uid(),v);ta.value="";ta.focus();toast("已貼上一張便利貼")};
+  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}});
+  box.append(h("div",{class:"ncomp-kinds"},h("span",{class:"lbl"},"這張是："),kb),h("div",{class:"ncomp-row"},ta,h("button",{class:"btn primary ncomp-send",onclick:()=>send()},"📌 貼上")));
+  if(hints&&hints.length)box.append(h("div",{class:"hints",style:"margin-top:6px"},h("span",{class:"lbl"},"例："),hints.map(x=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>{ta.value=x;ta.focus()}},x))));
+  return box}
+function noteWall(id,kinds,ro,opts){return live(h("div",{class:"nwall"}),el=>{const all=Store.items(id).filter(([k,v])=>(v.text||"").trim()||state.noteEdit===k).sort(byT);
+  const n=all.length,people=new Set(all.map(([k,v])=>v.by).filter(Boolean)).size;
+  el.append(h("div",{class:"nwall-sum"},"共 "+n+" 張便利貼"+(people?"・"+people+" 人參與":"")+(opts&&opts.sumExtra?opts.sumExtra(all):"")));
+  const cols=h("div",{class:"nwall-cols"});
+  kinds.forEach(([k,l,c,b])=>{const xs=all.filter(([kk,v])=>v.side===k);
+    cols.append(h("div",{class:"ncol",style:"--nc:"+c+";--nb:"+b},h("div",{class:"ncol-h"},l+"（"+xs.length+"）"),
+      h("div",{class:"ngrid"},xs.length?xs.map(([kk,v])=>stickyEl(id,kk,v,kinds,Object.assign({ro,redraw:()=>el._draw()},opts||{}))):h("div",{class:"nempty"},ro?"（尚無）":"還沒有便利貼"))))});
+  el.append(cols);el._pause=()=>!!state.noteEdit})}
+
+/* 內部能力：寫便利貼（分類在「歸類七大面向」） */
+function buildSWNotes(fid,g,ro){const f=FORMS[fid],id=docId(fid,g);const kinds=NOTE_KINDS.sw;
+  if(ro)return h("div",null,noteWall(id,kinds,true,{marks:true}));
+  const all=Store.items(id);const used=new Set(all.map(x=>(x[1].text||"").trim()));
+  const hints=["S","W"].flatMap(s=>(f.seed[s]||[]).map(x=>x[0])).filter(x=>!used.has(x));
+  return h("div",null,h("div",{class:"nhelp"},"每個人用自己的手機，想到一點就寫一張便利貼送出；大家的便利貼會即時出現在下方。討論時可以按 ★ 標重要、按「急」標急需處理，重複的可以刪除或合併修改。下一階段再把便利貼歸類到七大面向。"),
+    noteComposer(id,kinds,hints,{dim:"",imp:"",urg:""}),noteWall(id,kinds,false,{marks:true}))}
+
+/* 外部環境：寫便利貼＋分類到 PESTC */
+function buildPestcNotes(fid,g,ro){const f=FORMS[fid],id=docId(fid,g);const kinds=NOTE_KINDS.pestc;
+  if(ro)return pestcTable(g);
+  const tab=state.pestcTab==="class"?"class":"write";
+  const tb=[["write","✍️ 1. 寫便利貼"],["class","🗂 2. 分類到 PESTC"]].map(([k,l])=>h("button",{class:"formtab","aria-selected":String(k===tab),onclick:()=>{state.pestcTab=k;state.selItem=null;render()}},l));
+  const wrap=h("div",null,h("div",{class:"formtabs",style:"margin-bottom:10px"},tb));
+  if(tab==="write"){wrap.append(h("div",{class:"nhelp"},"先不用管分類：每個人想到一個外部的變化（政策、經濟、社會、技術、競爭者），就寫一張便利貼，選「機會」或「威脅」送出。寫完後再到「2. 分類到 PESTC」一起討論歸類。"),
+      noteComposer(id,kinds,null,{cat:""}),noteWall(id,kinds,false,{extra:v=>v.cat?h("span",{class:"ncat"},v.cat.split(" ")[0]):null,sumExtra:all=>"・已分類 "+all.filter(([k,v])=>v.cat).length}))}
+  else wrap.append(pestcClassify(g));
+  return wrap}
+function pestcClassify(g){const id=docId("pestc",g);const kinds=NOTE_KINDS.pestc;
+  const setCat=(k,cat,side)=>{state.selItem=null;const v=Store.body(id).items[k];if(v)Store.write(id,"items",k,Object.assign({},v,{cat},side?{side}:{}))};
+  return live(h("div"),el=>{const all=Store.items(id).filter(([k,v])=>(v.text||"").trim()).sort(byT);
+    const mk=([k,v])=>{const s=stickyEl(id,k,v,kinds,{ro:false,drag:true,redraw:()=>el._draw()});s.classList.add("mini");
+      if(v.cat)s.querySelector(".sticky-foot").prepend(h("button",{class:"sbtn",title:"移回待分類",onclick:e=>{e.stopPropagation();setCat(k,"")}},"↩"));return s};
+    const target=(node,cat,side)=>{node.addEventListener("dragover",e=>{e.preventDefault();node.classList.add("hot")});node.addEventListener("dragleave",()=>node.classList.remove("hot"));
+      node.addEventListener("drop",e=>{e.preventDefault();node.classList.remove("hot");const k=e.dataTransfer.getData("text/plain");if(k)setCat(k,cat,side)});
+      node.addEventListener("click",()=>{if(state.selItem)setCat(state.selItem,cat,side)});if(state.selItem)node.classList.add("armed");return node};
+    const pend=all.filter(([k,v])=>!v.cat);
+    el.append(target(h("div",{class:"pool"},h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"待分類（"+pend.length+" 張）"),
+      h("div",{class:"ngrid"},pend.length?pend.map(mk):h("span",{style:"font-size:13px;color:var(--muted)"},all.length?"全部都分類好了 👍":"還沒有便利貼，請先到「1. 寫便利貼」")),
+      h("div",{class:"hintline"},state.selItem?"已選取一張，點下方任一格放入":"電腦：把便利貼拖到下方格子｜手機：先點便利貼，再點格子")),"",null));
+    const old=Store.body(id).cells;
+    el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet board"},h("thead",null,h("tr",null,h("th",null,"面向"),h("th",null,"未來發展趨勢（機會）"),h("th",null,"未來發展趨勢（威脅）"))),
+      h("tbody",null,PESTC_ROWS.map((r,ri)=>h("tr",null,h("th",{class:"rowh"},r),[["O",0],["T",1]].map(([side,col])=>target(h("td",null,h("div",{class:"ngrid drop"},
+        splitLines(old["r"+ri+"c"+col]).map(t=>h("div",{class:"sticky mini legacy",style:"--nc:"+kinds[col][2]+";--nb:"+kinds[col][3]},h("div",{class:"sticky-txt"},t),h("div",{class:"sticky-foot"},h("span",{class:"who"},"先前填寫")))),
+        all.filter(([k,v])=>v.cat===r&&v.side===side).map(mk))),r,side))))))))})}
+function pestcTable(g){return live(h("div"),el=>{const its=Store.items(docId("pestc",g)).filter(([k,v])=>(v.text||"").trim()&&!v.cat);
+  el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("thead",null,h("tr",null,h("th",null,"面向"),h("th",null,"未來發展趨勢（機會）"),h("th",null,"未來發展趨勢（威脅）"))),
+    h("tbody",null,PESTC_ROWS.map((r,ri)=>h("tr",null,h("th",{class:"rowh"},r),[0,1].map(col=>{const xs=pestcLines(g,ri,col);return h("td",null,xs.length?h("ul",{class:"cellist"},xs.map(t=>h("li",null,t))):h("div",{class:"cellro"},""))})))))));
+  if(its.length){const kinds=NOTE_KINDS.pestc;el.append(h("div",{style:"font-size:13px;color:var(--muted);margin:10px 0 6px"},"尚未分類的便利貼（"+its.length+" 張）"),h("div",{class:"ngrid"},its.sort(byT).map(([k,v])=>{const s=stickyEl(docId("pestc",g),k,v,kinds,{ro:true});s.classList.add("mini");return s})))}})}
+
 /* 組織執掌與人力 */
 function deptRoles(code){return Store.items(docId("dorg",code)).sort(byT)}
 function buildDOrg(code,ro){const id=docId("dorg",code);const wrap=h("div");
@@ -2546,9 +2670,8 @@ function deptContext(code){const d=deptByCode(code),st=Store.body(docId("strateg
   const sw=["A","B","C"].flatMap(g=>Store.items(docId("sw",g)).map(x=>x[1]));const dims=DEPT_DIMS[code];
   blk("內部能力分析：與本部門相關的優勢（"+dims.join("、")+"）",sw.filter(v=>v.side==="S"&&dims.includes(v.dim)).map(v=>v.text+(v.imp==="重要"?"（重要）":"")));
   blk("內部能力分析：與本部門相關的劣勢（"+dims.join("、")+"）",sw.filter(v=>v.side==="W"&&dims.includes(v.dim)).map(v=>v.text+(v.imp==="重要"?"（重要）":"")+(v.urg==="急需"?"（急需）":"")));
-  const pe=["A","B","C"].map(g=>Store.body(docId("pestc",g)).cells);
-  blk("外部環境：機會",pe.flatMap(c=>PESTC_ROWS.flatMap((r,ri)=>splitLines(c["r"+ri+"c0"]).map(t=>r+"："+t))),12);
-  blk("外部環境：威脅",pe.flatMap(c=>PESTC_ROWS.flatMap((r,ri)=>splitLines(c["r"+ri+"c1"]).map(t=>r+"："+t))),12);
+  blk("外部環境：機會",["A","B","C"].flatMap(g=>PESTC_ROWS.flatMap((r,ri)=>pestcLines(g,ri,0).map(t=>r+"："+t))),12);
+  blk("外部環境：威脅",["A","B","C"].flatMap(g=>PESTC_ROWS.flatMap((r,ri)=>pestcLines(g,ri,1).map(t=>r+"："+t))),12);
   const fn=DEPT_FUNCS[code];
   ["swot_so","swot_wt"].forEach(fid=>{const f=FORMS[fid],rows=gridRows(f);
     blk(f.board+" 分析中與本部門功能相關的項目（"+fn.join("、")+"；★為重要）",["A","B","C"].flatMap(g=>Store.items(docId(fid,g)).filter(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell||"");return m&&fn.includes(f.cols[+m[2]])}).map(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell);return rows[+m[1]].label+" × "+f.cols[+m[2]]+"："+v.text+(v.star?"（★）":"")})),15)});
@@ -2841,19 +2964,25 @@ function traitsPrompt(){const m=mergedTraits();const total=[...m.values()].reduc
   return "以下是公司同仁寫下的「希望一起共事的人具備的特質」，共 "+total+" 筆（括號內是同樣文字被寫到的次數）：\n"+[...m.entries()].sort((a,b)=>b[1]-a[1]).map(([t,n])=>"- "+t+"（"+n+"）").join("\n")+
   "\n\n請協助：\n1. 把文字不同但意思相同或相近的特質歸為同一類（例如「積極主動」「主動」「會主動做事」是同一類），每一類的「被提到次數」是該類所有原始特質次數的加總。\n2. 歸納成 8–10 大特質，依被提到次數由多到少排序。\n3. 每一項特質名稱必須在 8 個中文字以內（例如「主動積極」「團隊合作」），並用一句話說明涵蓋的意思。\n4. 每一筆原始特質只能歸入一類；次數很少、又無法歸類的可以合併為「其他」，不要遺漏。\n\n只輸出 JSON 陣列，不要其他文字：\n[{\"trait\":\"主動積極\",\"desc\":\"…\",\"count\":12,\"items\":[\"積極主動\",\"主動\"]}]"}
 function jsonArr(t){const m=String(t||"").replace(/```json|```/g,"").match(/\[[\s\S]*\]/);if(!m)return null;try{const a=JSON.parse(m[0]);return Array.isArray(a)?a:null}catch(e){return null}}
+/* V2.6.1 共事特質：便利貼形式（同樣的特質合併成一張，標示次數；只有自己的可以刪除） */
+const TRAIT_NOTE=[["#E0A800","#FFF6CC"],["#2F6FB2","#E2EDFA"],["#2E8B6A","#E3F4EA"],["#C0392B","#FBE4E1"],["#7A55B0","#EFE8F8"],["#B7791F","#FDF0D5"]];
 function buildTraitSubmit(ro){
-  const id=docId("traits","X");const me=getMe();const wrap=h("div");
-  if(!ro&&state.mode!=="host"&&me){
-    const inp=h("input",{maxlength:12,placeholder:"輸入一個你重視的特質","aria-label":"特質",style:"flex:1 1 220px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:16px;background:var(--field)"});
-    const send=()=>{const t=inp.value.trim();if(!t)return;Store.write(id,"items",uid(),{text:t,by:me,t:Date.now()});inp.value="";inp.focus();toast("已送出：「"+t+"」")};
+  const id=docId("traits","X");const me=getMe();const wrap=h("div");const canWrite=!ro&&state.mode!=="host"&&me;
+  if(canWrite){const box=h("div",{class:"ncomp"});const inp=h("input",{class:"ncomp-ta",maxlength:12,placeholder:"寫一個你重視的特質（12 字內）","aria-label":"特質"});
+    const send=()=>{const t=inp.value.trim();if(!t)return;Store.write(id,"items",uid(),{text:t,by:me,t:Date.now()});inp.value="";inp.focus();toast("已貼上：「"+t+"」")};
     inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)send()});
-    wrap.append(h("div",{class:"addrow"},inp,h("button",{class:"btn primary",onclick:send},"送出")),
-      live(h("div",{style:"margin-top:10px"}),el=>{const mine=Store.items(id).filter(([k,v])=>v.by===me).sort(byT);
-        el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:6px"},"我送出的（"+mine.length+"）："),h("div",{class:"tlist"},mine.map(([k,v])=>h("span",{class:"tchip"},v.text,h("button",{"aria-label":"刪除 "+v.text,onclick:()=>Store.write(id,"items",k,null)},"×")))))}));
-  }else{
-    wrap.append(live(h("div"),el=>{const m=mergedTraits();el.append(h("div",{style:"font-weight:700;margin-bottom:8px"},"已送出 "+[...m.values()].reduce((a,b)=>a+b,0)+" 則、"+m.size+" 種特質"),
-      h("div",{class:"tlist"},[...m.entries()].sort((a,b)=>b[1]-a[1]).map(([t,n])=>h("span",{class:"tchip",style:"padding-right:12px"},t,n>1?h("b",{style:"color:var(--saffron);margin-left:4px"},"×"+n):null))))}));
-  }
+    box.append(h("div",{class:"ncomp-row"},inp,h("button",{class:"btn primary ncomp-send",onclick:send},"📌 貼上")),
+      h("div",{class:"hints",style:"margin-top:6px"},h("span",{class:"lbl"},"例："),(FORMS.traits.examples||[]).map(x=>h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>{inp.value=x;inp.focus()}},x))));
+    wrap.append(h("div",{class:"nhelp"},"想到一個特質就寫一張便利貼，可以貼很多張。大家的便利貼會即時出現在下方，同樣的特質會疊成一張並顯示次數；大螢幕同步以文字雲呈現。"),box)}
+  wrap.append(live(h("div",{class:"nwall"}),el=>{const all=Store.items(id).filter(([k,v])=>(v.text||"").trim());
+    const groups=new Map();all.forEach(([k,v])=>{const t=v.text.trim();if(!groups.has(t))groups.set(t,[]);groups.get(t).push([k,v])});
+    const list=[...groups.entries()].sort((a,b)=>b[1].length-a[1].length||Math.min(...a[1].map(x=>x[1].t||0))-Math.min(...b[1].map(x=>x[1].t||0)));
+    const mineN=all.filter(([k,v])=>v.by===me).length;
+    el.append(h("div",{class:"nwall-sum"},"共 "+all.length+" 張便利貼、"+groups.size+" 種特質"+(canWrite?"・我貼了 "+mineN+" 張":"")));
+    el.append(h("div",{class:"ngrid trait-grid"},list.length?list.map(([t,xs])=>{const c=TRAIT_NOTE[fnv(t)%TRAIT_NOTE.length];const mine=xs.filter(([k,v])=>v.by===me);
+      return h("div",{class:"sticky trait"+(mine.length?" mine":""),style:"--nc:"+c[0]+";--nb:"+c[1]},h("div",{class:"sticky-txt"},t),
+        h("div",{class:"sticky-foot"},h("span",{class:"who"},xs.length>1?h("b",{class:"tcount"},"×"+xs.length):"",mine.length?" 我":""),
+          canWrite&&mine.length?h("button",{class:"sbtn",title:"刪除我貼的這張",onclick:()=>Store.write(id,"items",mine[mine.length-1][0],null)},"×"):null))}):h("div",{class:"nempty"},"還沒有便利貼")))}));
   return wrap;
 }
 function traitCloud(){return live(h("div",{class:"cloud"}),el=>{const m=[...mergedTraits().entries()];
@@ -2935,7 +3064,8 @@ function tagPool(){
   const put=(cat,text,sub,g)=>{text=(text||"").trim();if(!text)return;const key=cat+"|"+text;if(!map.has(key))map.set(key,{key,cat,text,sub,groups:new Set()});if(g&&g!=="X")map.get(key).groups.add(g)};
   ["A","B","C"].forEach(g=>{
     Store.items(docId("sw",g)).sort(byT).forEach(([k,v])=>put(v.side==="W"?"W":"S",v.text,v.dim,g));
-    const pe=Store.body(docId("pestc",g)).cells;PESTC_ROWS.forEach((r,ri)=>{splitLines(pe["r"+ri+"c0"]).forEach(t=>put("O",t,r,g));splitLines(pe["r"+ri+"c1"]).forEach(t=>put("T",t,r,g))});
+    PESTC_ROWS.forEach((r,ri)=>{pestcLines(g,ri,0).forEach(t=>put("O",t,r,g));pestcLines(g,ri,1).forEach(t=>put("T",t,r,g))});
+    Store.items(docId("pestc",g)).filter(([k,v])=>!v.cat&&(v.text||"").trim()).forEach(([k,v])=>put(v.side==="T"?"T":"O",v.text,"未分類",g));
     const se=Store.body(docId("self10",g)).cells;COMP10.forEach((r,ri)=>splitLines(se["r"+ri+"c0"]).forEach(t=>put("K",t,r,g)));
     const cp=Store.body(docId("compare",g)).cells;RIVAL_SLOTS.forEach(([sl])=>{const nm=rivalName(g,sl)||"競爭者";COMP10.forEach((r,ri)=>splitLines(cp[sl+".r"+ri]).forEach(t=>put("R",t,nm+"・"+r,g)))});
   });
@@ -3047,7 +3177,7 @@ function swClassPrompt(g){const its=Store.items(docId("sw",g)).filter(([k,v])=>(
   return ["請協助把百鮮企業有限公司內部能力分析的每一項，歸類到最合適的一個面向。面向只能從這七個選：「"+DIM7.join("」「")+"」。",CO_BG,"",
     ...its.map(([k,v],i)=>(i+1)+". 【"+(v.side==="S"?"優勢":"劣勢")+"】"+v.text),"",
     "請嚴格用以下格式輸出，每行一項（方便貼回工作台）：","編號｜面向｜一句話理由","使用繁體中文。"].join("\n")}
-function pestcPrompt(g){const c=Store.body(docId("pestc",g)).cells;const cur=PESTC_ROWS.map((r,ri)=>r+"：機會＝"+(c["r"+ri+"c0"]||"").replace(/\n/g,"、")+"；威脅＝"+(c["r"+ri+"c1"]||"").replace(/\n/g,"、"));
+function pestcPrompt(g){const un=Store.items(docId("pestc",g)).filter(([k,v])=>!v.cat&&(v.text||"").trim()).map(([k,v])=>(v.side==="T"?"威脅":"機會")+"（未分類）："+v.text);const cur=PESTC_ROWS.map((r,ri)=>r+"：機會＝"+pestcLines(g,ri,0).join("、")+"；威脅＝"+pestcLines(g,ri,1).join("、")).concat(un);
   return ["你是熟悉台灣食品產業的產業分析師，正在協助「百鮮企業有限公司」做外部環境分析（PESTC：政策、經濟、社會、技術、競爭者）。",CO_BG,"",
     "【本組目前列出的】",...cur,"",
     "請上網查詢最新資料，整理未來 1–2 年（2027 年前後）台灣食品製造、調味品與食品代工產業的發展趨勢，並判斷對百鮮是「機會」還是「威脅」：",
@@ -3176,10 +3306,10 @@ function aiHelpGroup(fid,g){if(!g||g==="X"||planClosed())return null;const f=FOR
         h("small",{style:"width:100%;color:var(--muted)"},"三種方式擇一：「AI 訪談」由 AI 一題一題問、邊問邊整理；「先回答引導問題」在工作台填答再交給 AI；「直接彙整」輸入討論重點後產生 AI 指令。結果都會依小磨坊範例的寫法，貼回後自動填入下方表格。"))})}
   if(fid==="pick")return h("div",null,promptBoxDyn("AI 指令：依本組的百鮮競爭力與優劣勢，評估傳統盤、專案代工、未來目標的競爭者",()=>pickPrompt(g)));
   if(fid==="pestc"){const id=docId("pestc",g);
-    return h("div",null,promptBoxDyn("AI 指令：查詢產業趨勢，補充本組的機會與威脅（PESTC）",()=>pestcPrompt(g)),aiPasteBtn("貼上 AI 回覆","貼上 AI 的回覆（每行「機會｜P｜內容」）",t=>{let n=0;const add={};
-      t.split("\n").forEach(line=>{const p=line.replace(/\*\*/g,"").replace(/^[-・*\s]+/,"").split(/[｜|]/).map(x=>x.trim()).filter(Boolean);if(p.length<3)return;const col=/機會/.test(p[0])?0:/威脅/.test(p[0])?1:-1;const ri=["P","E","S","T","C"].indexOf((p[1]||"").charAt(0).toUpperCase());if(col<0||ri<0)return;
-        const key="r"+ri+"c"+col;const text=p.slice(2).join("｜");(add[key]=add[key]||[]).push(text);n++});
-      Object.entries(add).forEach(([key,arr])=>{const cur=(Store.cell(id,key)||"").split("\n").map(x=>x.trim()).filter(Boolean);const merged=cur.concat(arr.filter(x=>!cur.includes(x)));Store.write(id,"cells",key,merged.join("\n"))});
+    return h("div",null,promptBoxDyn("AI 指令：查詢產業趨勢，補充本組的機會與威脅（PESTC）",()=>pestcPrompt(g)),aiPasteBtn("貼上 AI 回覆","貼上 AI 的回覆（每行「機會｜P｜內容」）",t=>{let n=0;
+      const have=new Set(Store.items(id).map(([k,v])=>(v.text||"").trim()));
+      t.split("\n").forEach(line=>{const p=line.replace(/\*\*/g,"").replace(/^[-・*\s]+/,"").split(/[｜|]/).map(x=>x.trim()).filter(Boolean);if(p.length<3)return;const side=/機會/.test(p[0])?"O":/威脅/.test(p[0])?"T":"";const ri=PESTC_KEYS.indexOf((p[1]||"").charAt(0).toUpperCase());if(!side||ri<0)return;
+        const text=p.slice(2).join("｜");if(!text||have.has(text))return;have.add(text);Store.write(id,"items",uid(),{side,text,cat:PESTC_ROWS[ri],by:"AI",t:Date.now()+n});n++});
       return n?n:"找不到「機會｜P｜內容」格式的資料"}))}
   return null}
 
@@ -3733,6 +3863,7 @@ function exportRows(){if(0)return;
   const rows=[["表格","組別","項目","欄位","內容"]];
   Object.entries(FORMS).forEach(([fid,f])=>groupsFor(fid).forEach(g=>{
     const id=docId(fid,g),b=Store.body(id),gn=GROUPS[g].name;
+    if(fid==="pestc")Store.items(id).filter(([k,v])=>(v.text||"").trim()).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,v.cat||"未分類",(v.side==="T"?"威脅":"機會")+"（便利貼・"+(v.by||"")+"）",v.text]));
     if(f.type==="grid"){(f.topFields||[]).forEach(([k,l])=>b.cells[k]&&rows.push([f.title,gn,l,"",b.cells[k]]));
       gridRows(f).forEach((r,ri)=>f.cols.forEach((c,ci)=>{const v=b.cells["r"+ri+"c"+ci];if(v)rows.push([f.title,gn,(r.glabel?r.glabel+"／":"")+r.label,(f.editableCols&&f.editableCols.includes(ci)&&b.cells["col"+ci])||c,v])}))}
     else if(f.type==="sw")Store.items(id).sort(byT).forEach(([k,v])=>rows.push([f.title,gn,v.dim||"未分類",(v.side==="W"?"劣勢":"優勢")+(v.imp?"・"+v.imp:"")+(v.urg?"・"+v.urg:""),v.text]));
