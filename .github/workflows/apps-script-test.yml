@@ -32,15 +32,17 @@ jobs:
       - name: 換上新版 Code.gs
         run: |
           cd work
-          f=$(ls Code.js Code.gs 2>/dev/null | head -1)
-          test -n "$f" || { echo "找不到 Code 檔"; exit 1; }
+          f=$(grep -l "百鮮年度計劃暨會議管理工作台" *.js *.gs 2>/dev/null | head -1)
+          [ -n "$f" ] || f=$(ls *.js *.gs 2>/dev/null | grep -v '^appsscript' | head -1)
+          test -n "$f" || { echo "找不到 Apps Script 程式檔"; exit 1; }
+          echo "更新檔案：$f（原本 $(wc -c < "$f") bytes）"
           cp ../apps-script/test/Code.gs "$f"
           grep -o "百鮮年度計劃暨會議管理工作台 V[0-9.]*" "$f" | head -1
       - name: 上傳並更新部署
         run: |
           cd work
           npx -y @google/clasp@3 push -f
-          ver=$(grep -o "工作台 V[0-9.]*" Code.* | head -1 | sed 's/.* //')
+          ver=$(grep -ho "工作台 V[0-9.]*" *.js *.gs 2>/dev/null | head -1 | sed 's/.* //')
           npx -y @google/clasp@3 deploy -i "$DEPLOYMENT_ID" -d "$ver（GitHub 自動部署 ${GITHUB_SHA::7}）"
       - name: 清除授權
         if: always()
