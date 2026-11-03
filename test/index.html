@@ -875,6 +875,7 @@ const FORMS = {
     rowGroups:[{label:"O 機會",rows:SWOT_EXT},{label:"S 優勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["S","O"],cats:["S","O"]},
   swot_wt:{title:"WT 分析：核心能力建構",short:"WT 分析",type:"board",board:"WT",desc:"克服內部的弱勢，並同時降低外部的威脅（上半部：未來核心競爭力建構；下半部：現有核心競爭力強化）。把上方標籤拖進格子（手機：先點標籤再點格子），點 ☆ 標記重要。",
     rowGroups:[{label:"T 威脅",rows:SWOT_EXT},{label:"W 弱勢",rows:SWOT_IN}],cols:FUNCS7,defaultCats:["W","T"],cats:["W","T"]},
+  swotsum:{title:"11/3 AI 彙整結果：SO／WT 與 2027 策略專案",short:"11/3 AI 彙整",type:"swotsum",scope:"company",desc:"11/3 第五次會議三組 SO／WT 合併結果、AI 比對重點，以及 AI 依 SO／WT 擬定的 2027 策略與專案（只能檢視）。"},
   orgchart:{title:"百鮮企業有限公司 組織圖",short:"組織圖",type:"orgchart",scope:"company",desc:"點部門可看該部門的組織圖，再點課／組看職責與 KPI；點總經理、副總可看職責。各部門的職務執掌在「組織與人力」分頁編輯，這裡會即時更新。"},
   strategy:{title:"百鮮企業有限公司 2027 年度策略展開",short:"2027 策略展開",type:"grid",wide:true,scope:"company",
     desc:"全公司一份：先定營運目標與策略重點，再展開到各部門的專案與 KPI。",
@@ -890,7 +891,6 @@ const FORMS = {
   dorg:{title:"組織執掌與人力",short:"組織與人力",type:"dorg",scope:"dept",desc:"上半部為本部門的職務執掌（職責、詳細描述、KPI，只能編輯自己部門）；下半部填各崗位的現有人數、2027 編制，年度人力計劃會自動匯整。"},
   dfb:{title:"部門記錄：主管回饋與修改",short:"部門記錄",type:"dfb",scope:"dept",desc:"部門自行記錄 11/20 報告時主管口頭提出的回饋，11/21 上午修改後更新狀態與說明（僅供部門記錄，不會放進簡報）。"},
   xproj:{title:"跨部門專案",short:"跨部門專案",type:"xproj",scope:"company",desc:"由各部門專案中勾選「配合部門」的專案自動匯整。"},
-  review:{title:"歷年年度檢討",short:"年度檢討",type:"review",scope:"company",desc:"歷年年度計劃檢討的經營數據與檢討表（只能檢視）。上方的檢討重點會自動帶入各部門的 AI 指令與 AI 資料包，擬定新年度計劃時可作為依據。"},
   hrsum:{title:"2027 年度人力計劃",short:"人力計劃",type:"hrsum",scope:"company",desc:"由各部門「組織與人力」自動匯整。"},
   cal:{title:"2027 行事曆",short:"行事曆",type:"cal",scope:"company",desc:"點日期新增行程（部門週會、管理月會等），可設定每週／每月重複；勾選「年度大事」會匯整到年度行事曆總表。可匯出 .ics 檔匯入 Google 行事曆。"},
   ops:{title:"Q1 沙盤推演（操盤表）",short:"Q1 沙盤推演",type:"ops",desc:"分組討論：把各部門專案拖進操盤表，方塊可跨月份並拖移調整；業務部說明預計行動與營業額，廠務部說明預計行動與產出，並提出各部門還可以加入的專案。"}
@@ -947,7 +947,7 @@ const MEETINGS = [
    {t:"共事特質彙整・代表人物提名",sub:"AI 把上週大家寫的特質整合為 8–10 大特質，主持人鎖定後由大家提名代表人物",live:["traits8"]},
    {t:"下次議題說明：SWOT 分析＆策略擬定",preview:["swot_so"]}],
   next:{topic:"SWOT 分析＆策略擬定",when:"11/3（二）16:00"}},
- {id:"m5",no:"第五次會議",date:"2026-11-03",time:"16:00",theme:"SWOT 分析＆策略擬定",pforms:["swot_so","swot_wt"],
+ {id:"m5",no:"第五次會議",date:"2026-11-03",time:"16:00",theme:"SWOT 分析＆策略擬定",pforms:["swot_so","swot_wt","swotsum"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"SO／WT 分析說明",sub:"內部能力與外部環境的每個要素都已變成標籤，拖進 SO／WT 表格並標記重要",topic:["swot_so","swot_wt"]},
@@ -958,7 +958,7 @@ const MEETINGS = [
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
  {id:"m6",no:"年度策略展開",date:"2026-11-04",time:"13:00",theme:"2027 年度策略展開",deptMode:true,
-  tabs:["swot_so","swot_wt","tows","orgchart","strategy","dproj","review"],
+  tabs:["swotsum","swot_so","swot_wt","tows","orgchart","strategy","dproj"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"SO／WT 成果回顧",report:["swot_so","swot_wt"],dur:30},
@@ -967,7 +967,7 @@ const MEETINGS = [
    {t:"各部門發表預計專案",at:"13:00",sub:"專案標題、目標與預期指標；各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
   next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
-  tabs:["orgchart","review","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","cal"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","cal"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"說明兩天行程",twodays:true,dur:5},
@@ -984,7 +984,7 @@ const MEETINGS = [
    {t:"各部門自行討論",sub:"依今天的回饋準備修改",dur:40}],
   next:{topic:"年度計劃工作坊",when:"11/21（六）09:00"}},
  {id:"m8",no:"年度計劃工作坊",date:"2026-11-21",time:"09:00",theme:"Q1 沙盤推演・修改報告・年度總結",deptMode:true,
-  tabs:["orgchart","review","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"各部門討論",sub:"依昨天的回饋整理修改方向",dur:50},
@@ -1183,7 +1183,7 @@ function fillCount(fid,g){
   if(f.type==="feedback")return fbAll().length+" 人";
   if(f.type==="traitsubmit")return Store.items(docId("traits","X")).length+" 則";
   if(["dproj","dkpi","dorg","dfb"].includes(f.type))return Store.items(id).length+" 項";
-  if(["p1","p2","dstrat","xproj","hrsum","cal","ops","orgchart","review"].includes(f.type))return "";
+  if(["p1","p2","dstrat","xproj","hrsum","cal","ops","orgchart","swotsum"].includes(f.type))return "";
   if(f.type==="gdeck")return gdeckUse(g)?"已上傳":"自動";
   if(f.type==="compare3"){let n=0;RIVAL_SLOTS.forEach(([sl])=>COMP10.forEach((d,i)=>{if((b.cells[sl+".r"+i]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*COMP10.length}
   if(f.type==="rivals"){let n=0;RIVAL_SLOTS.forEach(([sl])=>RIVAL_FIELDS.forEach(([k])=>{if((b.cells[sl+"."+k]||"").trim())n++}));return n+"/"+RIVAL_SLOTS.length*RIVAL_FIELDS.length}
@@ -1994,89 +1994,6 @@ function hostLogin(){
 }
 
 /* ================= 表格元件 ================= */
-/* ===== V3.0.8 歷年年度檢討 ===== */
-const REVIEW_SUM_2026="";
-const REVIEW_BUILTIN={2026:{title:"2026 年度計劃檢討報告",period:"NetSuite 實績 2025/9～2026/8",sum:REVIEW_SUM_2026,
-  src:[{k:"co",label:"全公司經營數據",sheets:[]}]}};
-const rvDoc=(y,k,i)=>"rv"+y+k+"s"+i+"__X";
-function reviewIdx(){try{const v=JSON.parse(Store.cell("review__X","idx")||"[]");return Array.isArray(v)?v.filter(Boolean):[]}catch(e){return []}}
-function reviewYears(){const ys=new Set(Object.keys(REVIEW_BUILTIN).map(Number));reviewIdx().forEach(x=>ys.add(+x.y));return [...ys].sort((a,b)=>b-a)}
-function reviewSources(y){const out=[],b=REVIEW_BUILTIN[y];if(b)b.src.forEach(s=>out.push({k:s.k,label:s.label,builtin:true,sheets:s.sheets}));
-  reviewIdx().filter(x=>+x.y===+y).forEach(x=>out.push({k:x.k,label:x.label,at:x.at,sheets:Array.from({length:+x.n||0},(_,i)=>{const c=Store.body(rvDoc(y,x.k,i)).cells;let rows=[];try{rows=JSON.parse(c.rows||"[]")}catch(e){}
-    return {name:c.name||("工作表"+(i+1)),rows,restrict:c.restrict==="1",empty:c.empty==="1",cut:c.cut==="1"}})}));return out}
-function reviewSum(y){const v=Store.cell("review__X","sum."+y);return v||((REVIEW_BUILTIN[y]||{}).sum)||""}
-function reviewCanSee(s){if(!s.restrict)return true;if(isAdmin()||state.mode==="host")return true;const me=getMe();return !!me&&(isGM(me)||myDeptCode()==="SALES")}
-const rvNum=v=>/^[-+]?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
-const rvNe=r=>r.filter(x=>String(x).trim()).length;
-/* 把一張工作表拆成區塊：前面的說明文字、表格（含表頭）、後面的※註記 */
-function rvParse(rows){const bl=[];let cur=[];(rows||[]).forEach(r=>{if(rvNe(r))cur.push(r.map(x=>String(x==null?"":x)));else if(cur.length){bl.push(cur);cur=[]}});if(cur.length)bl.push(cur);
-  return bl.map(b=>{let i=0;const texts=[],notes=[];while(i<b.length&&rvNe(b[i])<=2&&!b[i].some(rvNum)){texts.push(b[i].filter(x=>x.trim()).join(" "));i++}
-    let j=b.length;while(j>i&&rvNe(b[j-1])<=2&&/^※/.test((b[j-1].find(x=>x.trim())||"").trim()))j--;
-    b.slice(j).forEach(r=>notes.push(r.filter(x=>x.trim()).join(" ")));
-    let t=b.slice(i,j);const keep=[];t.forEach(r=>r.forEach((x,ci)=>{if(String(x).trim())keep[ci]=true}));t=t.map(r=>r.filter((x,ci)=>keep[ci]));
-    let head=null;if(t.length>1&&rvNe(t[0])>=3&&!t[0].some(rvNum)&&t[0].every(x=>x.length<=40)){head=t[0];t=t.slice(1)}
-    return {texts:texts.filter(Boolean),notes,head,rows:t}})}
-function rvTableEl(p){if(!p.rows.length&&!p.head)return null;const td=(x,ci,th)=>h(th?"th":"td",{class:(rvNum(x)?"n":"")+(ci===0?" c0":"")},x);
-  return h("div",{class:"rvtw"},h("table",{class:"rvt"},p.head?h("thead",null,h("tr",null,p.head.map((x,ci)=>td(x,ci,true)))):null,
-    h("tbody",null,p.rows.map(r=>h("tr",{class:/^(合計|合计|小計|前 \d+ 名小計)/.test((r[0]||"").trim())||/合計 銷貨收入|營業收入淨額/.test(r[0]||"")?"tot":""},r.map((x,ci)=>td(x,ci,false)))))))}
-function rvSheetEl(s,first){const w=h("div",{class:"rvs"});if(s.empty)w.append(h("div",{class:"rvempty"},"此表尚未填寫（目前為空白範本），以下為表格格式。"));
-  if(s.cut)w.append(h("div",{class:"rvempty"},"此表資料量太大，只保留前面的部分。"));
-  rvParse(s.rows).forEach((p,bi)=>{p.texts.forEach((t,ti)=>w.append(h(bi===0&&ti===0?"h3":"div",{class:/^※/.test(t)?"rvnote":bi===0&&ti===0?"rvh":"rvsub"},t)));const tb=rvTableEl(p);if(tb)w.append(tb);p.notes.forEach(t=>w.append(h("div",{class:"rvnote"},t)))});
-  if(s.empty)w.classList.add("rvdim");return w}
-/* 給 AI／Excel 用：每個區塊一張表 */
-function reviewTables(y,opt){const out=[];reviewSources(y).forEach(src=>src.sheets.forEach(s=>{if(s.empty||s.restrict)return;const ps=rvParse(s.rows);
-  let carry=[];ps.forEach((p,bi)=>{if(!p.rows.length){carry=carry.concat(bi===0?p.texts.slice(1):p.texts,p.notes);return}const nc=Math.max(p.head?p.head.length:0,...p.rows.map(r=>r.length));const head=p.head||Array.from({length:nc},(_,i)=>i?"欄"+(i+1):"項目");
-    const title=(bi===0?"":(p.texts[0]||"")).replace(/^[一二三四五六七八九十]+、/,"");
-    out.push({name:y+" 檢討｜"+(reviewSources(y).length>1?src.label+"｜":"")+s.name.replace(/^\s+/,"")+(title?"｜"+title:""),note:[].concat(carry,bi===0?p.texts:p.texts.slice(1),p.notes).join("；").slice(0,600),head,rows:p.rows});carry=[]})}));return out}
-function reviewAgentMd(){const ys=reviewYears();if(!ys.length)return "";return "# 歷年年度檢討（背景資料）\n\n"+ys.map(y=>{const s=reviewSum(y);return (s?s+"\n\n":"")+tablesMd(reviewTables(y))}).join("\n\n")}
-function reviewCtx(){const ys=reviewYears().slice(0,2);return ys.map(y=>reviewSum(y)).filter(Boolean).join("\n\n")}
-const RV={y:null,src:null,sh:0,edit:false,imp:false,msg:""};
-function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=reviewYears();if(!ys.length){el.append(h("div",{class:"rvempty"},"尚無年度檢討資料"));return}
-  if(!ys.includes(RV.y))RV.y=ys[0];const y=RV.y,srcs=reviewSources(y);if(!srcs.some(s=>s.k===RV.src)){RV.src=srcs[0]?srcs[0].k:null;RV.sh=0}
-  const admin=isAdmin()||(state.mode==="host"&&!BACKEND_URL);const chip=(t,on,fn,extra)=>h("button",{class:"rvchip"+(on?" on":""),onclick:fn},t,extra||null);
-  el.append(h("div",{class:"rvbar"},h("b",null,"年度："),ys.map(v=>chip(v+" 年",v===y,()=>{RV.y=v;RV.src=null;RV.sh=0;RV.edit=false;el._draw()})),
-    admin?h("button",{class:"btn",style:"margin-left:auto;padding:4px 12px;font-size:13px",onclick:()=>{RV.imp=!RV.imp;el._draw()}},RV.imp?"收起匯入":"＋ 匯入檢討 Excel"):null));
-  if(admin&&RV.imp)el.append(reviewImportBox(el));
-  const b=REVIEW_BUILTIN[y];
-  const sumBox=h("div",{class:"rvsum"});const s=reviewSum(y);
-  sumBox.append(h("div",{class:"rvsumh"},h("b",null,(b?b.title:y+" 年度檢討")+(b&&b.period?"（"+b.period+"）":"")),h("span",{style:"flex:1"}),
-    h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>copyText(AGENT_HEAD+CO_PROFILE+"\n\n"+(s?s+"\n\n":"")+tablesMd(reviewTables(y)),t=>{RV.msg=t;el._draw()})},"📋 複製給 AI"),
-    admin?h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>{RV.edit=!RV.edit;el._draw()}},RV.edit?"完成":"✎ 編輯重點"):null));
-  if(RV.edit&&admin){const ta=h("textarea",{class:"pin",rows:12,style:"width:100%;font-size:13px"});ta.value=s;let tm;ta.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(()=>Store.write("review__X","cells","sum."+y,ta.value),600)});
-    sumBox.append(ta,h("div",{style:"font-size:12px;color:var(--muted)"},"這段重點會自動帶入各部門的 AI 指令（AI 顧問、資料包、NotebookLM）。清空就會恢復系統預設。"))}
-  else sumBox.append(s?h("div",{class:"rvsumt"},s):h("div",{style:"color:var(--muted);font-size:13px"},"尚未填寫檢討重點"+(admin?"，請按「編輯重點」":"")));
-  if(RV.msg)sumBox.append(h("div",{style:"font-size:12.5px;color:var(--gB)"},RV.msg));
-  el.append(sumBox);
-  if(srcs.length>1)el.append(h("div",{class:"rvbar"},h("b",null,"來源："),srcs.map(x=>chip(x.label,x.k===RV.src,()=>{RV.src=x.k;RV.sh=0;el._draw()}))));
-  const src=srcs.find(x=>x.k===RV.src);if(!src)return;
-  const vis=src.sheets.map((sh,i)=>[sh,i]).filter(([sh])=>reviewCanSee(sh));if(!vis.some(([,i])=>i===RV.sh))RV.sh=vis.length?vis[0][1]:0;
-  const nav=h("div",{class:"rvnav"},vis.map(([sh,i])=>chip(sh.name.trim(),i===RV.sh,()=>{RV.sh=i;el._draw()},sh.empty?h("small",null," 未填"):sh.restrict?h("small",null," 🔒"):null)));
-  el.append(nav);
-  if(admin&&!src.builtin)el.append(h("div",{style:"font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center"},"匯入於 "+(src.at||"").slice(0,16).replace("T"," "),
-    h("button",{class:"btn",style:"padding:2px 10px;font-size:12px",onclick:()=>{if(!confirm("確定移除「"+src.label+"」這份 "+y+" 年檢討資料？"))return;Store.write("review__X","cells","idx",JSON.stringify(reviewIdx().filter(x=>!(+x.y===+y&&x.k===src.k))));RV.src=null;el._draw()}},"移除這份")));
-  const cur=src.sheets[RV.sh];if(cur&&reviewCanSee(cur)){if(cur.restrict)el.append(h("div",{class:"rvnote"},"🔒 個人業績資料：只有管理員、總經理室與業務部看得到，也不會放進 AI 資料包。"));el.append(rvSheetEl(cur))}
-  else el.append(h("div",{class:"rvempty"},"沒有可檢視的工作表"))})}
-function reviewImportBox(host){const st={y:String(new Date().getFullYear()),label:"全公司",file:null,busy:false,msg:""};const box=h("div",{class:"rvsum"});
-  const draw=()=>{box.innerHTML="";const yi=h("input",{class:"pin",type:"number",value:st.y,style:"width:90px"});yi.addEventListener("input",()=>st.y=yi.value);
-    const li=h("input",{class:"pin",value:st.label,placeholder:"例如：全公司、業務部",style:"width:160px"});li.addEventListener("input",()=>st.label=li.value);
-    const fi=h("input",{type:"file",accept:".xlsx,.xls"});fi.addEventListener("change",()=>st.file=fi.files[0]||null);
-    box.append(h("b",null,"匯入年度檢討 Excel"),h("div",{style:"font-size:12.5px;color:var(--muted)"},"格式同「2026部門檢討表」：每個工作表會變成一頁，大家只能檢視。同一年可以匯入多份（例如全公司數據＋各部門檢討表），重複匯入同一年、同一名稱會覆蓋舊的。名稱含「業務別」的工作表只有管理員、總經理室與業務部看得到。"),
-      h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},"年度",yi,"名稱",li,fi,
-        h("button",{class:"btn primary",disabled:st.busy,onclick:async()=>{const y=parseInt(st.y,10);if(!(y>2000&&y<2100))return(st.msg="請輸入正確年度",draw());if(!st.file)return(st.msg="請選擇檔案",draw());
-          st.busy=true;st.msg="讀取中…";draw();try{st.msg=await reviewImport(y,(st.label||"").trim()||"全公司",st.file);RV.y=y;RV.src=null;RV.imp=false;host._draw()}catch(e){st.msg="匯入失敗："+e.message}st.busy=false;draw()}},"匯入")),
-      st.msg?h("div",{style:"font-size:12.5px;color:var(--gB)"},st.msg):null)};draw();return box}
-async function reviewImport(y,label,file){await loadXLSX();const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});
-  const idx=reviewIdx();const old=idx.find(x=>+x.y===y&&x.label===label);const k=old?old.k:Math.random().toString(36).slice(2,7).replace(/[^a-z0-9]/g,"a");
-  const skip=/^(封面|目錄|工作表\d*|Sheet\d*)$/;let n=0;
-  wb.SheetNames.forEach(nm=>{if(skip.test(nm.trim()))return;let rows=XLSX.utils.sheet_to_json(wb.Sheets[nm],{header:1,raw:false,defval:"",blankrows:true}).map(r=>r.map(x=>String(x).trim().replace(/^#DIV\/0!$/,"")));
-    while(rows.length&&!rvNe(rows[rows.length-1]))rows.pop();if(!rows.length)return;
-    let txt=JSON.stringify(rows),cut=false;while(txt.length>40000&&rows.length>5){rows=rows.slice(0,Math.floor(rows.length*0.85));txt=JSON.stringify(rows);cut=true}
-    const filled=rows.slice(3).reduce((a,r)=>a+r.slice(1).filter(x=>x.trim()).length,0);
-    const id=rvDoc(y,k,n);Store.write(id,"cells","name",nm.trim());Store.write(id,"cells","rows",txt);Store.write(id,"cells","restrict",/業務別/.test(nm)?"1":"");Store.write(id,"cells","cut",cut?"1":"");n++});
-  if(!n)throw new Error("檔案裡沒有可匯入的工作表");
-  const rest=idx.filter(x=>!(+x.y===y&&x.k===k));rest.push({y,k,label,n,at:new Date().toISOString()});Store.write("review__X","cells","idx",JSON.stringify(rest));
-  return "✓ 已匯入 "+n+" 個工作表"}
-
 function buildForm(fid,g,ro,opts){
   const f=FORMS[fid];if(planClosed()&&fid!=="feedback")ro=true;
   if(fid==="pestc")return buildPestcNotes(fid,g,ro);
@@ -2101,7 +2018,7 @@ function buildForm(fid,g,ro,opts){
   if(f.type==="dfb")return buildDFb(g,ro);
   if(f.type==="xproj")return buildXProj();
   if(f.type==="hrsum")return buildHrSum();
-  if(f.type==="review")return buildReview(ro);
+  if(f.type==="swotsum")return buildSwotSum();
   if(f.type==="cal")return buildCal(ro);
   if(f.type==="ops")return buildOps(ro,null,g);
   if(f.type==="roles")return buildRoles(fid,g,ro,opts&&opts.compact);
@@ -2925,7 +2842,6 @@ function deptContext(code){const d=deptByCode(code),st=Store.body(docId("strateg
     blk(f.board+" 分析中與本部門功能相關的項目（"+fn.join("、")+"；★為重要）",["A","B","C"].flatMap(g=>Store.items(docId(fid,g)).filter(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell||"");return m&&fn.includes(f.cols[+m[2]])}).map(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell);return rows[+m[1]].label+" × "+f.cols[+m[2]]+"："+v.text+(v.star?"（★）":"")})),15)});
   blk("競爭者分析總結",["A","B","C"].flatMap(g=>RIVAL_SLOTS.map(([sl,lab])=>{const s2=Store.cell(docId("compare",g),sl+".sum");return s2?lab+"－"+(rivalName(g,sl)||"競爭者")+"："+s2.replace(/\n/g," "):""})),9);
   const ai=["SO","WT"].map(k=>Store.cell("swotai__X",k)).filter(Boolean);if(ai.length)L.push("【11/3 AI 比對三組 SO／WT 的重點】\n"+ai.map(x=>x.slice(0,600)).join("\n"));
-  const rvc=reviewCtx();if(rvc)L.push(rvc);
   return L.join("\n\n")}
 const AI_HEAD=code=>"你是熟悉台灣食品製造業的經營顧問。我是百鮮企業有限公司「"+deptByCode(code).name+"」的同仁，正在擬定 2027 年度計劃。\n\n"+CO_PROFILE+"\n\n以下是公司 9/29–11/4 年度檢討討論的結果：\n\n";
 const AI_TAIL="\n\n請使用繁體中文；資料不足或需要內部數據的地方請標示「待確認」，不要自行編造數字。";
@@ -3118,7 +3034,7 @@ function diffList(code){const d=deptDiff(code);if(!d)return h("div",{class:"cell
   if(!d.length)return h("div",{class:"cellro"},"與第一天版本相比沒有修改");
   const col={"新增":"#2E8B6A","修改":"#C98F0A","刪除":"#C0392B"};
   return h("div",{style:"display:grid;gap:6px"},d.map(x=>h("div",{class:"chgrow",style:"border-left:5px solid "+col[x.t]},h("b",{style:"color:"+col[x.t]},"【"+x.t+"】"),h("span",{style:"color:#5E6B78"},x.sec+"｜"),h("b",null,x.name),x.what?h("span",{style:"margin-left:6px;background:#FFF3C4;padding:0 6px;border-radius:4px"},"改了："+x.what.join("、")):null)))}
-function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["orgchart","dproj","review"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["dstrat","dproj","dsteps","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["review","cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
+function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
 
 function buildRivals(g,ro){
   const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
@@ -3301,6 +3217,11 @@ function aiAutoBox(key,getPrompt,opts){opts=opts||{};return live(h("div",{style:
   else{const rd=!opts.ready||opts.ready();el.append(h("div",{style:"font-size:13px;color:var(--muted)"},AI_RUN[key]?"AI 分析中…":!rd?(opts.wait||"等資料齊全後會自動產生"):host?"按上方按鈕產生，或進入簡報頁時會自動產生":"主持人產生後，結果會顯示在這裡"));
     if(host&&opts.auto&&!AI_RUN[key]&&!AI_RUN[key+"_q"]&&Store.loaded&&rd){AI_RUN[key+"_q"]=1;setTimeout(()=>{AI_RUN[key+"_q"]=0;if(aiBad(Store.cell("swotai__X",key)))run()},300)}}})}
 /* 三組合併的 SO／WT 原始表格：同一格內相同（或主持人合併過）的項目只列一次，標示組別與★ */
+function buildSwotSum(){const wrap=h("div",{style:"display:grid;gap:14px;min-width:0"});
+  const sec=(t,...k)=>h("div",{style:"border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:10px;min-width:0"},h("h3",{style:"margin:0;font-size:16px"},t),...k);
+  wrap.append(sec("AI 依三組 SO／WT 擬定的 2027 策略與專案",aiAutoBox("PLAN",swotPlanAllPrompt,{})));
+  ["swot_so","swot_wt"].forEach(fid=>{const f=FORMS[fid];wrap.append(sec(f.title,h("div",{style:"overflow-x:auto;max-width:100%"},swotMergedTable(fid,false)),aiAutoBox(f.board,()=>swotComparePrompt(fid),{head:h("b",null,"🤖 AI 比對三組重點（"+f.board+"）")})))});
+  return wrap}
 function swotMergedTable(fid,big){const f=FORMS[fid],rows=gridRows(f),al=tagAlias();
   return live(h("div",{class:"tablewrap"}),el=>{const cell={};
     ["A","B","C"].forEach(g=>Store.items(docId(fid,g)).sort(byT).forEach(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell||"");if(!m||!(v.text||"").trim())return;
@@ -3832,8 +3753,8 @@ function nlmMeetingDoc(mid){const m=MEETINGS.find(x=>x.id===mid),L=["# 百鮮年
   L.push("",tablesMd(aggMeeting(mid)));return {key:"meet_"+mid,title:"百鮮年度計劃｜"+m.no+"｜"+nlmTheme(m),md:L.join("\n")}}
 /* ---- AI agent 指令 ---- */
 const AGENT_HEAD="以下是百鮮企業 2027 年度計劃的資料。表格依原始討論表格整理，三組（A／B／C）的內容已合併，"+AGG_NOTE+"。\n請先閱讀並記住這些資料，回覆「已讀取」即可；接下來我會請你協助擬定年度計劃。回答請使用繁體中文，只根據資料回答，資料中沒有的數字請標示「待確認」。\n\n";
-const agentPack=(title,tables)=>AGENT_HEAD+CO_PROFILE+"\n\n# "+title+"\n\n"+tablesMd(tables)+"\n\n"+reviewAgentMd();
-function deptAgentPack(code){return AGENT_HEAD+CO_PROFILE+"\n\n# 一、前期討論彙整（10/6–11/3，第 1–5 次會議）\n\n"+tablesMd(aggPre())+"\n\n# 二、"+deptByCode(code).name+" 2027 年度計劃資料\n\n"+tablesMd(aggDept([code]))+"\n\n"+reviewAgentMd()}
+const agentPack=(title,tables)=>AGENT_HEAD+CO_PROFILE+"\n\n# "+title+"\n\n"+tablesMd(tables);
+function deptAgentPack(code){return AGENT_HEAD+CO_PROFILE+"\n\n# 一、前期討論彙整（10/6–11/3，第 1–5 次會議）\n\n"+tablesMd(aggPre())+"\n\n# 二、"+deptByCode(code).name+" 2027 年度計劃資料\n\n"+tablesMd(aggDept([code]))}
 /* ---- Excel ---- */
 function loadLib(test,srcs){return new Promise((res,rej)=>{if(test())return res();const tryOne=i=>{if(i>=srcs.length)return rej(new Error("無法載入元件，請檢查網路"));const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>test()?res():tryOne(i+1);sc.onerror=()=>{sc.remove();tryOne(i+1)};document.head.append(sc)};tryOne(0)})}
 const XLSX_SRC=["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js","https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"];
@@ -3854,7 +3775,7 @@ function openDataHub(){const admin=isAdmin()&&!!BACKEND_URL;const st={sel:{},bus
   const preTitle="百鮮年度計劃前期討論彙整（三組合併）";
   const deptT=c=>c?"百鮮 2027 年度策略｜"+deptByCode(c).name:"百鮮 2027 年度策略彙整（各部門）";
   const cloud=()=>{const ys=nlmMonthYears();return [["前期討論（Google 試算表＋依會議的 Google 文件）",[{key:"sheet_pre",kind:"sheet",title:preTitle,tables:aggPre()}].concat(Object.keys(NLM_MEETS).map(nlmMeetingDoc))],
-    ["2027 年度策略（Google 試算表＋依部門的 Google 文件）",[{key:"sheet_dept",kind:"sheet",title:deptT(""),tables:aggDept(DEPT_CODES)}].concat(DEPT_CODES.map(nlmDeptDoc))]].concat(ys.map(y=>[rocY(y)+" 年度管理月會（依部門）",DEPT_CODES.map(c=>nlmMonthDoc(c,y))])).concat(reviewYears().map(y=>[y+" 年度檢討（Google 試算表）",[{key:"sheet_review_"+y,kind:"sheet",title:"百鮮 "+y+" 年度檢討",tables:reviewTables(y)}]]))};
+    ["2027 年度策略（Google 試算表＋依部門的 Google 文件）",[{key:"sheet_dept",kind:"sheet",title:deptT(""),tables:aggDept(DEPT_CODES)}].concat(DEPT_CODES.map(nlmDeptDoc))]].concat(ys.map(y=>[rocY(y)+" 年度管理月會（依部門）",DEPT_CODES.map(c=>nlmMonthDoc(c,y))]))};
   let body=null;const say=t=>{st.msg=t;draw()};
   const draw=()=>{if(!body)return;body.innerHTML="";
     const card=(title,...kids)=>h("div",{style:"grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px"},h("b",{style:"font-size:15px"},title),...kids);
@@ -3869,7 +3790,6 @@ function openDataHub(){const admin=isAdmin()&&!!BACKEND_URL;const st={sel:{},bus
     body.append(card("📦 匯出彙整資料",h("div",{style:"font-size:13px;color:var(--muted)"},"三組的討論結果合併在原始表格裡（"+AGG_NOTE+"）。Excel 每張表一個分頁；「複製給 AI」會連同使用說明一起複製，可直接貼到 Gemini、ChatGPT、Claude 或自己的 AI agent。"),
       row("前期討論彙整","第 1–5 次會議：內部能力、百鮮競爭力、競爭者、外部環境、SO／WT",[pv("pre"),cp(preMd),xl("百鮮年度計劃前期討論彙整.xlsx",aggPre)]),pvBox("pre",preMd),
       row(h("span",null,"年度策略 ",dsel),st.dept?"含前期討論彙整＋本部門的策略展開、專案、KPI、職務執掌、人力":"營運目標、策略展開、各部門專案、KPI、職務執掌、人力",[pv("dept"),cp(deptMd),xl((st.dept?deptByCode(st.dept).name:"各部門")+"_2027年度策略.xlsx",()=>st.dept?aggPre().concat(aggDept([st.dept])):aggDept(DEPT_CODES))]),pvBox("dept",deptMd),
-      row("歷年年度檢討","經營數據（銷售、產品、客戶、通路、產能）與檢討重點；個人業績不會匯出",[pv("rv"),cp(()=>AGENT_HEAD+CO_PROFILE+"\n\n"+reviewAgentMd()),xl("百鮮歷年年度檢討.xlsx",()=>reviewYears().flatMap(y=>reviewTables(y)))]),pvBox("rv",()=>reviewAgentMd()),
       st.msg?h("div",{style:"font-size:13px;color:var(--gB)"},st.msg):null));
     const nb=nlmInfo("nb");
     body.append(card("📖 AI 使用方式",nlmFolderLink(),nb&&nb.url?h("div",null,h("a",{class:"btn",href:nb.url,target:"_blank",rel:"noopener",style:"text-decoration:none;padding:4px 12px"},"開啟百鮮 2027 年度計劃 NotebookLM 筆記本")):null,aiGuideBox()));
