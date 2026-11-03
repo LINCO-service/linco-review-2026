@@ -26,7 +26,7 @@ jobs:
       - name: 下載目前的 Apps Script 專案（保留 appsscript.json 等設定）
         run: |
           mkdir work && cd work
-          npx -y @google/clasp@2.4.2 clone "$SCRIPT_ID"
+          npx -y @google/clasp@3 clone "$SCRIPT_ID"
           ls -la
       - name: 換上新版 Code.gs
         run: |
@@ -38,9 +38,9 @@ jobs:
       - name: 上傳並更新部署
         run: |
           cd work
-          npx -y @google/clasp@2.4.2 push -f
+          npx -y @google/clasp@3 push -f
           ver=$(grep -o "工作台 V[0-9.]*" Code.* | head -1 | sed 's/.* //')
-          npx -y @google/clasp@2.4.2 deploy -i "$DEPLOYMENT_ID" -d "$ver（GitHub 自動部署 ${GITHUB_SHA::7}）"
+          npx -y @google/clasp@3 deploy -i "$DEPLOYMENT_ID" -d "$ver（GitHub 自動部署 ${GITHUB_SHA::7}）"
       - name: 清除授權
         if: always()
         run: rm -f ~/.clasprc.json
