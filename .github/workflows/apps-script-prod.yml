@@ -23,6 +23,7 @@ jobs:
         run: |
           test -n "$CLASPRC" || { echo "尚未設定 GitHub Secret：CLASPRC_JSON"; exit 1; }
           printf '%s' "$CLASPRC" > ~/.clasprc.json
+          node -e 'try{const o=JSON.parse(require("fs").readFileSync(process.env.HOME+"/.clasprc.json","utf8"));if(!(o.tokens&&o.tokens.default&&o.tokens.default.refresh_token))throw new Error("缺少 tokens.default.refresh_token")}catch(e){console.error("CLASPRC_JSON 內容格式不正確（請確認整段複製，包含最後的大括號 }）："+e.message);process.exit(1)}'
       - name: 下載目前的 Apps Script 專案（保留 appsscript.json 等設定）
         run: |
           mkdir work && cd work
