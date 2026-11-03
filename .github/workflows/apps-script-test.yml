@@ -1,0 +1,42 @@
+# 推送 apps-script/test/Code.gs 後，自動更新「測試」Apps Script 後端（沿用原部署，網址不變）
+name: Apps Script 自動部署（測試）
+on:
+  push:
+    branches: [main]
+    paths: ['apps-script/test/**']
+  workflow_dispatch:
+concurrency: apps-script-test
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SCRIPT_ID: 17cjrr1Wx3zZCIk_NL6oYVOxU9dhGNFGJ8neAXYZie9IKcha4k_C4EvD_
+      DEPLOYMENT_ID: AKfycbzkIXd-GGYHAQG97dZW3oZghcZr0p10HjVwhCXkRZ3RdwO0n8v_Q-uCihJjQX3BdSroEA
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 寫入 clasp 授權
+        run: printf '%s' "${{ secrets.CLASPRC_JSON }}" > ~/.clasprc.json
+      - name: 下載目前的 Apps Script 專案（保留 appsscript.json 等設定）
+        run: |
+          mkdir work && cd work
+          npx -y @google/clasp@2.4.2 clone "$SCRIPT_ID"
+          ls -la
+      - name: 換上新版 Code.gs
+        run: |
+          cd work
+          f=$(ls Code.js Code.gs 2>/dev/null | head -1)
+          test -n "$f" || { echo "找不到 Code 檔"; exit 1; }
+          cp ../apps-script/test/Code.gs "$f"
+          grep -o "百鮮年度計劃暨會議管理工作台 V[0-9.]*" "$f" | head -1
+      - name: 上傳並更新部署
+        run: |
+          cd work
+          npx -y @google/clasp@2.4.2 push -f
+          ver=$(grep -o "工作台 V[0-9.]*" Code.* | head -1 | sed 's/.* //')
+          npx -y @google/clasp@2.4.2 deploy -i "$DEPLOYMENT_ID" -d "$ver（GitHub 自動部署 ${GITHUB_SHA::7}）"
+      - name: 清除授權
+        if: always()
+        run: rm -f ~/.clasprc.json
