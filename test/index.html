@@ -3210,18 +3210,34 @@ function mdBlock(t){const d=h("div",{class:"aimd"});d.innerHTML=mdToHtml(String(
 function aiAutoBox(key,getPrompt,opts){opts=opts||{};return live(h("div",{style:"display:grid;gap:8px"}),el=>{const raw=Store.cell("swotai__X",key),res=aiBad(raw)?"":raw,host=state.mode==="host"&&!!BACKEND_URL;
   const msg=h("span",{style:"font-size:13px;color:var(--muted)"});
   const run=async()=>{if(AI_RUN[key])return;AI_RUN[key]=1;msg.textContent="AI 分析中，約 30–60 秒…";if(btn)btn.disabled=true;
-    try{const j=await backendPost({action:"ai",prompt:getPrompt()});Store.write("swotai__X","cells",key,j.text);toast("AI 已完成")}catch(e){msg.textContent="AI 失敗："+e.message;if(btn)btn.disabled=false}finally{AI_RUN[key]=0}};
+    try{const j=await backendPost(Object.assign({action:"ai",prompt:getPrompt()},opts.json?{json:true}:{}));Store.write("swotai__X","cells",key,j.text);toast("AI 已完成")}catch(e){msg.textContent="AI 失敗："+e.message;if(btn)btn.disabled=false}finally{AI_RUN[key]=0}};
   const btn=host?h("button",{class:"btn"+(res?"":" primary"),style:"padding:4px 12px",onclick:e=>{if(res&&!e.currentTarget.dataset.c){e.currentTarget.dataset.c="1";e.currentTarget.textContent="會覆蓋目前結果，再按一次";return}run()}},res?"重新產生":"✨ 產生 AI 結果"):null;
   el.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},opts.head||null,btn,msg));
-  if(res)el.append(h("div",{style:"border:1px solid var(--saffron);background:var(--saffron-soft);color:var(--ink);border-radius:10px;padding:10px 14px;line-height:1.65;"+(opts.big?"font-size:clamp(14px,1.3vw,18px)":"font-size:14px")},mdBlock(res)));
+  if(res)el.append(opts.render?opts.render(res):h("div",{style:"border:1px solid var(--saffron);background:var(--saffron-soft);color:var(--ink);border-radius:10px;padding:10px 14px;line-height:1.65;"+(opts.big?"font-size:clamp(14px,1.3vw,18px)":"font-size:14px")},mdBlock(res)));
   else{const rd=!opts.ready||opts.ready();el.append(h("div",{style:"font-size:13px;color:var(--muted)"},AI_RUN[key]?"AI 分析中…":!rd?(opts.wait||"等資料齊全後會自動產生"):host?"按上方按鈕產生，或進入簡報頁時會自動產生":"主持人產生後，結果會顯示在這裡"));
     if(host&&opts.auto&&!AI_RUN[key]&&!AI_RUN[key+"_q"]&&Store.loaded&&rd){AI_RUN[key+"_q"]=1;setTimeout(()=>{AI_RUN[key+"_q"]=0;if(aiBad(Store.cell("swotai__X",key)))run()},300)}}})}
 /* 三組合併的 SO／WT 原始表格：同一格內相同（或主持人合併過）的項目只列一次，標示組別與★ */
+function swotMatrixPrompt(){return swotPlanAllPrompt().split("\n\n請以三組都標★")[0]+
+  "\n\n請整理成「精簡版 TOWS 策略矩陣」，不要依功能部門分欄，只輸出 JSON（不要其他文字）：\n"+
+  '{"S":["關鍵優勢",...],"W":["關鍵劣勢",...],"O":["關鍵機會",...],"T":["關鍵威脅",...],"SO":["策略",...],"WO":["策略",...],"ST":["策略",...],"WT":["策略",...]}'+
+  "\n規則：S／W／O／T 各 3–4 項，每項 15 字以內，以三組都標★或重複出現的項目為主；SO／WO／ST／WT 各 2–3 項 2027 策略，每項 25 字以內，用動詞開頭、具體可執行。使用繁體中文。"}
+function swotMatrixEl(raw,big){const o=parseObj(raw);if(!o)return h("div",{class:"aimd"},mdBlock(raw));const L=k=>(Array.isArray(o[k])?o[k]:o[k]?[o[k]]:[]).map(String);
+  const fs=big?"font-size:clamp(13px,1.25vw,18px)":"font-size:14px";
+  const list=(k,num)=>h(num?"ol":"ul",{style:"margin:0;padding-left:1.3em;line-height:1.5"},L(k).map(x=>h("li",null,x)));
+  const hd=(t,k,bg)=>h("div",{style:"background:"+bg+";border-radius:8px;padding:8px 10px"},h("b",null,t),list(k));
+  const cell=(t,sub,k)=>h("div",{style:"border:1px solid var(--saffron);background:var(--saffron-soft);border-radius:8px;padding:8px 10px"},h("div",{style:"margin-bottom:4px"},h("b",null,t),h("small",{style:"color:#6B5A2A;margin-left:6px"},sub)),list(k,true));
+  return h("div",{style:"display:grid;grid-template-columns:minmax(110px,.8fr) 1fr 1fr;gap:8px;"+fs},
+    h("div",{style:"display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--muted)"},"TOWS"),hd("內部優勢 S","S","rgba(46,125,50,.10)"),hd("內部劣勢 W","W","rgba(198,40,40,.08)"),
+    hd("外部機會 O","O","rgba(21,101,192,.08)"),cell("SO 策略","增長突破","SO"),cell("WO 策略","內部優化","WO"),
+    hd("外部威脅 T","T","rgba(120,120,120,.12)"),cell("ST 策略","利基防禦","ST"),cell("WT 策略","風險防禦","WT"))}
 function buildSwotSum(){const wrap=h("div",{style:"display:grid;gap:14px;min-width:0"});
   const sec=(t,...k)=>h("div",{style:"border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:10px;min-width:0"},h("h3",{style:"margin:0;font-size:16px"},t),...k);
+  const ready=()=>["swot_so","swot_wt"].some(fid=>["A","B","C"].some(g=>boardLines(fid,g).length));
+  wrap.append(sec("精簡版策略矩陣（TOWS）",h("div",{style:"overflow-x:auto"},h("div",{style:"min-width:640px"},aiAutoBox("MATRIX",swotMatrixPrompt,{json:true,auto:true,ready,render:r=>swotMatrixEl(r,false),wait:"三組放好 SO／WT 標籤後會自動產生"})))));
   wrap.append(sec("AI 依三組 SO／WT 擬定的 2027 策略與專案",aiAutoBox("PLAN",swotPlanAllPrompt,{})));
-  ["swot_so","swot_wt"].forEach(fid=>{const f=FORMS[fid];wrap.append(sec(f.title,h("div",{style:"overflow-x:auto;max-width:100%"},swotMergedTable(fid,false)),aiAutoBox(f.board,()=>swotComparePrompt(fid),{head:h("b",null,"🤖 AI 比對三組重點（"+f.board+"）")})))});
-  return wrap}
+  const det=h("details",null,h("summary",{style:"cursor:pointer;font-weight:700"},"查看三組原始 SO／WT 表（依功能面向）與 AI 比對重點"));
+  ["swot_so","swot_wt"].forEach(fid=>{const f=FORMS[fid];det.append(h("div",{style:"display:grid;gap:10px;margin-top:10px;min-width:0"},h("h4",{style:"margin:0"},f.title),h("div",{style:"overflow-x:auto;max-width:100%"},swotMergedTable(fid,false)),aiAutoBox(f.board,()=>swotComparePrompt(fid),{head:h("b",null,"🤖 AI 比對三組重點（"+f.board+"）")})))});
+  wrap.append(sec("原始資料",det));return wrap}
 function swotMergedTable(fid,big){const f=FORMS[fid],rows=gridRows(f),al=tagAlias();
   return live(h("div",{class:"tablewrap"}),el=>{const cell={};
     ["A","B","C"].forEach(g=>Store.items(docId(fid,g)).sort(byT).forEach(([k,v])=>{const m=/^r(\d+)c(\d+)$/.exec(v.cell||"");if(!m||!(v.text||"").trim())return;
