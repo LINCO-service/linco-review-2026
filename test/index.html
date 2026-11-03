@@ -742,6 +742,12 @@ ul.oc-dd{padding-left:1.2em}
 .slide .t8nm.top{background:#1E2B3A;color:#fff;border-color:#1E2B3A}
 .slide .t8nm.top b{color:#FFCE37}
 .slide .t8wait{font-size:clamp(12px,1.2vw,16px);color:#8A7A4A}
+/* V2.9.0 AI 流程 */
+.aiflow{border:1px solid var(--saffron);background:var(--saffron-soft);border-radius:12px;padding:10px 14px;margin-bottom:12px}
+.aiflow>summary{cursor:pointer;font-weight:700;font-size:15px}
+.aistep{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;background:var(--paper);border-radius:10px;padding:10px 12px}
+.aino{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:700;font-size:13px}
+.aiguide{background:var(--mist);border-radius:10px;padding:10px 12px}
 </style>
 </head>
 <body>
@@ -1351,7 +1357,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V2.8.0";
+const VERSION="V2.9.1";
 const LOGO_PNG="data:image/png;base64,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";
 function loadPdfLibs(){const L=(srcs)=>new Promise((res,rej)=>{const t=(i)=>{if(i>=srcs.length)return rej(new Error("無法載入 PDF 元件，請檢查網路"));const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>res();sc.onerror=()=>{sc.remove();t(i+1)};document.head.append(sc)};t(0)});
   return Promise.all([window.html2canvas?1:L(["https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js","https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"]),
@@ -2810,11 +2816,6 @@ function deptOrgPrompt(code){const ps=deptProjects(code).map(x=>x[1]).filter(p=>
   const rs=deptRoles(code).map(x=>x[1]).map(r=>"- "+(r.unit?r.unit+"／":"")+(r.title||"")+"：現有 "+(r.now||"?")+" 人");
   return AI_HEAD(code)+deptContext(code)+"\n\n【本部門 2027 專案】"+(ps.length?"\n"+ps.join("\n"):"（尚未填寫）")+"\n\n【本部門目前人力】"+(rs.length?"\n"+rs.join("\n"):"（尚未填寫）")+
   "\n\n請評估要完成上述專案，本部門 2027 年的人力需求，用下面的表格格式輸出：\n課別｜崗位｜主要職責｜現有人數｜2027 編制｜預計補齊月份｜說明\n並說明哪些工作可以用流程改善、自動化或跨部門支援取代增聘。"+AI_TAIL}
-function aiHelpFor(fid,code){if(!code||!deptByCode(code))return null;
-  if(fid==="dstrat"||fid==="dproj")return promptBoxDyn("AI 指令：依年度檢討結果，建議本部門策略與 2027 專案（表格格式同專案管理）",()=>deptStratPrompt(code));
-  if(fid==="dkpi")return promptBoxDyn("AI 指令：依策略與專案，建議本部門 KPI／DPI",()=>deptKpiPrompt(code));
-  if(fid==="dorg")return promptBoxDyn("AI 指令：依 2027 專案，評估本部門人力需求",()=>deptOrgPrompt(code));
-  return null}
 /* ================= 2027 行事曆（每日＋年度大事＋匯出 Google 行事曆） ================= */
 const HOLI27=[["2027-01-01","元旦"],["2027-02-05","除夕"],["2027-02-06","春節（初一）"],["2027-02-07","春節（初二）"],["2027-02-08","春節（初三）"],["2027-02-28","和平紀念日"],["2027-04-04","兒童節"],["2027-04-05","清明節"],["2027-05-01","勞動節"],["2027-06-09","端午節"],["2027-09-15","中秋節"],["2027-09-28","教師節"],["2027-10-10","國慶日"],["2027-10-25","臺灣光復節"],["2027-12-25","行憲紀念日"],["2027-02-09","春節補假"],["2027-02-10","春節補假"],["2027-03-01","和平紀念日補假"],["2027-04-06","兒童節補假"],["2027-04-30","勞動節補假"],["2027-10-11","國慶日補假"],["2027-12-24","行憲紀念日補假"]].sort((a,b)=>a[0].localeCompare(b[0]));
 const HOLI_MAP=Object.fromEntries(HOLI27);
@@ -3187,7 +3188,8 @@ function promptBoxInner(text){const pre=h("pre",{style:"white-space:pre-wrap;fon
     h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},h("button",{class:"btn primary",style:"padding:5px 14px",onclick:()=>copyText(pre.textContent,t=>msg.textContent=t)},"📋 複製指令"),h("button",{class:"btn",style:"padding:5px 12px",onclick:()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([pre.textContent],{type:"text/plain;charset=utf-8"}));a.download="AI指令.txt";document.body.append(a);a.click();a.remove()}},"⬇ 下載成文字檔"),link("https://chatgpt.com/","ChatGPT"),link("https://gemini.google.com/app","Gemini"),link("https://claude.ai/new","Claude"),msg))}
 function tagPool(){
   const map=new Map();
-  const put=(cat,text,sub,g)=>{text=(text||"").trim();if(!text)return;const key=cat+"|"+text;if(!map.has(key))map.set(key,{key,cat,text,sub,groups:new Set()});if(g&&g!=="X")map.get(key).groups.add(g)};
+  const nk=t=>t.toLowerCase().replace(/[\s，。、；：！？,.;:!?（）()「」『』"'“”‘’…\-－—–~～\/／・]/g,"");
+  const put=(cat,text,sub,g)=>{text=(text||"").trim();if(!text)return;const key=cat+"|"+nk(text);if(!map.has(key))map.set(key,{key,cat,text,sub,groups:new Set()});if(g&&g!=="X")map.get(key).groups.add(g)};
   ["A","B","C"].forEach(g=>{
     Store.items(docId("sw",g)).sort(byT).forEach(([k,v])=>put(v.side==="W"?"W":"S",v.text,v.dim,g));
     if(pestcHasSimple(g))PESTC_ROWS.forEach((r,ri)=>{pestcSimpleLines(g,ri,0).forEach(t=>put("O",t,r,g));pestcSimpleLines(g,ri,1).forEach(t=>put("T",t,r,g))});
@@ -3197,6 +3199,7 @@ function tagPool(){
     const cp=Store.body(docId("compare",g)).cells;RIVAL_SLOTS.forEach(([sl])=>{const nm=rivalName(g,sl)||"競爭者";COMP10.forEach((r,ri)=>splitLines(cp[sl+".r"+ri]).forEach(t=>put("R",t,nm+"・"+r,g)))});
   });
   Store.items(docId("tags","X")).sort(byT).forEach(([k,v])=>put(v.cat||"U",v.text,"自訂",null));
+  const al=tagAlias();Object.entries(al).forEach(([k,to])=>{const a=map.get(k),b=map.get(to);if(a&&b&&a!==b){a.groups.forEach(x=>b.groups.add(x));(b.also=b.also||[]).push(a.text);map.delete(k)}});
   return [...map.values()];
 }
 function buildBoard(fid,g,ro){
@@ -3213,7 +3216,7 @@ function buildBoard(fid,g,ro){
         return h("button",{"aria-pressed":String(cats.includes(c)),onclick:()=>{const i=cats.indexOf(c);i>=0?cats.splice(i,1):cats.push(c);el._draw()}},h("i",{class:"cd",style:"width:8px;height:8px;border-radius:50%;background:"+col}),nm+" "+n)})));
       const shown=pool.filter(t=>cats.includes(t.cat));
       el.append(h("div",{class:"tags"},shown.length?shown.map(t=>{
-        const chip=h("span",{role:"button",tabindex:"0",class:"tag"+(state.selTag&&state.selTag.key===t.key?" sel":"")+(used.has(t.key)?" used":""),draggable:"true",title:t.sub||"",
+        const chip=h("span",{role:"button",tabindex:"0",class:"tag"+(state.selTag&&state.selTag.key===t.key?" sel":"")+(used.has(t.key)?" used":""),draggable:"true",title:(t.sub||"")+(t.also?"\n已合併："+t.also.join("、"):""),
           onclick:()=>{state.selTag=state.selTag&&state.selTag.key===t.key?null:t;el._draw();armCells()}},
           h("i",{class:"cd",style:"background:"+CATS[t.cat][1]}),t.text,t.sub?h("small",null,t.sub):null,h("span",{class:"gdots"},[...t.groups].map(x=>h("i",{style:"background:"+GROUPS[x].color}))));
         chip.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",JSON.stringify({tag:t}));e.dataTransfer.effectAllowed="copy"});
@@ -3224,6 +3227,9 @@ function buildBoard(fid,g,ro){
       inp.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing)addU()});
       el.append(h("div",{class:"addrow",style:"margin:8px 0 0"},csel,inp,h("button",{class:"btn",onclick:addU},"新增")),
         h("div",{class:"hintline"},state.selTag?"已選取「"+state.selTag.text+"」，點下方任一格放入":"電腦：直接把標籤拖進格子｜手機：先點標籤，再點格子"));
+      if((state.mode==="host"||isAdmin())&&BACKEND_URL){const msg=h("span",{style:"font-size:13px;color:var(--gB)"}),say=(t,bad)=>{msg.textContent=t;msg.style.color=bad?"var(--danger)":"var(--gB)"};const na=Object.keys(tagAlias()).length;
+        el.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px"},h("button",{class:"btn",style:"padding:3px 12px;font-size:13px",onclick:async e=>{const b=e.currentTarget;b.disabled=true;try{await tagMergeAI(say)}catch(x){say("失敗："+x.message,true)}b.disabled=false}},"🤖 AI 合併意思重複的標籤（主持人）"),
+          na?h("button",{class:"btn",style:"padding:3px 12px;font-size:13px",onclick:()=>{Store.write(docId("tags","X"),"cells","alias","");toast("已還原 "+na+" 個合併")}},"還原合併（"+na+"）"):null,msg))}
     }));
   }
   const table=h("table",{class:"sheet board wide"});
@@ -3236,7 +3242,7 @@ function buildBoard(fid,g,ro){
       const cell="r"+ri+"c"+ci;
       const drop=live(h("div",{class:"drop"}),el=>{
         Store.items(id).filter(([k,v])=>v.cell===cell).sort(byT).forEach(([k,v])=>{
-          const chip=h("span",{class:"tag"+(v.star?" star-on":""),draggable:ro?null:"true"},h("i",{class:"cd",style:"background:"+(CATS[v.cat]||CATS.U)[1]}),v.text,
+          const chip=h("span",{class:"tag"+(v.star?" star-on":""),draggable:ro?null:"true"},h("i",{class:"cd",style:"background:"+(CATS[v.cat]||CATS.U)[1]}),v.text,v.by==="AI"?h("small",{style:"opacity:.55;margin-left:3px;font-size:10px"},"AI"):null,
             ro?(v.star?h("span",{class:"star on"},"★"):null):h("button",{class:"star"+(v.star?" on":""),"aria-label":"標記重要",title:"標記重要",onclick:e=>{e.stopPropagation();Store.write(id,"items",k,Object.assign({},v,{star:!v.star}))}},v.star?"★":"☆"),
             ro?null:h("button",{class:"x","aria-label":"移除",title:"移除",onclick:e=>{e.stopPropagation();Store.write(id,"items",k,null)}},"×"));
           if(!ro)chip.addEventListener("dragstart",e=>{e.dataTransfer.setData("text/plain",JSON.stringify({move:k}));e.dataTransfer.effectAllowed="move"});
@@ -3405,6 +3411,7 @@ function selfQPanel(g,ro){const id=docId("self10",g);
     ro?null:promptBoxDyn("步驟一 AI 指令：協助回答引導問題、提出追問",()=>selfStep1Prompt(g)))}
 function aiPasteBtn(title,ph,apply){return h("button",{class:"btn",style:"margin:6px 0",onclick:()=>pasteDialog(title,ph,t=>{const r=apply(t);if(typeof r==="string")return r;toast("已帶入 "+r+" 項，可再逐項修改");return ""})},"貼上 AI 回覆，自動帶入")}
 function aiHelpGroup(fid,g){if(!g||g==="X"||planClosed())return null;const f=FORMS[fid];
+  if(f.type==="board")return swotAutoBox(fid,g);
   if(f.type==="sw"){const id=docId("sw",g);
     return h("div",null,promptBoxDyn("AI 指令：補充本組的優勢與劣勢",()=>swPrompt(g)),aiPasteBtn("貼上 AI 回覆","貼上 AI 的回覆（每行「優勢｜內容」或「劣勢｜內容」）",t=>{
       const have=new Set(Store.items(id).map(x=>(x[1].text||"").trim()));let n=0,i=0;
@@ -3459,48 +3466,220 @@ function render(){setTimeout(saveUI,0);if(BACKEND_URL&&!window.claude&&!state.rs
     if(gs&&gs.startsWith("rt:")&&!(LS("linco-gtok")&&LS("linco-gscope")===gs)){renderGuestEntry(gs);return}
     if(gs&&gs.startsWith("mm")){if(getMe()){state.area="monthly";state.ym=gs.slice(2);history.replaceState(null,"",baseURL())}else if(!LS("linco-gtok")){renderGuestEntry(gs);return}}}
   if((state.area==="monthly"||state.area==="routine")&&(getMe()||state.mode==="host"||!BACKEND_URL)){state.area==="monthly"?renderMonthly():renderRoutine();return}state.mode==="host"?renderHost():renderParticipant()}
-/* ===== V2.7.0：匯出到 NotebookLM（會議／部門策略／月會依部門，存成 Google 文件，NotebookLM 會自動同步） ===== */
+/* ===== V2.9.0：三組彙整（依原始表格）→ Excel／Google 試算表／NotebookLM 文件／AI agent 指令；SO／WT 各組 AI 放置；部門 AI 年度計劃流程 ===== */
 const NLM_MEETS={m0:["roles"],m1:["sw"],m2:["self10","pick","rivals"],m3:["compare","traits"],m4:["pestc","traits8"],m5:["swot_so","swot_wt","swotai"]};
 const NLM_ID="nlm__X";
-/* 匯出時排除的競爭者（主持人在匯出視窗取消勾選；格式 "A.trad"） */
 const nlmExcl=()=>new Set((Store.cell(NLM_ID,"excl")||"").split(",").filter(Boolean));
 const nlmOut=(g,sl)=>nlmExcl().has(g+"."+sl);
-const mdCell=s=>String(s==null?"":s).replace(/\|/g,"／").replace(/\s*\n+\s*/g,"；").trim();
+const nlmInfo=k=>{try{return JSON.parse(Store.cell(NLM_ID,k)||"null")}catch(e){return null}};
+const AG=["A","B","C"],agN=g=>GROUPS[g].name;
+const joinL=xs=>xs.filter(Boolean).join("\n");
+const mdCell=s=>String(s==null?"":s).replace(/\|/g,"／").replace(/\s*\n+\s*/g,"<br>").trim();
 const mdList=(xs,empty)=>xs.length?xs.map(x=>"- "+x).join("\n"):(empty||"（尚無資料）");
-const mdTable=(head,rows)=>rows.length?["| "+head.join(" | ")+" |","|"+head.map(()=>"---").join("|")+"|"].concat(rows.map(r=>"| "+r.map(mdCell).join(" | ")+" |")).join("\n"):"（尚無資料）";
-function nlmForm(fid,g){const f=FORMS[fid]||{},L=[];
-  if(fid==="roles"){const id=docId("roles",g);L.push("組長："+(Store.cell(id,"leader")||"未定"),"",mdTable(["會議","記錄人","報告人"],ROLE_MEETINGS.map(([m,d])=>[d,Store.cell(id,"rec_"+m),Store.cell(id,"rep_"+m)])))}
-  else if(fid==="sw"){const its=Store.items(docId("sw",g)).map(x=>x[1]).filter(v=>(v.text||"").trim());
-    const one=v=>(v.dim?"〔"+v.dim+"〕":"〔未歸類〕")+v.text.trim()+(v.imp==="重要"?"（★重要）":"")+(v.urg==="急需"?"（急需處理）":"");
-    L.push("優勢 S：",mdList(its.filter(v=>v.side==="S").map(one)),"","劣勢 W：",mdList(its.filter(v=>v.side==="W").map(one)))}
-  else if(fid==="self10"){const c=Store.body(docId("self10",g)).cells;L.push(mdTable(["構面","百鮮的現況"],COMP10.map((d,i)=>[d,c["r"+i+"c0"]]).filter(r=>r[1])))}
-  else if(fid==="pick"){const c=Store.body(docId("pick",g)).cells;L.push(mdTable(["類型","競爭者","選擇理由"],f.rows.map((r,ri)=>[r,c["r"+ri+"c0"],c["r"+ri+"c1"],ri]).filter(r=>(r[1]||r[2])&&!nlmOut(g,RIVAL_SLOTS[r[3]][0])).map(r=>r.slice(0,3))))}
-  else if(fid==="rivals"){const rid=docId("rivals",g);RIVAL_SLOTS.filter(([sl])=>!nlmOut(g,sl)).forEach(([sl,lab])=>{L.push("**"+lab+"："+(rivalName(g,sl)||"未選定")+"**");
-    const xs=RIVAL_FIELDS.map(([k,l])=>[l,Store.cell(rid,sl+"."+k)]).filter(x=>x[1]&&x[0]!=="公司名稱").map(x=>x[0]+"："+mdCell(x[1]));L.push(mdList(xs),"")})}
-  else if(fid==="compare"){const out=RIVAL_SLOTS.filter(([sl])=>nlmOut(g,sl)).map(([sl,lab])=>"## "+lab+"：");
-    L.push(groupMarkdown(g).split("\n").slice(2).join("\n").split(/\n(?=## )/).filter(sec=>!out.some(p=>sec.startsWith(p))).join("\n").replace(/^## /gm,"### ")||"（尚無資料）")}
-  else if(fid==="traits"){const m=[...mergedTraits().entries()].sort((a,b)=>b[1]-a[1]);L.push(mdList(m.map(([t,n])=>t+(n>1?"（"+n+" 人寫到）":""))))}
-  else if(fid==="traits8"){const id=docId("traits8","X"),all=Store.items(id),traits=all.filter(([k,v])=>v.kind==="trait").sort(byT),noms=all.filter(([k,v])=>v.kind==="nom");
-    traits.forEach(([k,v],i)=>{const agg=new Map();noms.filter(([nk,nv])=>nv.trait===k).forEach(([nk,nv])=>agg.set(nv.name,(agg.get(nv.name)||0)+1));
-      const ns=[...agg.entries()].sort((a,b)=>b[1]-a[1]).map(([n,c])=>n+(c>1?"×"+c:""));
-      L.push((i+1)+". **"+(v.text||"").trim()+"**"+(v.desc?"：" +mdCell(v.desc):"")+(ns.length?"\n   代表人物："+ns.join("、"):""))});if(!traits.length)L.push("（尚無資料）")}
-  else if(fid==="pestc"){PESTC_ROWS.forEach((r,ri)=>{L.push("**"+r+"**","機會：",mdList(pestcLines(g,ri,0),"（無）"),"威脅：",mdList(pestcLines(g,ri,1),"（無）"),"")});
-    const sim=PESTC_ROWS.map((r,ri)=>[r,pestcSimpleLines(g,ri,0).join("；"),pestcSimpleLines(g,ri,1).join("；")]).filter(x=>x[1]||x[2]);
-    if(sim.length)L.push("AI 簡化版：","",mdTable(["面向","機會","威脅"],sim))}
-  else if(f.type==="board"){const rows=gridRows(f),its=Store.items(docId(fid,g)).map(x=>x[1]).filter(v=>(v.text||"").trim());
-    const placed=its.map(v=>[v,/^r(\d+)c(\d+)$/.exec(v.cell||"")]).filter(x=>x[1]);
-    L.push(mdTable(["列","功能","項目"],placed.sort((a,b)=>(+a[1][1]-+b[1][1])||(+a[1][2]-+b[1][2])).map(([v,m])=>[(rows[+m[1]].glabel?rows[+m[1]].glabel+"・":"")+rows[+m[1]].label,f.cols[+m[2]],v.text.trim()+(v.star?"（★重要）":"")])));
-    const un=its.filter(v=>!/^r\d+c\d+$/.test(v.cell||""));if(un.length)L.push("","尚未放入表格：",mdList(un.map(v=>v.text.trim())))}
-  return L.join("\n")}
-function nlmMeetingDoc(mid){const m=MEETINGS.find(x=>x.id===mid),L=[];
-  L.push("# 百鮮年度計劃前期討論｜"+m.no+"："+m.theme,"","- 日期："+adDate(m.date)+" "+m.time,"- 主題："+m.theme,"- 議程：","");
+const mdTable=(head,rows)=>rows.length?["| "+head.map(mdCell).join(" | ")+" |","|"+head.map(()=>"---").join("|")+"|"].concat(rows.map(r=>"| "+head.map((x,i)=>mdCell(r[i])).join(" | ")+" |")).join("\n"):"（尚無資料）";
+const AGG_NOTE="〔A〕〔B〕〔C〕＝出自哪一組，★＝組員標記為重要";
+/* 每張表＝{name,head,rows}；三組合併在同一張原始表格裡 */
+function aggForm(fid){const f=FORMS[fid]||{},out=[],T=(name,head,rows,note)=>out.push({name,head,rows,note});
+  const tagLine=(text,g,star,extra)=>"・"+String(text).trim()+"〔"+g+(star?"★":"")+(extra||"")+"〕";
+  if(fid==="roles"){const ids=AG.map(g=>docId("roles",g));
+    T("分組名單",["組別","組長","成員（部門）"],AG.map((g,i)=>[agN(g),Store.cell(ids[i],"leader"),GROUPS[g].members.map(([n,dp])=>n+"（"+dp+"）").join("、")]));
+    T("記錄人與報告人",["會議"].concat(AG.flatMap(g=>[agN(g)+" 記錄人",agN(g)+" 報告人"])),ROLE_MEETINGS.map(([m,d])=>[d].concat(AG.flatMap((g,i)=>[Store.cell(ids[i],"rec_"+m),Store.cell(ids[i],"rep_"+m)]))))}
+  else if(fid==="sw"){const its=AG.flatMap(g=>Store.items(docId("sw",g)).sort(byT).map(([k,v])=>Object.assign({g},v))).filter(v=>(v.text||"").trim());
+    const one=v=>tagLine(v.text,v.g,v.imp==="重要",v.urg==="急需"?"・急需":"");
+    T("內部能力分析",["七大面向","優勢 S","劣勢 W"],DIM7.concat(["未歸類"]).map(dm=>{const ok=v=>dm==="未歸類"?!DIM7.includes(v.dim):v.dim===dm;
+      return [dm,joinL(its.filter(v=>v.side==="S"&&ok(v)).map(one)),joinL(its.filter(v=>v.side==="W"&&ok(v)).map(one))]}).filter(r=>r[1]||r[2]),AGG_NOTE+"；急需＝急需處理")}
+  else if(fid==="self10")T("百鮮競爭力",["構面"].concat(AG.map(agN)),COMP10.map((d,i)=>[d].concat(AG.map(g=>Store.cell(docId("self10",g),"r"+i+"c0")))))
+  else if(fid==="pick")T("競爭者選擇",["類型"].concat(AG.map(agN)),f.rows.map((r,ri)=>[r].concat(AG.map(g=>{const c=Store.body(docId("pick",g)).cells,sl=RIVAL_SLOTS[ri][0];if(nlmOut(g,sl))return "";
+    return joinL([c["r"+ri+"c0"],c["r"+ri+"c1"]?"理由："+c["r"+ri+"c1"]:""])}))))
+  else if(fid==="rivals"){const F=RIVAL_FIELDS.filter(([k])=>k!=="name");
+    T("競爭者基本資料",["組別","類型","公司名稱"].concat(F.map(x=>x[1])),AG.flatMap(g=>RIVAL_SLOTS.filter(([sl])=>!nlmOut(g,sl)&&rivalName(g,sl)).map(([sl,lab])=>[agN(g),lab,rivalName(g,sl)].concat(F.map(([k])=>Store.cell(docId("rivals",g),sl+"."+k))))))}
+  else if(fid==="compare"){const rows=[];
+    AG.forEach(g=>{const C=Store.body(docId("compare",g)).cells,self=Store.body(docId("self10",g)).cells;RIVAL_SLOTS.filter(([sl])=>!nlmOut(g,sl)&&rivalName(g,sl)).forEach(([sl,lab])=>{const nm=rivalName(g,sl);
+      COMP10.forEach((d,i)=>{const v=cmpV(C,sl,i);if(!(C[sl+".r"+i]||C[sl+".sr"+i]||C[sl+".n"+i]||v))return;rows.push([agN(g),lab,nm,d,C[sl+".r"+i],self["r"+i+"c0"],C[sl+".sr"+i],C[sl+".su"+i],v?VERDICT[v][0]:"",C[sl+".n"+i]])});
+      const t=cmpTotals(C,sl);if(t.n)rows.push([agN(g),lab,nm,"總分（滿分 "+t.n*5+"）","","",t.r,t.u,"",""]);
+      if(C[sl+".sum"])rows.push([agN(g),lab,nm,"總結","","","","","",C[sl+".sum"]])})});
+    T("競爭者分析",["組別","類型","競爭者","構面","競爭者現況","百鮮現況","競爭者分數","百鮮分數","比較","說明"],rows)}
+  else if(fid==="traits")T("共事特質",["特質","寫到的人數"],[...mergedTraits().entries()].sort((a,b)=>b[1]-a[1]).map(([t,n])=>[t,n]))
+  else if(fid==="traits8"){const all=Store.items(docId("traits8","X")),noms=all.filter(([k,v])=>v.kind==="nom");
+    T("特質與代表人物",["序","特質","說明","代表人物"],all.filter(([k,v])=>v.kind==="trait").sort(byT).map(([k,v],i)=>{const agg=new Map();noms.filter(([nk,nv])=>nv.trait===k).forEach(([nk,nv])=>agg.set(nv.name,(agg.get(nv.name)||0)+1));
+      return [i+1,(v.text||"").trim(),v.desc||"",[...agg.entries()].sort((a,b)=>b[1]-a[1]).map(([n,c])=>n+(c>1?"×"+c:"")).join("、")]}))}
+  else if(fid==="pestc"){T("外部環境",["面向","機會 O","威脅 T"],PESTC_ROWS.map((r,ri)=>[r,joinL(AG.flatMap(g=>pestcLines(g,ri,0).map(t=>tagLine(t,g)))),joinL(AG.flatMap(g=>pestcLines(g,ri,1).map(t=>tagLine(t,g))))]),"〔A〕〔B〕〔C〕＝出自哪一組");
+    if(AG.some(g=>pestcHasSimple(g)))T("外部環境（AI 簡化版）",["面向","機會 O","威脅 T"],PESTC_ROWS.map((r,ri)=>[r,joinL(AG.flatMap(g=>pestcSimpleLines(g,ri,0).map(t=>tagLine(t,g)))),joinL(AG.flatMap(g=>pestcSimpleLines(g,ri,1).map(t=>tagLine(t,g))))]),"〔A〕〔B〕〔C〕＝出自哪一組")}
+  else if(f.type==="board"){const rows=gridRows(f),its=AG.flatMap(g=>Store.items(docId(fid,g)).sort(byT).map(([k,v])=>Object.assign({g},v))).filter(v=>(v.text||"").trim()&&/^r\d+c\d+$/.test(v.cell||""));
+    T(f.board+" 分析",["","列"].concat(f.cols),rows.map((r,ri)=>[r.glabel,r.label].concat(f.cols.map((c,ci)=>joinL(its.filter(v=>v.cell==="r"+ri+"c"+ci).map(v=>tagLine(v.text,v.g,v.star)))))),AGG_NOTE)}
+  else if(fid==="swotai"){const xs=[["SO","SO 分析"],["WT","WT 分析"]].map(([k,l])=>[l,Store.cell("swotai__X",k)]).filter(x=>x[1]);if(xs.length)T("AI 比對三組 SOWT",["分析","AI 整理的一致、差異與重點"],xs)}
+  return out}
+const aggMeeting=mid=>NLM_MEETS[mid].flatMap(aggForm);
+const aggPre=()=>Object.keys(NLM_MEETS).flatMap(aggMeeting);
+function aggDept(codes){const out=[],T=(name,head,rows)=>out.push({name,head,rows}),st=Store.body(docId("strategy","X")).cells,dn=c=>deptByCode(c).name;
+  T("營運目標與策略重點",["項目","內容"],[["2027 營運目標",st.goal||""],["2027 策略重點",st.focus||""]]);
+  const units=codes.flatMap(c=>DEPT_UNITS[dn(c)]);
+  T("策略展開",["項目"].concat(units.map(u=>STRAT_COLS[u])),["策略展開（專案）","KPI 指標"].map((r,ri)=>[r].concat(units.map(u=>st["r"+ri+"c"+u]||""))));
+  T("年度專案",["部門","專案","重要度","專案目標","預期指標","行動計劃"].concat(M12.map(m=>m+"月")).concat(["預算費用","負責部門","配合部門"]),
+    codes.flatMap(c=>deptProjects(c).map(x=>x[1]).filter(p=>(p.name||"").trim()).map(p=>[dn(c),p.name,p.w?p.w+"%":"",p.goal,p.kpi,p.plan].concat(M12.map(m=>(p.months||[]).includes(m)?"●":"")).concat([p.budget,p.owner||dn(c),(p.partners||[]).join("、")]))));
+  T("KPI 指標",["部門","指標名稱","屬性","重要度","2026 實際","2027 目標","定義／公式"].concat(M12.map(m=>m+"月目標")),
+    codes.flatMap(c=>Store.items(docId("dkpi",c)).sort(byT).map(x=>x[1]).filter(k=>(k.name||"").trim()).map(k=>[dn(c),k.name,k.attr,k.w?k.w+"%":"",k.last,k.target,k.def].concat(M12.map(m=>k["m"+m]||"")))));
+  T("職務執掌",["部門","課／組","職務","主要職責","詳細描述","KPI"],codes.flatMap(c=>orgDuties(c).map(r=>[dn(c),r.unit==="部門"?"":r.unit,r.role,r.resp,r.desc,(r.kpis||[]).map(k=>k.name).concat((r.common||[]).map(n=>n+"（共同）")).join("、")])));
+  T("人力配置",["部門","課別","崗位","主要職責","現有人數","2027 編制","增減","預計補齊月份","說明"],codes.flatMap(c=>deptRoles(c).map(x=>x[1]).filter(r=>(r.title||"").trim()).map(r=>{const d=num(r.plan)-num(r.now);return [dn(c),r.unit,r.title,r.duty,r.now,r.plan,d?(d>0?"+":"")+d:"0",r.month?r.month+"月":"",r.note]})));
+  return out}
+const tablesMd=ts=>ts.map(t=>"## "+t.name+"\n\n"+(t.note?"（"+t.note+"）\n\n":"")+mdTable(t.head,t.rows)).join("\n\n");
+function nlmMeetingDoc(mid){const m=MEETINGS.find(x=>x.id===mid),L=["# 百鮮年度計劃前期討論｜"+m.no+"："+m.theme,"","- 日期："+adDate(m.date)+" "+m.time,"- 三組（A／B／C）討論結果已合併在同一張表；"+AGG_NOTE,"- 議程："];
   m.agenda.filter(a=>!a.checkin).forEach((a,i)=>L.push((i+1)+". "+a.t+(a.sub?"（"+a.sub+"）":"")));
-  NLM_MEETS[mid].forEach(fid=>{
-    if(fid==="swotai"){const xs=[["SO","SO 分析"],["WT","WT 分析"]].map(([k,l])=>[l,Store.cell("swotai__X",k)]).filter(x=>x[1]);if(!xs.length)return;
-      L.push("","## AI 比對三組 SO／WT 的結果","");xs.forEach(([l,t])=>L.push("### "+l,"",t,""));return}
-    const f=FORMS[fid];L.push("","## "+f.title,"","說明："+(f.desc||""));
-    groupsFor(fid).forEach(g=>{if(g!=="X")L.push("","### "+GROUPS[g].name+"（"+GROUPS[g].members.map(x=>x[0]).join("、")+"）");L.push("",nlmForm(fid,g))})});
-  return {key:"meet_"+mid,title:"百鮮年度計劃｜"+m.no+"｜"+m.theme,md:L.join("\n")}}
+  L.push("",tablesMd(aggMeeting(mid)));return {key:"meet_"+mid,title:"百鮮年度計劃｜"+m.no+"｜"+m.theme,md:L.join("\n")}}
+/* ---- AI agent 指令 ---- */
+const AGENT_HEAD="以下是百鮮企業 2027 年度計劃的資料。表格依原始討論表格整理，三組（A／B／C）的內容已合併，"+AGG_NOTE+"。\n請先閱讀並記住這些資料，回覆「已讀取」即可；接下來我會請你協助擬定年度計劃。回答請使用繁體中文，只根據資料回答，資料中沒有的數字請標示「待確認」。\n\n";
+const agentPack=(title,tables)=>AGENT_HEAD+CO_PROFILE+"\n\n# "+title+"\n\n"+tablesMd(tables);
+function deptAgentPack(code){return AGENT_HEAD+CO_PROFILE+"\n\n# 一、前期討論彙整（9/29–11/3，第 0–5 次會議）\n\n"+tablesMd(aggPre())+"\n\n# 二、"+deptByCode(code).name+" 2027 年度計劃資料\n\n"+tablesMd(aggDept([code]))}
+/* ---- Excel ---- */
+function loadLib(test,srcs){return new Promise((res,rej)=>{if(test())return res();const tryOne=i=>{if(i>=srcs.length)return rej(new Error("無法載入元件，請檢查網路"));const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>test()?res():tryOne(i+1);sc.onerror=()=>{sc.remove();tryOne(i+1)};document.head.append(sc)};tryOne(0)})}
+const XLSX_SRC=["https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js","https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"];
+function sheetNames(ts){const used=new Set();return ts.map(t=>{let n=String(t.name).replace(/[\[\]:*?\/\\]/g,"・").slice(0,31),b=n,i=2;while(used.has(n)){n=b.slice(0,28)+"_"+i++}used.add(n);return n})}
+const aoaOf=t=>[t.head].concat(t.rows.map(r=>t.head.map((x,i)=>r[i]==null?"":String(r[i])))).concat(t.note?[[],["說明："+t.note]]:[]);
+async function downloadXlsx(fname,ts){await loadLib(()=>window.XLSX,XLSX_SRC);const wb=XLSX.utils.book_new(),ns=sheetNames(ts);
+  ts.forEach((t,i)=>{const aoa=aoaOf(t),ws=XLSX.utils.aoa_to_sheet(aoa);ws["!cols"]=t.head.map((x,ci)=>({wch:Math.min(50,Math.max(8,...aoa.map(r=>Math.max(...String(r[ci]==null?"":r[ci]).split("\n").map(l=>l.length*1.7)))))}));XLSX.utils.book_append_sheet(wb,ws,ns[i])});
+  XLSX.writeFile(wb,fname)}
+/* ---- 使用說明 ---- */
+const AI_GUIDES=[
+ ["Gemini",["打開 gemini.google.com，用公司 Google 帳號登入，按「新對話」。","在系統按「📋 複製給 AI」，貼到 Gemini 送出；資料很長時，改按「⬇ Excel」下載，再用輸入框的「＋」上傳檔案。","Gemini 回覆「已讀取」後，再貼上本頁的指令（策略與專案／KPI・DPI／組織與人力）。","回覆中的表格整段選取複製，回到系統按「貼上 AI 結果」，就會自動帶入表格，再逐項修改。"]],
+ ["NotebookLM",["打開 notebooklm.google.com，開啟管理員分享的「百鮮 2027 年度計劃」筆記本；沒有的話按「建立新筆記本」。","自己建的筆記本：按「新增來源」→「Google 雲端硬碟」，選「NotebookLM 資料」資料夾裡的文件與試算表；也可以上傳從系統下載的 Excel。","在中間的對話框貼上指令。每個回答都會標出處，點數字可以看原始資料。","好用的回答按「儲存至記事」；右側「Studio」可以產生語音摘要、心智圖，快速掌握重點。","需要帶回系統的表格，複製後按「貼上 AI 結果」。"]],
+ ["ChatGPT／Claude",["開新對話，上傳從系統下載的 Excel，或貼上「📋 複製給 AI」的資料。","貼上本頁的指令。若回覆不是表格，補一句「請用 | 分隔的表格輸出，第一列放欄位名稱」。","表格複製回系統，按「貼上 AI 結果」。"]]];
+function aiGuideBox(){const st={i:0};return live(h("div",{class:"aiguide"}),el=>{el.append(h("div",{class:"formtabs",style:"margin:0 0 8px"},AI_GUIDES.map(([n],i)=>h("button",{class:"formtab","aria-selected":String(st.i===i),onclick:()=>{st.i=i;el._draw()}},n))),
+  h("ol",{style:"margin:0;padding-left:1.3em;display:grid;gap:4px;font-size:14px;line-height:1.6"},AI_GUIDES[st.i][1].map(t=>h("li",null,t))))})}
+/* ---- 資料匯出與 AI（所有人可用；雲端同步限管理員） ---- */
+function openDataHub(){const admin=isAdmin()&&!!BACKEND_URL;const st={sel:{},busy:false,log:{},err:"",dept:myDeptCode()||"",msg:""};
+  const preTitle="百鮮年度計劃前期討論彙整（三組合併）";
+  const deptT=c=>c?"百鮮 2027 年度策略｜"+deptByCode(c).name:"百鮮 2027 年度策略彙整（各部門）";
+  const cloud=()=>{const ys=nlmMonthYears();return [["前期討論（Google 試算表＋依會議的 Google 文件）",[{key:"sheet_pre",kind:"sheet",title:preTitle,tables:aggPre()}].concat(Object.keys(NLM_MEETS).map(nlmMeetingDoc))],
+    ["2027 年度策略（Google 試算表＋依部門的 Google 文件）",[{key:"sheet_dept",kind:"sheet",title:deptT(""),tables:aggDept(DEPT_CODES)}].concat(DEPT_CODES.map(nlmDeptDoc))]].concat(ys.map(y=>[rocY(y)+" 年度管理月會（依部門）",DEPT_CODES.map(c=>nlmMonthDoc(c,y))]))};
+  let body=null;const say=t=>{st.msg=t;draw()};
+  const draw=()=>{if(!body)return;body.innerHTML="";
+    const card=(title,...kids)=>h("div",{style:"grid-column:1/-1;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px"},h("b",{style:"font-size:15px"},title),...kids);
+    const row=(label,sub,acts)=>h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px dashed var(--line)"},h("div",{style:"flex:1 1 240px;min-width:0"},h("div",null,label),sub?h("div",{style:"font-size:12.5px;color:var(--muted)"},sub):null),h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},acts));
+    const b=(t,fn,pri)=>h("button",{class:"btn"+(pri?" primary":""),style:"padding:4px 12px;font-size:13px",disabled:st.busy,onclick:fn},t);
+    const xl=(fname,get)=>b("⬇ Excel",async()=>{try{say("產生 Excel 中…");await downloadXlsx(fname,get());say("✓ 已下載 "+fname)}catch(e){say("下載失敗："+e.message)}});
+    const cp=get=>b("📋 複製給 AI",()=>copyText(get(),t=>say(t)),true);
+    const pv=(k,get)=>b(st.open===k?"收起":"預覽",()=>{st.open=st.open===k?null:k;draw()});
+    const pvBox=(k,get)=>st.open===k?h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:12.5px;max-height:45vh;overflow:auto;background:var(--mist);border-radius:8px;padding:10px 12px;margin:0"},get()):null;
+    const dsel=h("select",{class:"pin",style:"max-width:180px"},h("option",{value:""},"全部部門"),DEPTS.map(d=>h("option",{value:d.code},d.name)));dsel.value=st.dept;dsel.addEventListener("change",()=>{st.dept=dsel.value;draw()});
+    const preMd=()=>agentPack(preTitle,aggPre()),deptMd=()=>st.dept?deptAgentPack(st.dept):agentPack(deptT(""),aggDept(DEPT_CODES));
+    body.append(card("📦 匯出彙整資料",h("div",{style:"font-size:13px;color:var(--muted)"},"三組的討論結果合併在原始表格裡（"+AGG_NOTE+"）。Excel 每張表一個分頁；「複製給 AI」會連同使用說明一起複製，可直接貼到 Gemini、ChatGPT、Claude 或自己的 AI agent。"),
+      row("前期討論彙整","第 0–5 次會議：分組、內部能力、百鮮競爭力、競爭者、外部環境、共事特質、SO／WT",[pv("pre"),cp(preMd),xl("百鮮年度計劃前期討論彙整.xlsx",aggPre)]),pvBox("pre",preMd),
+      row(h("span",null,"年度策略 ",dsel),st.dept?"含前期討論彙整＋本部門的策略展開、專案、KPI、職務執掌、人力":"營運目標、策略展開、各部門專案、KPI、職務執掌、人力",[pv("dept"),cp(deptMd),xl((st.dept?deptByCode(st.dept).name:"各部門")+"_2027年度策略.xlsx",()=>st.dept?aggPre().concat(aggDept([st.dept])):aggDept(DEPT_CODES))]),pvBox("dept",deptMd),
+      st.msg?h("div",{style:"font-size:13px;color:var(--gB)"},st.msg):null));
+    const nb=nlmInfo("nb");
+    body.append(card("📖 AI 使用方式",nb&&nb.url?h("div",null,h("a",{class:"btn",href:nb.url,target:"_blank",rel:"noopener",style:"text-decoration:none;padding:4px 12px"},"開啟百鮮 2027 年度計劃 NotebookLM 筆記本")):null,aiGuideBox()));
+    if(!admin)return;
+    /* 管理員：同步到雲端硬碟（NotebookLM 會自動同步） */
+    const groups=cloud();const ex=nlmExcl();
+    const cbox=h("div",{style:"display:grid;gap:2px"},h("div",{style:"font-size:13px;color:var(--muted)"},"競爭者篩選：取消勾選＝匯出時排除"),
+      AG.map(g=>h("div",{style:"display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px"},h("b",{style:"min-width:40px"},agN(g)),RIVAL_SLOTS.map(([sl,lab])=>{const nm=rivalName(g,sl),k=g+"."+sl;if(!nm)return h("span",{style:"color:var(--muted)"},lab+"：未選定");
+        const c=h("input",{type:"checkbox",disabled:st.busy});c.checked=!ex.has(k);c.addEventListener("change",()=>{const s2=nlmExcl();c.checked?s2.delete(k):s2.add(k);Store.write(NLM_ID,"cells","excl",[...s2].join(","));["sheet_pre","meet_m2","meet_m3"].concat(DEPT_CODES.map(x=>"dept_"+x)).forEach(x=>st.sel[x]=true);draw()});
+        return h("label",{style:"display:flex;gap:4px;align-items:center"+(ex.has(k)?";color:var(--muted);text-decoration:line-through":"")},c,lab+"："+nm)}))));
+    const lists=groups.map(([gname,list])=>{const keys=list.filter(x=>!x.empty).map(x=>x.key),all=keys.length&&keys.every(k=>st.sel[k]);
+      return h("div",{style:"display:grid;gap:0"},h("div",{style:"display:flex;justify-content:space-between;align-items:center;margin-top:6px"},h("b",{style:"font-size:13.5px"},gname),keys.length?h("button",{class:"btn",style:"padding:1px 10px;font-size:12px",onclick:()=>{keys.forEach(k=>st.sel[k]=!all);draw()}},all?"取消全選":"全選"):null),
+        list.map(x=>{const inf=nlmInfo(x.key),lg=st.log[x.key];const c=h("input",{type:"checkbox",disabled:x.empty||st.busy});c.checked=!!st.sel[x.key];c.addEventListener("change",()=>{st.sel[x.key]=c.checked});
+          return h("div",{style:"display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:3px 0;border-top:1px dashed var(--line);font-size:13.5px"},h("label",{style:"display:flex;gap:6px;align-items:center;flex:1 1 260px"+(x.empty?";color:var(--muted)":"")},c,(x.kind==="sheet"?"📊 ":"📄 ")+x.title+(x.empty?"（尚無資料）":"")),
+            lg?h("span",{style:"font-size:12.5px;color:"+(lg.bad?"var(--danger)":"var(--gB)")},lg.text):null,inf&&inf.url?h("a",{href:inf.url,target:"_blank",rel:"noopener",style:"font-size:12.5px"},"開啟（"+(inf.t||"").slice(5,16)+"）"):null)}))});
+    const go=h("button",{class:"btn primary",disabled:st.busy,onclick:async()=>{const pick=groups.flatMap(g=>g[1]).filter(x=>st.sel[x.key]&&!x.empty);if(!pick.length){st.err="請先勾選要同步的檔案";draw();return}
+      st.busy=true;st.err="";pick.forEach(x=>st.log[x.key]={text:"等待中…"});draw();
+      for(const x of pick){st.log[x.key]={text:"同步中…"};draw();
+        try{const j=x.kind==="sheet"?await backendPost({action:"nlmsheet",key:x.key,title:x.title,sheets:x.tables.map((t,i)=>({name:sheetNames(x.tables)[i],rows:aoaOf(t)}))}):await backendPost({action:"nlmexport",key:x.key,title:x.title,html:mdToHtml(x.md)});
+          const t=todayStr()+" "+new Date().toTimeString().slice(0,5);Store.write(NLM_ID,"cells",x.key,JSON.stringify({url:j.url,t}));if(j.folderUrl)Store.write(NLM_ID,"cells","folder",JSON.stringify({url:j.folderUrl,t}));st.log[x.key]={text:j.created?"✓ 已建立":"✓ 已更新"}}
+        catch(e){st.log[x.key]={text:"失敗："+e.message,bad:true}}draw()}
+      st.busy=false;draw();toast("同步完成")}},st.busy?"同步中…":"☁ 同步選取的檔案");
+    const fu=nlmInfo("folder");const nbIn=h("input",{class:"pin",placeholder:"貼上 NotebookLM 筆記本的分享連結",style:"flex:1 1 280px"});nbIn.value=nb&&nb.url||"";
+    body.append(card("☁ 同步到 NotebookLM（管理員）",h("div",{style:"font-size:13px;color:var(--muted)"},"同步後會在雲端硬碟「百鮮年度計劃工作台附件／NotebookLM 資料」建立 Google 試算表與文件；之後再同步，連結不變，NotebookLM 會自動更新。"),
+      cbox,...lists,h("div",{style:"display:flex;flex-wrap:wrap;gap:10px;align-items:center"},go,fu&&fu.url?h("a",{href:fu.url,target:"_blank",rel:"noopener"},"開啟雲端硬碟資料夾"):null,st.err?h("span",{style:"color:var(--danger)"},st.err):null),
+      h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:8px"},h("span",{style:"font-size:13px"},"分享給同仁的筆記本："),nbIn,h("button",{class:"btn",style:"padding:4px 12px;font-size:13px",onclick:()=>{const u=nbIn.value.trim();if(u&&!/^https:\/\/notebooklm\.google\.com\//.test(u)){toast("請貼上 notebooklm.google.com 的連結");return}Store.write(NLM_ID,"cells","nb",u?JSON.stringify({url:u}):"");toast(u?"已儲存，同仁在 AI 使用方式會看到連結":"已清除")}},"儲存")),
+      h("div",{style:"font-size:12.5px;color:var(--muted)"},"筆記本要在 NotebookLM 右上角「分享」加入同仁（或設為公司內知道連結者可檢視），同仁才打得開。")))};
+  openDialog("資料匯出與 AI",b=>{body=b;draw()},{wide:true,static:true})}
+const openNlmExport=openDataHub;
+/* ---- 貼回 AI 表格 ---- */
+function parsePipe(text){return String(text||"").split("\n").map(l=>l.trim()).filter(l=>/[|｜]/.test(l)).map(l=>l.replace(/^[|｜]|[|｜]$/g,"").split(/[|｜]/).map(c=>c.replace(/\*\*/g,"").replace(/<br\s*\/?>/gi,"\n").trim())).filter(r=>!r.every(c=>!c||/^:?-+:?$/.test(c)))}
+function pipeObjects(text,map){const rows=parsePipe(text);const hi=rows.findIndex(r=>r.filter(c=>Object.values(map).some(re=>re.test(c))).length>=2);if(hi<0)return [];const head=rows[hi],idx={},taken=new Set();
+  Object.entries(map).forEach(([k,re])=>{const i=head.findIndex((c,j)=>!taken.has(j)&&re.test(c));if(i>=0){idx[k]=i;taken.add(i)}});
+  return rows.slice(hi+1).filter(r=>r.join("|")!==head.join("|")&&r.some(Boolean)).map(r=>{const o={};Object.entries(idx).forEach(([k,i])=>o[k]=(r[i]||"").trim());return o})}
+function parseMonths(s){s=String(s||"");const out=new Set();if(/全年|整年/.test(s))M12.forEach(m=>out.add(m));
+  s.replace(/Q\s*([1-4])/gi,(x,q)=>{QTR[+q-1].forEach(m=>out.add(m));return ""}).replace(/(\d{1,2})\s*月?\s*[-–—~～至到]\s*(\d{1,2})/g,(x,a,b)=>{for(let m=+a;m<=+b;m++)if(m>=1&&m<=12)out.add(m);return ""}).replace(/\d{1,2}/g,x=>{if(+x>=1&&+x<=12)out.add(+x);return ""});
+  return [...out].sort((a,b)=>a-b)}
+const pct=s=>{const m=/\d+(\.\d+)?/.exec(String(s||""));return m?m[0]:""};
+const DEPT_AI={
+ proj:{label:"策略與專案展開",form:"dproj",head:"專案名稱｜重要度（%）｜專案目標｜預期指標｜行動計劃｜執行月份｜預算費用｜配合部門",
+  map:{name:/專案名稱|^專案$/,w:/重要度/,goal:/目標/,kpi:/指標/,plan:/行動/,months:/月份|進度|期間|時程/,budget:/預算/,partners:/配合/},
+  apply(code,o){const d=deptByCode(code);return {name:o.name,w:pct(o.w),goal:o.goal||"",kpi:o.kpi||"",plan:o.plan||"",months:parseMonths(o.months),budget:o.budget||"",partners:DEPTS.filter(x=>x.code!==code&&String(o.partners||"").includes(x.name.replace(/部$/,""))).map(x=>x.name),owner:d.name}}},
+ kpi:{label:"KPI・DPI 指標",form:"dkpi",head:"指標名稱｜屬性（KPI／DPI）｜重要度（%）｜2026 實際｜2027 目標｜定義／計算公式",
+  map:{name:/指標名稱|^指標$/,attr:/屬性/,w:/重要度/,last:/2026|實際/,target:/2027|目標/,def:/定義|公式/},
+  apply(code,o){return {name:o.name,attr:/DPI/i.test(o.attr)?"DPI":"KPI",w:pct(o.w),last:/待|確認|^-$/.test(o.last||"")?"":(o.last||""),target:o.target||"",def:o.def||""}}},
+ org:{label:"組織與人力",form:"dorg",head:"課別｜崗位｜主要職責｜現有人數｜2027 編制｜預計補齊月份｜說明",
+  map:{unit:/課別|單位|課／組/,title:/崗位|職務/,duty:/職責/,now:/現有/,plan:/編制/,month:/月份|補齊/,note:/說明|備註/},
+  apply(code,o){return {unit:o.unit||"",title:o.title,duty:o.duty||"",now:pct(o.now),plan:pct(o.plan),month:(parseMonths(o.month)[0]||"")+"",note:o.note||""}}}};
+function deptAiApply(code,kind,text){const D=DEPT_AI[kind],id=docId(D.form,code);if(planClosed())return "年度計劃已關閉，無法帶入";
+  const os=pipeObjects(text,D.map).filter(o=>(o[kind==="org"?"title":"name"]||"").trim());if(!os.length)return "找不到表格。請確認 AI 回覆裡有「"+D.head.split("｜").slice(0,3).join("｜")+"…」這種用 | 分隔的表格";
+  const key=kind==="org"?"title":"name",have=new Set(Store.items(id).map(([k,v])=>((kind==="org"?(v.unit||"")+"/":"")+(v[key]||"")).trim()));let n=0,t=Date.now();
+  os.forEach(o=>{const v=D.apply(code,o),sig=((kind==="org"?(v.unit||"")+"/":"")+(v[key]||"")).trim();if(!v[key]||have.has(sig))return;have.add(sig);Store.write(id,"items",uid(),Object.assign(v,{t:t++,by:"AI"}));n++});
+  return n?n:"表格裡的項目都已經在系統中，沒有新增"}
+function deptOrgText(code){const du=orgDuties(code).map(r=>"- "+(r.unit&&r.unit!=="部門"?r.unit+"／":"")+r.role+"："+r.resp+((r.kpis||[]).length?"（KPI："+r.kpis.map(k=>k.name).join("、")+"）":""));
+  const rs=deptRoles(code).map(x=>x[1]).filter(r=>(r.title||"").trim()).map(r=>"- "+(r.unit?r.unit+"／":"")+r.title+"：現有 "+(r.now||"?")+" 人，2027 編制 "+(r.plan||"?")+" 人");
+  return "【本部門職務執掌（組織圖）】\n"+(du.join("\n")||"（尚無資料）")+"\n\n【本部門人力配置】\n"+(rs.join("\n")||"（尚未填寫）")}
+function deptAiPrompt(code,kind){const d=deptByCode(code),ps=deptProjects(code).map(x=>x[1]).filter(p=>(p.name||"").trim()),ks=Store.items(docId("dkpi",code)).map(x=>x[1]).filter(k=>(k.name||"").trim());
+  const base=AI_HEAD(code)+deptContext(code)+"\n\n"+deptOrgText(code)+"\n\n【本部門目前的 2027 專案】\n"+(ps.map(p=>"- "+p.name+(p.goal?"："+p.goal.replace(/\n/g," "):"")).join("\n")||"（尚未填寫）")+"\n\n【本部門目前的 KPI／DPI】\n"+(ks.map(k=>"- "+k.name+(k.target?"：2027 目標 "+k.target:"")).join("\n")||"（尚未填寫）");
+  const fmt=h0=>"\n\n最後用下面這個表格格式輸出（用 | 分隔，第一列就是欄位名稱，每列一項，不要合併儲存格）：\n"+h0.replace(/｜/g," | ");
+  if(kind==="proj")return base+"\n\n請依公司 2027 營運目標與策略重點，協助"+d.name+"完成年度專案展開：\n1. 先用 3–5 點說明本部門 2027 策略方向，各自對應前期討論的哪些優勢／機會，或要改善哪些劣勢／威脅。\n2. 把策略展開為 4–8 個年度專案，重要度合計 100%，執行月份寫 1–12 月中的月份（例如 3–6）。\n3. 已有的專案若合適可保留並補強，標出需要跨部門合作的專案。"+fmt(DEPT_AI.proj.head)+AI_TAIL;
+  if(kind==="kpi")return base+"\n\n請依策略與專案，建議"+d.name+" 2027 年的管理指標 5–8 項：KPI＝公司列管、DPI＝部門內部管理，重要度合計 100%，並對照職務執掌中已有的 KPI，避免重複或遺漏。表格後用一句話說明每項指標對應的策略或專案。"+fmt(DEPT_AI.kpi.head)+AI_TAIL;
+  return base+"\n\n請依 2027 專案與職務執掌，評估"+d.name+"的人力配置：列出每個崗位的現有人數與 2027 編制，需要增聘的寫預計補齊月份（1–12），並在表格後說明哪些工作可以用流程改善、自動化或跨部門支援取代增聘。"+fmt(DEPT_AI.org.head)+AI_TAIL}
+function deptAiGuide(fid,code){if(!code||!deptByCode(code))return null;const kind0=fid==="dkpi"?"kpi":fid==="dorg"?"org":"proj";
+  if(!["dproj","dstrat","dkpi","dorg"].includes(fid))return null;
+  const st=state.aiG=state.aiG||{};if(!st.kind||st.fid!==fid){st.kind=kind0;st.fid=fid}
+  const box=h("details",{class:"aiflow",open:st.open!==false?"":null},h("summary",null,"🤖 用 AI 製作本部門年度計劃",h("span",{style:"font-weight:400;font-size:13px;color:var(--muted);margin-left:8px"},"準備資料 → 選擇項目 → 複製指令 → 貼回結果")));
+  box.addEventListener("toggle",()=>{st.open=box.open});
+  const inner=live(h("div",{style:"display:grid;gap:12px;margin-top:10px"}),el=>{const D=DEPT_AI[st.kind],msg=h("div",{style:"font-size:13px;color:var(--gB);min-height:1.2em"});const say=(t,bad)=>{msg.textContent=t;msg.style.color=bad?"var(--danger)":"var(--gB)"};
+    const step=(n,title,...kids)=>h("div",{class:"aistep"},h("div",{class:"aino"},String(n)),h("div",{style:"display:grid;gap:6px;min-width:0"},h("b",null,title),...kids));
+    const nb=nlmInfo("nb");const b=(t,fn,pri)=>h("button",{class:"btn"+(pri?" primary":""),style:"padding:4px 12px;font-size:13px",onclick:fn},t);
+    el.append(step(1,"準備資料：把前期討論和本部門資料交給 AI",h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},
+      b("📋 複製資料包給 AI",()=>copyText(deptAgentPack(code),t=>say(t))),b("⬇ 下載 Excel 資料包",async()=>{try{say("產生 Excel 中…");await downloadXlsx(deptByCode(code).name+"_AI資料包.xlsx",aggPre().concat(aggDept([code])));say("✓ 已下載")}catch(e){say("下載失敗："+e.message,true)}}),
+      nb&&nb.url?h("a",{class:"btn",href:nb.url,target:"_blank",rel:"noopener",style:"text-decoration:none;padding:4px 12px;font-size:13px"},"開啟 NotebookLM 筆記本"):null,
+      b(st.guide?"收起使用方式":"📖 Gemini／NotebookLM 怎麼用？",()=>{st.guide=!st.guide;el._draw()})),st.guide?aiGuideBox():null,
+      h("div",{style:"font-size:12.5px;color:var(--muted)"},"資料包包含三組合併的前期討論、營運目標與策略重點、本部門的專案、KPI、職務執掌與人力。用 NotebookLM 時資料已在筆記本裡，可直接跳到第 3 步。")),
+      step(2,"選擇要請 AI 做什麼",h("div",{class:"formtabs",style:"margin:0"},Object.entries(DEPT_AI).map(([k,x])=>h("button",{class:"formtab","aria-selected":String(st.kind===k),onclick:()=>{st.kind=k;el._draw()}},x.label)))),
+      step(3,"複製指令貼給 AI（或直接請 Gemini 產生草稿）",h("details",null,h("summary",{style:"cursor:pointer;font-size:13px;color:var(--muted)"},"查看指令內容"),h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:12.5px;max-height:260px;overflow:auto;background:var(--mist);border-radius:8px;padding:8px 10px;margin:6px 0 0"},deptAiPrompt(code,st.kind))),
+        h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},b("📋 複製「"+D.label+"」指令",()=>copyText(deptAiPrompt(code,st.kind),t=>say(t)),true),
+          BACKEND_URL?b("🤖 直接請 Gemini 產生並帶入",async e=>{const bt=e.currentTarget;bt.disabled=true;say("Gemini 產生中，約 30–60 秒…");try{const j=await backendPost({action:"ai",prompt:deptAiPrompt(code,st.kind)});st.raw=j.text;const r=deptAiApply(code,st.kind,j.text);typeof r==="string"?say(r,true):say("✓ 已帶入 "+r+" 項到「"+FORMS[D.form].short+"」，請逐項檢查修改（AI 帶入的項目可直接刪改）");el._draw()}catch(x){say("產生失敗："+x.message,true)}bt.disabled=false}):null)),
+      step(4,"把 AI 回覆的表格貼回系統",h("div",{style:"display:flex;flex-wrap:wrap;gap:6px;align-items:center"},b("📥 貼上 AI 結果",()=>pasteDialog("貼上 AI 結果："+D.label,"把 AI 回覆整段貼上（需含「"+D.head.split("｜").slice(0,3).join(" | ")+" …」表格）",t=>{const r=deptAiApply(code,st.kind,t);if(typeof r==="string")return r;toast("已帶入 "+r+" 項");return ""})),
+        h("span",{style:"font-size:12.5px;color:var(--muted)"},"新增到「"+FORMS[D.form].short+"」，已有同名項目不會重複"+(D.form!==fid?"；切到「"+FORMS[D.form].short+"」分頁查看":""))),
+        st.raw?h("details",null,h("summary",{style:"cursor:pointer;font-size:13px;color:var(--muted)"},"Gemini 的完整回覆（含策略說明）"),h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:12.5px;max-height:300px;overflow:auto;background:var(--mist);border-radius:8px;padding:8px 10px;margin:6px 0 0"},st.raw)):null),msg)});
+  box.append(inner);return box}
+const aiHelpFor=deptAiGuide;
+/* ---- SO／WT：各組用前期資料讓 AI 放標籤 ---- */
+function tagAlias(){try{return JSON.parse(Store.cell(docId("tags","X"),"alias")||"{}")||{}}catch(e){return {}}}
+function tagMergePrompt(tags){return "以下是三組討論整理出的標籤，已刪除文字完全相同的。請找出「意思相同或非常接近」的標籤（只在同一類別內比較），把它們分成一組，每組第一個放說得最完整、最具體的那一個；沒有重複的不用列。\n只輸出 JSON：{\"groups\":[[3,8,15],[4,9]]}\n\n標籤（編號｜類別｜內容）：\n"+tags.map((t,i)=>(i+1)+"｜"+CATS[t.cat][0]+"｜"+t.text).join("\n")}
+async function tagMergeAI(say){const tags=tagPool().filter(t=>["S","W","O","T"].includes(t.cat));if(tags.length<2){say("標籤太少，不需要合併");return}
+  say("AI 比對中，約 20–40 秒…");const j=await backendPost({action:"ai",prompt:tagMergePrompt(tags),json:true});const o=parseObj(j.text);if(!o||!Array.isArray(o.groups))throw new Error("AI 回覆格式無法解讀");
+  const al=tagAlias();let n=0;o.groups.forEach(gr=>{const ts=(gr||[]).map(i=>tags[(+i)-1]).filter(Boolean);if(ts.length<2)return;const keep=ts[0];ts.slice(1).forEach(t=>{if(t.cat===keep.cat&&t.key!==keep.key){al[t.key]=keep.key;n++}})});
+  Store.write(docId("tags","X"),"cells","alias",JSON.stringify(al));say(n?"✓ 合併了 "+n+" 個意思重複的標籤（滑鼠移到標籤上可看合併了哪些）":"沒有找到意思重複的標籤")}
+function swotTagsFor(fid,g){const f=FORMS[fid];return tagPool().filter(t=>f.cats.includes(t.cat))}
+function swotAutoPrompt(fid,g){const f=FORMS[fid],rows=gridRows(f),tags=swotTagsFor(fid,g),ext=f.rowGroups[0],inn=f.rowGroups[1],n0=ext.rows.length;
+  return CO_PROFILE+"\n\n你是熟悉台灣食品製造業的經營顧問。請協助「"+agN(g)+"」把前期三組討論整理出的項目（已刪除完全相同的內容），放進「"+f.board+" 分析」表格。\n"+(f.board==="SO"?"SO 分析：利用內部優勢（S）把握外部機會（O）。":"WT 分析：克服內部劣勢（W），同時降低外部威脅（T）。")+
+  "\n\n表格的列（row）：\n"+rows.map((r,i)=>i+"："+r.glabel+"－"+r.label).join("\n")+"\n表格的欄（col，七大功能）：\n"+f.cols.map((c,i)=>i+"："+c).join("\n")+
+  "\n\n規則：\n1. "+ext.label+"的項目只能放在 row 0–"+(n0-1)+"；"+inn.label+"的項目只能放在 row "+n0+"–"+(rows.length-1)+"。\n2. 每個項目放在最適合的一格（依它影響的功能選欄），一個項目最多放兩格；與本表無關的可以不放。\n3. 意思相同或非常接近的項目（例如「產能不足」與「產能有限，交期長」）視為同一項，只放其中說得最完整的一個。\n4. 挑出最重要的 5–8 項，star 設為 true。\n5. 只輸出 JSON，不要其他文字：{\"items\":[{\"id\":1,\"row\":0,\"col\":2,\"star\":true}]}\n\n項目清單（編號｜類別｜內容｜來源）：\n"+
+  tags.map((t,i)=>(i+1)+"｜"+CATS[t.cat][0]+"｜"+t.text+"｜"+(t.sub||"")).join("\n")}
+function swotAutoApply(fid,g,text){const f=FORMS[fid],id=docId(fid,g),rows=gridRows(f),tags=swotTagsFor(fid,g),n0=f.rowGroups[0].rows.length,o=parseObj(text);
+  if(!o||!Array.isArray(o.items))return "找不到 JSON 格式的回覆（需包含 \"items\"）";
+  const have=new Set(Store.items(id).map(([k,v])=>v.key+"@"+v.cell));let n=0,t=Date.now();
+  o.items.forEach(it=>{const tg=tags[(+it.id)-1],r=+it.row,c=+it.col;if(!tg||!(r>=0&&r<rows.length)||!(c>=0&&c<f.cols.length))return;
+    const ext=["O","T"].includes(tg.cat);if(ext!==(r<n0))return;const cell="r"+r+"c"+c;if(have.has(tg.key+"@"+cell))return;have.add(tg.key+"@"+cell);
+    Store.write(id,"items",uid(),{key:tg.key,cat:tg.cat,text:tg.text,cell,star:!!it.star,by:"AI",t:t++});n++});
+  return n?n:"AI 建議的位置都已經放過了"}
+function swotAutoBox(fid,g){const f=FORMS[fid],id=docId(fid,g);const msg=h("span",{style:"font-size:13px;color:var(--gB)"});const say=(t,bad)=>{msg.textContent=t;msg.style.color=bad?"var(--danger)":"var(--gB)"};
+  const b=(t,fn,pri)=>h("button",{class:"btn"+(pri?" primary":""),style:"padding:4px 12px;font-size:13px",onclick:fn},t);
+  return h("div",{class:"refbox",style:"display:grid;gap:8px;margin-bottom:10px;border-color:var(--saffron)"},h("b",null,"🤖 用前期三組資料產生 "+f.board+" 草稿"),
+    h("div",{style:"font-size:13px;color:var(--muted)"},"AI 會從三組前期討論的"+f.cats.map(c=>CATS[c][0]).join("、")+"標籤（意思重複的只取一個）挑出適合的放進表格、標出重要項目，組員再拖移、刪除或加星號調整。已放好的格子不會被覆蓋。"),
+    h("div",{style:"display:flex;flex-wrap:wrap;gap:6px;align-items:center"},
+      BACKEND_URL?b("🤖 AI 依前期資料放入",async e=>{const bt=e.currentTarget;if(!swotTagsFor(fid,g).length){say("前期討論還沒有可用的標籤",true);return}bt.disabled=true;say("AI 分析中，約 20–40 秒…");
+        try{const j=await backendPost({action:"ai",prompt:swotAutoPrompt(fid,g),json:true});const r=swotAutoApply(fid,g,j.text);typeof r==="string"?say(r,true):say("✓ AI 放入 "+r+" 個標籤（標示「AI」），請組員檢查調整")}catch(x){say("失敗："+x.message,true)}bt.disabled=false},true):null,
+      b("📋 複製指令給自己的 AI",()=>copyText(swotAutoPrompt(fid,g),t=>say(t))),
+      b("📥 貼上 AI 回覆",()=>pasteDialog("貼上 AI 回覆："+f.board+" 分析","貼上 AI 回覆的 JSON（{\"items\":[…]}）",t=>{const r=swotAutoApply(fid,g,t);if(typeof r==="string")return r;toast("已放入 "+r+" 個標籤");return ""})),
+      b("移除 AI 放入的標籤",e=>{const bt=e.currentTarget;const ks=Store.items(id).filter(([k,v])=>v.by==="AI");if(!ks.length){say("目前沒有 AI 放入的標籤");return}if(!bt.dataset.c){bt.dataset.c="1";bt.textContent="確定移除 "+ks.length+" 個？";return}ks.forEach(([k])=>Store.write(id,"items",k,null));say("已移除 "+ks.length+" 個");bt.dataset.c="";bt.textContent="移除 AI 放入的標籤"}),msg))}
+
 function nlmDeptDoc(code){const d=deptByCode(code),st=Store.body(docId("strategy","X")).cells,units=DEPT_UNITS[d.name],L=[];
   L.push("# 百鮮 2027 年度策略｜"+d.name,"","- 公司 2027 營運目標："+(mdCell(st.goal)||"（尚未填寫）"),"- 公司 2027 策略重點："+(mdCell(st.focus)||"（尚未填寫）"));
   L.push("","## 本部門策略展開","",mdTable(["單位","策略展開（專案）","KPI 指標"],units.map(u=>[STRAT_COLS[u],st["r0c"+u],st["r1c"+u]]).filter(r=>r[1]||r[2])));
@@ -3542,55 +3721,14 @@ function mdToHtml(md){const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,
   const out=[],ls=md.split("\n");let i=0;
   while(i<ls.length){const l=ls[i];
     if(/^#{1,3} /.test(l)){const n=l.indexOf(" ");out.push("<h"+n+">"+inl(l.slice(n+1))+"</h"+n+">");i++;continue}
-    if(/^\|/.test(l)&&/^\|[-| ]+\|$/.test(ls[i+1]||"")){const row=(s,t)=>"<tr>"+s.replace(/^\||\|$/g,"").split("|").map(c=>"<"+t+">"+inl(c.trim())+"</"+t+">").join("")+"</tr>";
+    if(/^\|/.test(l)&&/^\|[-| ]+\|$/.test(ls[i+1]||"")){const row=(s,t)=>"<tr>"+s.replace(/^\||\|$/g,"").split("|").map(c=>"<"+t+">"+inl(c.trim()).replace(/&lt;br&gt;/g,"<br>")+"</"+t+">").join("")+"</tr>";
       const rs=[row(l,"th")];i+=2;while(i<ls.length&&/^\|/.test(ls[i])){rs.push(row(ls[i],"td"));i++}
       out.push('<table border="1" cellpadding="4" style="border-collapse:collapse">'+rs.join("")+"</table>");continue}
     if(/^- /.test(l)){const xs=[];while(i<ls.length&&/^- /.test(ls[i])){xs.push("<li>"+inl(ls[i].slice(2))+"</li>");i++}out.push("<ul>"+xs.join("")+"</ul>");continue}
     if(/^\d+\. /.test(l)){const xs=[];while(i<ls.length&&/^\d+\. /.test(ls[i])){let t=inl(ls[i].replace(/^\d+\. /,""));i++;while(i<ls.length&&/^ {3}\S/.test(ls[i])){t+="<br>"+inl(ls[i].trim());i++}xs.push("<li>"+t+"</li>")}out.push("<ol>"+xs.join("")+"</ol>");continue}
     if(l.trim())out.push("<p>"+inl(l)+"</p>");i++}
   return '<html><head><meta charset="utf-8"></head><body style="font-family:Arial">'+out.join("\n")+"</body></html>"}
-const NLM_ASK=code=>"請只根據這本筆記本的來源回答，使用繁體中文。\n我是百鮮「"+deptByCode(code).name+"」的主管，正在擬定 2027 年度策略。請依「百鮮年度計劃前期討論」第 0–5 次會議"+(nlmMonthYears().length?"、"+deptByCode(code).name+"的管理月會記錄":"")+"，以及「百鮮 2027 年度策略｜"+deptByCode(code).name+"」文件：\n1. 整理與本部門相關的優勢、劣勢、機會、威脅，各列 3–5 點並註明出處。\n2. 提出本部門 2027 年 3–5 項策略方向，說明各自對應哪些優勢／機會，或要改善哪些劣勢／威脅。\n3. 把每項策略展開為年度專案：專案名稱、專案目標、行動計劃、執行月份、預期指標、需要配合的部門。\n4. 檢視本部門目前已填的專案與 KPI，指出缺漏或與公司營運目標不一致的地方。\n來源中沒有的數字請標示「待確認」，不要自行推測。";
-function openNlmExport(){
-  const docs=()=>{const ys=nlmMonthYears();return [["前期討論（依會議）",Object.keys(NLM_MEETS).map(nlmMeetingDoc)],["2027 年度策略（依部門）",DEPT_CODES.map(nlmDeptDoc)]].concat(ys.map(y=>[rocY(y)+" 年度管理月會（依部門）",DEPT_CODES.map(c=>nlmMonthDoc(c,y))]))};
-  const st={sel:{},open:{},busy:false,log:{},err:"",ask:"SALES"};
-  let body=null;const draw=()=>{if(!body)return;body.innerHTML="";const groups=docs(),info=k=>{try{return JSON.parse(Store.cell(NLM_ID,k)||"null")}catch(e){return null}};
-    body.append(h("div",{class:"refbox",style:"grid-column:1/-1;font-size:14px;line-height:1.7"},h("b",null,"使用方式"),
-      h("ol",{style:"margin:4px 0 0;padding-left:1.3em"},h("li",null,"勾選要匯出的文件，按「匯出／更新」，系統會在雲端硬碟「"+"百鮮年度計劃工作台附件／NotebookLM 資料"+"」資料夾建立 Google 文件。"),
-        h("li",null,"第一次：到 NotebookLM 新增筆記本 → 新增來源 → Google 雲端硬碟，把這些文件加進去。"),
-        h("li",null,"之後內容有更新，再按一次「匯出／更新」即可；文件連結不變，NotebookLM 會自動同步。"))));
-    const ex=nlmExcl(),cbox=h("div",{style:"grid-column:1/-1;border:1px solid var(--line);border-radius:10px;padding:10px 12px"});
-    cbox.append(h("div",{style:"margin-bottom:6px"},h("b",null,"競爭者篩選"),h("span",{style:"font-size:13px;color:var(--muted);margin-left:8px"},"取消勾選＝匯出時排除（第二、三次會議與各部門策略文件都不會出現）；改完請重新匯出這些文件")));
-    ["A","B","C"].forEach(g=>cbox.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:4px 0;border-top:1px dashed var(--line);font-size:14px"},h("b",{style:"min-width:44px"},GROUPS[g].name),
-      RIVAL_SLOTS.map(([sl,lab])=>{const nm=rivalName(g,sl),k=g+"."+sl;if(!nm)return h("span",{style:"color:var(--muted)"},lab+"：未選定");const cb=h("input",{type:"checkbox",disabled:st.busy});cb.checked=!ex.has(k);
-        cb.addEventListener("change",()=>{const s2=nlmExcl();if(cb.checked)s2.delete(k);else s2.add(k);Store.write(NLM_ID,"cells","excl",[...s2].join(","));["meet_m2","meet_m3"].concat(DEPT_CODES.map(c=>"dept_"+c)).forEach(x=>st.sel[x]=true);draw()});
-        return h("label",{style:"display:flex;align-items:center;gap:4px"+(ex.has(k)?";color:var(--muted);text-decoration:line-through":"")},cb,lab+"："+nm)}))));
-    body.append(cbox);
-    groups.forEach(([gname,list])=>{const box=h("div",{style:"grid-column:1/-1;border:1px solid var(--line);border-radius:10px;padding:10px 12px"});
-      const keys=list.filter(x=>!x.empty).map(x=>x.key),all=keys.length&&keys.every(k=>st.sel[k]);
-      box.append(h("div",{style:"display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"},h("b",null,gname),
-        keys.length?h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>{keys.forEach(k=>st.sel[k]=!all);draw()}},all?"取消全選":"全選"):null));
-      list.forEach(x=>{const inf=info(x.key),lg=st.log[x.key];const cb=h("input",{type:"checkbox",disabled:x.empty||st.busy});cb.checked=!!st.sel[x.key];cb.addEventListener("change",()=>{st.sel[x.key]=cb.checked});
-        box.append(h("div",{style:"display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:4px 0;border-top:1px dashed var(--line);font-size:14px"},
-          h("label",{style:"display:flex;align-items:center;gap:6px;flex:1 1 260px"+(x.empty?";color:var(--muted)":"")},cb,x.title+(x.empty?"（尚無資料）":"")),
-          lg?h("span",{style:"font-size:13px;color:"+(lg.bad?"var(--danger)":"var(--gB)")},lg.text):null,
-          inf&&inf.url?h("a",{href:inf.url,target:"_blank",rel:"noopener",style:"font-size:13px"},"開啟文件（"+(inf.t||"").slice(5,16)+"）"):null,
-          h("button",{class:"btn",style:"padding:2px 10px;font-size:13px",onclick:()=>{st.open[x.key]=!st.open[x.key];draw()}},st.open[x.key]?"收起":"預覽")),
-          ...(st.open[x.key]?[h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:13px;max-height:50vh;overflow:auto;background:var(--mist);border-radius:8px;padding:10px 12px;margin:4px 0 8px"},x.md)]:[]))});
-      body.append(box)});
-    const go=h("button",{class:"btn primary",disabled:st.busy,onclick:async()=>{const pick=groups.flatMap(g=>g[1]).filter(x=>st.sel[x.key]&&!x.empty);if(!pick.length){st.err="請先勾選要匯出的文件";draw();return}
-      st.busy=true;st.err="";pick.forEach(x=>st.log[x.key]={text:"等待中…"});draw();
-      for(const x of pick){st.log[x.key]={text:"匯出中…"};draw();
-        try{const j=await backendPost({action:"nlmexport",key:x.key,title:x.title,html:mdToHtml(x.md)});const t=todayStr()+" "+new Date().toTimeString().slice(0,5);Store.write(NLM_ID,"cells",x.key,JSON.stringify({url:j.url,t}));if(j.folderUrl)Store.write(NLM_ID,"cells","folder",JSON.stringify({url:j.folderUrl,t}));st.log[x.key]={text:j.created?"✓ 已建立":"✓ 已更新"}}
-        catch(e){st.log[x.key]={text:"失敗："+e.message,bad:true}}draw()}
-      st.busy=false;draw();toast("匯出完成")}},st.busy?"匯出中…":"⬆ 匯出／更新選取的文件");
-    const fu=info("folder");
-    body.append(h("div",{style:"grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;align-items:center"},go,fu&&fu.url?h("a",{href:fu.url,target:"_blank",rel:"noopener"},"開啟雲端硬碟資料夾"):null,st.err?h("span",{style:"color:var(--danger)"},st.err):null));
-    const sel=h("select",{class:"pin",style:"max-width:200px"},DEPTS.map(d=>h("option",{value:d.code},d.name)));sel.value=st.ask;
-    const box=h("div",{style:"grid-column:1/-1"});const fill=()=>{box.innerHTML="";const pre=h("pre",{style:"white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.6;margin:8px 0;background:var(--mist);border-radius:8px;padding:10px 12px"},NLM_ASK(st.ask));const msg=h("span",{style:"font-size:13px;color:var(--gB)"});
-      box.append(pre,h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},h("button",{class:"btn primary",style:"padding:5px 14px",onclick:()=>copyText(pre.textContent,t=>msg.textContent=t)},"📋 複製提問"),h("a",{class:"btn",href:"https://notebooklm.google.com/",target:"_blank",rel:"noopener",style:"text-decoration:none;padding:5px 12px"},"開啟 NotebookLM"),msg))};sel.addEventListener("change",()=>{st.ask=sel.value;fill()});fill();
-    body.append(h("div",{style:"grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px"},h("b",null,"NotebookLM 提問範本：部門策略　"),sel),box)};
-  openDialog("匯出到 NotebookLM",b=>{body=b;draw()},{wide:true,static:true})}
-function adminBar(exportBtn,noMode){return h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn||h("button",{class:"btn",onclick:exportCSV},"匯出 CSV"),noMode?null:h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",style:planClosed()?"color:var(--danger)":"",onclick:e=>{if(!planClosed()&&!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="關閉後只能檢視，確定？";return}Store.write(CFG_ID,"cells","plan.closed",planClosed()?"":"1");toast(planClosed()?"年度計劃已關閉":"年度計劃已重新開放");setTimeout(render,300)}},planClosed()?"🔓 重新開放年度計劃":"🔒 關閉年度計劃"),h("button",{class:"btn",onclick:openPeople},"人員管理"),BACKEND_URL?h("button",{class:"btn",onclick:openAuditLog},"操作記錄"):null,h("button",{class:"btn",onclick:openNlmExport},"匯出到 NotebookLM"),h("button",{class:"btn",onclick:openTabSettings},"分頁開放"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"))}
+function adminBar(exportBtn,noMode){return h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn||h("button",{class:"btn",onclick:exportCSV},"匯出 CSV"),noMode?null:h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",style:planClosed()?"color:var(--danger)":"",onclick:e=>{if(!planClosed()&&!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="關閉後只能檢視，確定？";return}Store.write(CFG_ID,"cells","plan.closed",planClosed()?"":"1");toast(planClosed()?"年度計劃已關閉":"年度計劃已重新開放");setTimeout(render,300)}},planClosed()?"🔓 重新開放年度計劃":"🔒 關閉年度計劃"),h("button",{class:"btn",onclick:openPeople},"人員管理"),BACKEND_URL?h("button",{class:"btn",onclick:openAuditLog},"操作記錄"):null,h("button",{class:"btn",onclick:openDataHub},"資料匯出與 AI"),h("button",{class:"btn",onclick:openTabSettings},"分頁開放"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"))}
 function adminRow(){return state.mode==="host"&&(isAdmin()||!BACKEND_URL)?h("div",{class:"adminrow"},h("span",{class:"adminlab"},"🛠 管理"),adminBar(null,true)):null}
 function renderHost(){
   const root=$("#app");root.innerHTML="";
@@ -3687,6 +3825,7 @@ function renderParticipant(){
       wrap.append(pick)}
   }else{
     wrap.append(live(h("div",{class:"meCard",style:"display:block"}),el=>attCard(el,m,d,me,g)));
+    wrap.append(h("div",{style:"display:flex;justify-content:flex-end;margin:-4px 0 10px"},h("button",{class:"btn",style:"padding:5px 14px;font-size:14px",onclick:openDataHub},"📦 資料匯出與 AI 使用方式")));
     if(m.id==="m8"&&selfevalOpen())wrap.append(h("div",{style:"border:1px solid var(--saffron);background:var(--saffron-soft);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between"},
       h("div",null,h("b",null,"📝 員工年度工作自評表"),h("div",{style:"font-size:13px;color:var(--muted)"},"以 LINE 登入填寫，請於 "+(cfg("selfeval.deadline")||SELFEVAL_DEADLINE_DEFAULT)+" 前完成")),
       h("a",{class:"btn primary",href:SELFEVAL_URL,target:"_blank",rel:"noopener",style:"text-decoration:none"},"前往填寫")));
