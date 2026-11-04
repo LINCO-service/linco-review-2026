@@ -100,7 +100,7 @@ function login_(req) {
   const fails = Number(cache.get(key) || 0);
   if (fails >= 5) return { ok: false, error: '錯誤次數過多，請 10 分鐘後再試，或請管理員協助' };
   let U = readUsers_(), u = U.byId[id];
-  if (!u && id === VIEWER_ID) { ensureViewer_(); U = readUsers_(); u = U.byId[id]; }                // V3.1.3：唯讀測試帳號自動建立
+  if (id === VIEWER_ID && isTestEnv_() && (!u || u.role !== '管理員')) { ensureViewer_(); U = readUsers_(); u = U.byId[id]; }   // V3.1.3：測試帳號只在測試環境自動建立（管理員權限）
   if (!u || !u.active) return { ok: false, error: '查無此工號，請確認或聯絡管理員' };
   const pw = String(req.pw || '').trim();
   const ok = u.hash ? pwHash_(u.id, pw) === u.hash : (!!u.bday && normCode_(pw) === u.bday);
@@ -108,12 +108,16 @@ function login_(req) {
   cache.remove(key);
   return { ok: true, token: makeToken_(u), user: publicUser_(u), mustChange: !u.hash };
 }
-/** V3.1.3：唯讀測試帳號（角色「檢視」，只能看不能改，不需改密碼） */
-const VIEWER_ID = 'TEST', VIEWER_PW = '000000';
+/** V3.1.3：測試帳號 TEST／000000，只在測試環境存在，具管理員（主持人）權限，不需改密碼。
+ *  另保留角色「檢視」：可指定給只能看、不能改的帳號。 */
+const VIEWER_ID = 'TEST', VIEWER_PW = '000000', TEST_SCRIPT_ID = '17cjrr1Wx3zZCIk_NL6oYVOxU9dhGNFGJ8neAXYZie9IKcha4k_C4EvD_';
+function isTestEnv_() { try { return ScriptApp.getScriptId() === TEST_SCRIPT_ID; } catch (e) { return false; } }
 function ensureViewer_() {
   const lock = LockService.getScriptLock(); lock.waitLock(20000);
-  try { if (readUsers_().byId[VIEWER_ID]) return; const sh = users_();
-    sh.appendRow([VIEWER_ID, '測試帳號', '', '', '', '檢視', '', '是', '', pwHash_(VIEWER_ID, VIEWER_PW), 1, '']); usersBust_(); } finally { lock.releaseLock(); }
+  try { const u = readUsers_().byId[VIEWER_ID], sh = users_();
+    if (u) { sh.getRange(u.row, 6).setValue('管理員'); if (!u.hash) sh.getRange(u.row, 10).setValue(pwHash_(VIEWER_ID, VIEWER_PW)); }
+    else sh.appendRow([VIEWER_ID, '測試帳號', '總經理室', '', '', '管理員', '', '是', '', pwHash_(VIEWER_ID, VIEWER_PW), 1, '']);
+    usersBust_(); } finally { lock.releaseLock(); }
 }
 function changePw_(req) {
   const U = readUsers_(), u = verifyToken_(req.auth && req.auth.token, U);
