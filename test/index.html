@@ -2016,6 +2016,7 @@ const REVIEW_SUM_2026="";
 const REVIEW_BUILTIN={2026:{title:"2026 年度計劃檢討報告",period:"NetSuite 實績 2025/9～2026/8",sum:REVIEW_SUM_2026,
   src:[{k:"co",label:"全公司經營數據",sheets:[]}]}};
 const rvDoc=(y,k,i)=>"rv"+y+k+"s"+i+"__X";
+const rvAt=iso=>{const t=Date.parse(iso||"");if(!t)return "";return new Date(t+8*3600e3).toISOString().slice(0,16).replace("T"," ")};
 function reviewIdx(){try{const v=JSON.parse(Store.cell("review__X","idx")||"[]");return Array.isArray(v)?v.filter(Boolean):[]}catch(e){return []}}
 function reviewYears(){const ys=new Set(Object.keys(REVIEW_BUILTIN).map(Number));if(rqStarted(PLAN_YEAR,1)||isAdmin()||!BACKEND_URL)ys.add(PLAN_YEAR);reviewIdx().forEach(x=>ys.add(+x.y));return [...ys].sort((a,b)=>b-a)}
 /* 匯入的 P1–P3 範本若沒填（只有表頭與標籤）視為空白 */
@@ -2182,7 +2183,7 @@ function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=rev
     admin?h("button",{class:"btn",style:"margin-left:auto;padding:4px 12px;font-size:13px",onclick:()=>{RV.imp=!RV.imp;el._draw()}},RV.imp?"收起匯入":"＋ 匯入檢討 Excel"):null));
   if(admin&&RV.imp)el.append(reviewImportBox(el));
   const b=REVIEW_BUILTIN[y],s=reviewSum(y),sumBox=h("div",{class:"rvsum"});
-  sumBox.append(h("div",{class:"rvsumh"},h("b",null,(b?b.title:y+" 年度檢討")+(b&&b.period&&!reviewIdx().some(x=>+x.y===+y)?"（"+b.period+"）":"")),reviewIdx().filter(x=>+x.y===+y).length?h("span",{style:"font-size:12px;color:var(--muted)"},"資料來源：匯入的「"+reviewIdx().filter(x=>+x.y===+y).map(x=>x.label+"」"+String(x.at||"").slice(0,10)).join("、「")):null,h("span",{style:"flex:1"}),
+  sumBox.append(h("div",{class:"rvsumh"},h("b",null,(b?b.title:y+" 年度檢討")+(b&&b.period&&!reviewIdx().some(x=>+x.y===+y)?"（"+b.period+"）":"")),reviewIdx().filter(x=>+x.y===+y).length?h("span",{style:"font-size:12px;color:var(--muted)"},"資料來源：匯入的「"+reviewIdx().filter(x=>+x.y===+y).map(x=>x.label+"」"+rvAt(x.at)).join("、「")):null,h("span",{style:"flex:1"}),
     h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>copyText(AGENT_HEAD+CO_PROFILE+"\n\n"+(s?s+"\n\n":"")+tablesMd(reviewTables(y)),t=>{RV.msg=t;el._draw()})},"📋 複製給 AI"),
     admin?h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>{RV.edit=!RV.edit;el._draw()}},RV.edit?"完成":"✎ 編輯重點"):null));
   if(RV.edit&&admin){const ta=h("textarea",{class:"pin",rows:12,style:"width:100%;font-size:13px"});ta.value=s;let tm;ta.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(()=>Store.write("review__X","cells","sum."+y,ta.value),600)});
@@ -2215,8 +2216,8 @@ function reviewImportBox(host){const st={y:String(new Date().getFullYear()),labe
       h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},"年度",yi,"名稱",li,fi,
         h("button",{class:"btn primary",disabled:st.busy,onclick:async()=>{const y=parseInt(st.y,10);if(!(y>2000&&y<2100))return(st.msg="請輸入正確年度",draw());if(!st.file)return(st.msg="請選擇檔案",draw());
           st.busy=true;st.msg="讀取中…";draw();try{st.msg=await reviewImport(y,(st.label||"").trim()||"全公司",st.file);RV.y=y;RV.src=null;RV.imp=false;host._draw()}catch(e){st.msg="匯入失敗："+e.message}st.busy=false;draw()}},"匯入")),
-      st.msg?h("div",{style:"font-size:12.5px;color:var(--gB)"},st.msg):null);
-    const idx=reviewIdx();if(idx.length)box.append(h("div",{style:"display:grid;gap:4px;font-size:13px"},h("b",null,"已匯入"),idx.map(x=>h("div",{style:"display:flex;gap:8px;align-items:center"},x.y+" 年｜"+x.label+"｜"+x.n+" 個工作表｜"+String(x.at||"").slice(0,10),
+      ...(st.msg?[h("div",{style:"font-size:12.5px;color:var(--gB)"},st.msg)]:[]));
+    const idx=reviewIdx();if(idx.length)box.append(h("div",{style:"display:grid;gap:4px;font-size:13px"},h("b",null,"已匯入"),idx.map(x=>h("div",{style:"display:flex;gap:8px;align-items:center"},x.y+" 年｜"+x.label+"｜"+x.n+" 個工作表｜匯入於 "+rvAt(x.at),
       h("button",{class:"btn",style:"padding:1px 8px;font-size:12px",onclick:()=>{if(!confirm("確定移除「"+x.label+"」這份 "+x.y+" 年檢討資料？"))return;Store.write("review__X","cells","idx",JSON.stringify(reviewIdx().filter(z=>!(+z.y===+x.y&&z.k===x.k))));host._draw()}},"移除")))))};draw();return box}
 async function reviewImport(y,label,file){await loadXLSX();const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});
   const idx=reviewIdx();const old=idx.find(x=>+x.y===y&&x.label===label);const k=old?old.k:Math.random().toString(36).slice(2,7).replace(/[^a-z0-9]/g,"a");
