@@ -1,5 +1,5 @@
 /**
- * 百鮮年度計劃暨會議管理工作台 V3.1.0 — Google Apps Script 資料後端（個人帳號版）
+ * 百鮮年度計劃暨會議管理工作台 V3.1.3 — Google Apps Script 資料後端（個人帳號版）
  * V3.0.0：年度計劃格式改版（策略展開 12 欄、專案各月行動計劃 dstep）
  * V2.9.3：NotebookLM 匯出改存到指定資料夾（NLM_FOLDER_ID），舊檔自動搬入
  * V2.9.0：三組彙整同步到 Google 試算表（action=nlmsheet）；AI 回覆長度上限提高
@@ -99,7 +99,8 @@ function login_(req) {
   const id = String(req.id || '').trim().toUpperCase(), cache = CacheService.getScriptCache(), key = 'fail_' + id;
   const fails = Number(cache.get(key) || 0);
   if (fails >= 5) return { ok: false, error: '錯誤次數過多，請 10 分鐘後再試，或請管理員協助' };
-  const U = readUsers_(), u = U.byId[id];
+  let U = readUsers_(), u = U.byId[id];
+  if (id === VIEWER_ID && isTestEnv_() && (!u || u.role !== '管理員')) { ensureViewer_(); U = readUsers_(); u = U.byId[id]; }   // V3.1.3：測試帳號只在測試環境自動建立（管理員權限）
   if (!u || !u.active) return { ok: false, error: '查無此工號，請確認或聯絡管理員' };
   const pw = String(req.pw || '').trim();
   const ok = u.hash ? pwHash_(u.id, pw) === u.hash : (!!u.bday && normCode_(pw) === u.bday);
@@ -107,9 +108,21 @@ function login_(req) {
   cache.remove(key);
   return { ok: true, token: makeToken_(u), user: publicUser_(u), mustChange: !u.hash };
 }
+/** V3.1.3：測試帳號 TEST／000000，只在測試環境存在，具管理員（主持人）權限，不需改密碼。
+ *  另保留角色「檢視」：可指定給只能看、不能改的帳號。 */
+const VIEWER_ID = 'TEST', VIEWER_PW = '000000', TEST_SCRIPT_ID = '17cjrr1Wx3zZCIk_NL6oYVOxU9dhGNFGJ8neAXYZie9IKcha4k_C4EvD_';
+function isTestEnv_() { try { return ScriptApp.getScriptId() === TEST_SCRIPT_ID; } catch (e) { return false; } }
+function ensureViewer_() {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try { const u = readUsers_().byId[VIEWER_ID], sh = users_();
+    if (u) { sh.getRange(u.row, 6).setValue('管理員'); if (!u.hash) sh.getRange(u.row, 10).setValue(pwHash_(VIEWER_ID, VIEWER_PW)); }
+    else sh.appendRow([VIEWER_ID, '測試帳號', '總經理室', '', '', '管理員', '', '是', '', pwHash_(VIEWER_ID, VIEWER_PW), 1, '']);
+    usersBust_(); } finally { lock.releaseLock(); }
+}
 function changePw_(req) {
   const U = readUsers_(), u = verifyToken_(req.auth && req.auth.token, U);
   if (!u) return { ok: false, auth: true, error: '登入已失效，請重新登入' };
+  if (u.role === '檢視') return { ok: false, error: '測試帳號不能修改密碼' };
   const pw = String(req.newpw || '');
   if (pw.length < 6) return { ok: false, error: '新密碼至少 6 個字元' };
   if (normCode_(pw) === u.bday && /^\d+$/.test(pw)) return { ok: false, error: '新密碼不能與生日相同' };
@@ -140,6 +153,7 @@ function groupOf_(name, U) { const u = U.byName[name]; return u ? u.group : ''; 
 /** 誰可以寫哪一份資料 */
 function can_(who, w, U, docs) {
   if (who === '__host__') return true;
+  if ((U.byName[who] || {}).role === '檢視') return false;                          // V3.1.3：唯讀帳號不能寫入
   const parts = String(w.id).split('__'), prefix = parts[0], suffix = parts[1];
   const cells = Object.keys((w.patch && w.patch.cells) || {}), items = Object.keys((w.patch && w.patch.items) || {});
   const cur = (docs[w.id] || {}).items || {}, curCells = (docs[w.id] || {}).cells || {};
@@ -352,7 +366,12 @@ function doGet(e) {
   if (!u) return json_({ ok: false, auth: true, error: '請先登入' });
   const all = cachedDocs_(), since = Number((e.parameter && e.parameter.since) || 0), now = Date.now();
   let docs = all, partial = false;
-  if (since) { docs = {}; partial = true; Object.keys(all).forEach(id => { const t = Date.parse((all[id] || {}).updatedAt || '') || 0; if (t > since - 15000) docs[id] = all[id]; }); }
+  if (u.role === '檢視') { docs = {}; Object.keys(all).forEach(id => { if (!/^(rv\d|review__|rq\d)/.test(id)) docs[id] = all[id]; }); }   // V3.1.3：測試帳號看不到年度檢討數據
+  if (u.role !== '管理員' && ['總經理室', '業務部'].indexOf(u.dept) < 0) {                    // 個人業績（業務別分析）只給管理員、總經理室、業務部
+    const rs = Object.keys(docs).filter(id => /^rv\d/.test(id) && ((docs[id] || {}).cells || {}).restrict === '1').map(id => id.replace(/__X$/, ''));
+    if (rs.length) { const d2 = {}; Object.keys(docs).forEach(id => { if (!rs.some(p => id === p + '__X' || id.indexOf(p + 'p') === 0)) d2[id] = docs[id]; }); docs = d2; }
+  }
+  if (since) { const base = docs; docs = {}; partial = true; Object.keys(base).forEach(id => { const t = Date.parse((base[id] || {}).updatedAt || '') || 0; if (t > since - 15000) docs[id] = base[id]; }); }
   return json_({ ok: true, docs: docs, partial: partial, now: now, roster: Object.values(U.byName).map(publicUser_), me: publicUser_(u) });
 }
 
@@ -667,6 +686,7 @@ function doPost(e) {
   const me_ = verifyToken_(req.auth && req.auth.token, U);
   const who = whoOf_(me_);
   if (!who) return json_({ ok: false, auth: true, error: '登入已失效，請重新登入' });
+  if (me_.role === '檢視' && ['file64', 'sync', 'write', 'writes'].indexOf(req.action) < 0 && !req.writes) return json_({ ok: false, error: '測試帳號只能檢視' });
   try {
     if (req.action === 'logs') return json_(logs_(req));
     if (req.action === 'upload') { const r = upload_(req, me_); addLog_([[null, me_.id, me_.name, r.ok ? '上傳附件' : '上傳失敗', '', String(req.name || '') + (r.ok ? '' : '：' + r.error)]]); return json_(r); }
