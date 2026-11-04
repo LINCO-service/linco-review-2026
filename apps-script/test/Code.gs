@@ -362,7 +362,12 @@ function doGet(e) {
   if (!u) return json_({ ok: false, auth: true, error: '請先登入' });
   const all = cachedDocs_(), since = Number((e.parameter && e.parameter.since) || 0), now = Date.now();
   let docs = all, partial = false;
-  if (since) { docs = {}; partial = true; Object.keys(all).forEach(id => { const t = Date.parse((all[id] || {}).updatedAt || '') || 0; if (t > since - 15000) docs[id] = all[id]; }); }
+  if (u.role === '檢視') { docs = {}; Object.keys(all).forEach(id => { if (!/^(rv\d|review__|rq\d)/.test(id)) docs[id] = all[id]; }); }   // V3.1.3：測試帳號看不到年度檢討數據
+  if (u.role !== '管理員' && ['總經理室', '業務部'].indexOf(u.dept) < 0) {                    // 個人業績（業務別分析）只給管理員、總經理室、業務部
+    const rs = Object.keys(docs).filter(id => /^rv\d/.test(id) && ((docs[id] || {}).cells || {}).restrict === '1').map(id => id.replace(/__X$/, ''));
+    if (rs.length) { const d2 = {}; Object.keys(docs).forEach(id => { if (!rs.some(p => id === p + '__X' || id.indexOf(p + 'p') === 0)) d2[id] = docs[id]; }); docs = d2; }
+  }
+  if (since) { const base = docs; docs = {}; partial = true; Object.keys(base).forEach(id => { const t = Date.parse((base[id] || {}).updatedAt || '') || 0; if (t > since - 15000) docs[id] = base[id]; }); }
   return json_({ ok: true, docs: docs, partial: partial, now: now, roster: Object.values(U.byName).map(publicUser_), me: publicUser_(u) });
 }
 

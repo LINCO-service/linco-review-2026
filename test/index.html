@@ -2014,19 +2014,18 @@ function hostLogin(){
 
 /* ================= 表格元件 ================= */
 /* ===== V3.0.8 歷年年度檢討 ===== */
-const REVIEW_SUM_2026="";
-const REVIEW_BUILTIN={2026:{title:"2026 年度計劃檢討報告",period:"NetSuite 實績 2025/9～2026/8",sum:REVIEW_SUM_2026,
-  src:[{k:"co",label:"全公司經營數據",sheets:[]}]}};
+/* V3.1.3：檢討數據不再寫在網頁原始碼裡（網站是公開的），一律由管理員匯入、存在後端，只有登入者讀得到 */
+const REVIEW_BUILTIN={2026:{title:"2026 年度計劃檢討報告",period:"NetSuite 實績 2025/9～2026/8",names:["P0-銷售額趨勢分析 (百鮮)", "P0-銷售額趨勢分析 (品諦)", "P0-1銷售額趨勢分析", "P0-2-產品別分析", "P0-3-客戶別分析", "P0-4-通路別分析", "業務別分析", "新客戶分析", "複合調味料品項排名", "P0-5-產能使用率分析"]}};
 const rvDoc=(y,k,i)=>"rv"+y+k+"s"+i+"__X",rvPart=(y,k,i,j)=>"rv"+y+k+"s"+i+"p"+j+"__X";
 const rvAt=iso=>{const t=Date.parse(iso||"");if(!t)return "";return new Date(t+8*3600e3).toISOString().slice(0,16).replace("T"," ")};
 function reviewIdx(){try{const v=JSON.parse(Store.cell("review__X","idx")||"[]");return Array.isArray(v)?v.filter(Boolean):[]}catch(e){return []}}
 function reviewYears(){const ys=new Set(Object.keys(REVIEW_BUILTIN).map(Number));if(rqStarted(PLAN_YEAR,1)||isAdmin()||!BACKEND_URL)ys.add(PLAN_YEAR);reviewIdx().forEach(x=>ys.add(+x.y));return [...ys].sort((a,b)=>b-a)}
 /* 匯入的 P1–P3 範本若沒填（只有表頭與標籤）視為空白 */
 function rvLooksEmpty(nm,rows){if(!/^\s*P[1-3]/i.test(nm||""))return false;let n=0;(rows||[]).slice(4).forEach(r=>r.slice(2).forEach(x=>{const t=String(x||"").trim();if(t&&!/^(目標|實際|％|%|0|月|\d{1,2})$/.test(t))n++}));return n<3}
-function reviewSources(y){const out=[],b=REVIEW_BUILTIN[y],imp=reviewIdx().some(x=>+x.y===+y);if(b&&!imp)b.src.forEach(s=>out.push({k:s.k,label:s.label,builtin:true,sheets:s.sheets}));
+function reviewSources(y){const out=[],b=REVIEW_BUILTIN[y],imp=reviewIdx().some(x=>+x.y===+y);if(b&&!imp&&b.src)b.src.forEach(s=>out.push({k:s.k,label:s.label,builtin:true,sheets:s.sheets}));
   reviewIdx().filter(x=>+x.y===+y).forEach(x=>out.push({k:x.k,label:x.label,at:x.at,sheets:Array.from({length:+x.n||0},(_,i)=>{const c=Store.body(rvDoc(y,x.k,i)).cells;let rows=[];try{rows=+c.parts>0?Array.from({length:+c.parts},(_,j)=>JSON.parse(Store.cell(rvPart(y,x.k,i,j),"rows")||"[]")).flat():JSON.parse(c.rows||"[]")}catch(e){}
     const name=c.name||("工作表"+(i+1));return {name,rows,restrict:c.restrict==="1",empty:c.empty==="1"||rvLooksEmpty(name,rows),cut:c.cut==="1"}})}));return out}
-function reviewSum(y){const v=Store.cell("review__X","sum."+y);return v||((REVIEW_BUILTIN[y]||{}).sum)||""}
+function reviewSum(y){return Store.cell("review__X","sum."+y)||""}
 function reviewCanSee(s){if(!s.restrict)return true;if(isAdmin()||state.mode==="host")return true;const me=getMe();return !!me&&(isGM(me)||myDeptCode()==="SALES")}
 const rvNum=v=>/^[-+]?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
 const rvNe=r=>r.filter(x=>String(x).trim()).length;
@@ -2168,13 +2167,15 @@ async function rqXlImport(y,q,c,file){const X=await xlRead(file),id=rqId(y,q,c);
   xlRows(X["P3 組織流程"],["項目",XL_ID]).forEach(r=>{if(/^(org|flow)$/.test(r[XL_ID])){w("o."+r[XL_ID],r["問題描述"]);w("o."+r[XL_ID]+"2",r["改善對策"])}});
   return "✓ 已匯入，更新 "+n+" 個欄位"}
 /* ---- 年度檢討表範本（管理員匯入用，格式同 2026） ---- */
-async function reviewTplDownload(){const b=REVIEW_BUILTIN[2026];const sh=b.src[0].sheets.filter(s=>!s.restrict).map(s=>[s.name.trim(),s.rows.map((r,ri)=>r.map(x=>ri>2&&rvNum(x)?"":rvT(x))),null]);
+async function reviewTplDownload(){const src=reviewIdx().slice(-1)[0];if(!src)throw new Error("請先匯入一份檢討表，範本會依它的格式產生");
+  const sh=reviewSources(+src.y).find(x=>x.k===src.k).sheets.filter(s=>!s.restrict).map(s=>[rvT(s.name).trim(),s.rows.map((r,ri)=>r.map(x=>ri>2&&rvNum(x)?"":rvT(x))),null]);
   await xlSave("年度檢討表範本.xlsx",sh)}
 
 const RV_BIG=[["P0","P0 經營數據分析"],["P1","P1 KPI&DPI 指標檢討"],["P2","P2 策略與專案檢討"],["P3","P3 組織流程檢討"]];
 const rvGroup=nm=>{const m=/^\s*(P[0-3])/i.exec(nm||"");return m?m[1].toUpperCase():"P0"};
 /* 依年度整理成 P0–P3 大分頁，每個大分頁內是像 Excel 的頁簽（頁簽在上方） */
-function reviewTabs(y){const srcs=reviewSources(y),multi=srcs.length>1,T={P0:[],P1:[],P2:[],P3:[]};
+function reviewTabs(y){const srcs=isViewer()?[]:reviewSources(y),multi=srcs.length>1,T={P0:[],P1:[],P2:[],P3:[]};
+  if(isViewer()&&REVIEW_BUILTIN[y])REVIEW_BUILTIN[y].names.forEach((n,i)=>T[rvGroup(n)].push({key:"v:"+i,label:n.replace(/^P\d(-\d)?[-\s]*/i,""),viewer:true}));
   if(y===PLAN_YEAR){T.P1.push({key:"rq:kpi",label:"KPI&DPI 指標檢討",rq:"kpi"});T.P2.push({key:"rq:strat",label:"策略檢討",rq:"strat"},{key:"rq:proj",label:"年度專案檢討",rq:"proj"});T.P3.push({key:"rq:org",label:"組織流程檢討",rq:"org"})}
   srcs.forEach(src=>src.sheets.forEach((sh,i)=>{if(sh.empty||!reviewCanSee(sh))return;T[rvGroup(sh.name)].push({key:src.k+":"+i,label:rvT(sh.name).trim().replace(/^P\d(-\d)?[-\s]*/i,"")+(multi?"（"+src.label+"）":""),sheet:sh,lock:sh.restrict})}));
   return RV_BIG.filter(([k])=>T[k].length).map(([k,l])=>({k,l,tabs:T[k]}))}
@@ -2192,15 +2193,16 @@ function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=rev
     sumBox.append(ta,h("div",{style:"font-size:12px;color:var(--muted)"},"這段重點會自動帶入各部門的 AI 指令（AI 顧問、資料包、NotebookLM）。清空就會恢復系統預設。"))}
   else sumBox.append(s?h("div",{class:"rvsumt"},s):h("div",{style:"color:var(--muted);font-size:13px"},"尚未填寫檢討重點"+(admin?"，請按「編輯重點」":"")));
   if(RV.msg)sumBox.append(h("div",{style:"font-size:12.5px;color:var(--gB)"},RV.msg));
-  el.append(sumBox);
+  if(!isViewer())el.append(sumBox);
   const groups=reviewTabs(y);if(!groups.length){el.append(h("div",{class:"rvempty"},"這個年度還沒有檢討資料"));return}
   if(!groups.some(g=>g.k===RV.big))RV.big=groups[0].k;const G=groups.find(g=>g.k===RV.big);
   el.append(h("div",{class:"rvbig",role:"tablist"},groups.map(g=>h("button",{role:"tab",class:"rvbt"+(g.k===RV.big?" on":""),onclick:()=>{RV.big=g.k;RV.sub="";el._draw()}},g.l))));
   if(!G.tabs.some(t=>t.key===RV.sub))RV.sub=G.tabs[0].key;const T=G.tabs.find(t=>t.key===RV.sub);
   const panel=h("div",{class:"rvpanel"});
-  if(G.tabs.some(t=>t.rq))panel.append(rqPicker(y,el));
+  if(G.tabs.some(t=>t.rq)&&!isViewer())panel.append(rqPicker(y,el));
   panel.append(h("div",{class:"xtabs",role:"tablist"},G.tabs.map(t=>h("button",{role:"tab",class:"xtab"+(t.key===RV.sub?" on":""),onclick:()=>{RV.sub=t.key;el._draw()}},t.label,t.lock?" 🔒":""))));
   const body=h("div",{class:"xbody"});
+  if(isViewer()){body.append(h("div",{class:"rvempty"},"👀 測試帳號只能看到分頁架構，無法檢視檢討數據。"));panel.append(body);el.append(panel);return}
   if(T.rq)body.append(h("div",{class:"rvnote",style:"margin-bottom:6px"},"指標、策略、專案由 "+y+" 年度計劃帶入；各月目標／實際、差異分析、專案成果由各月管理月會報告帶入。"+(rqCanEdit(RV.dept)?"右側欄位由本部門填寫本季檢討。":"")),rqSecEl(y,RV.q,RV.dept,T.rq));
   else{if(T.lock)body.append(h("div",{class:"rvnote"},"🔒 個人業績資料：只有管理員、總經理室與業務部看得到，也不會放進 AI 資料包。"));body.append(rvSheetEl(T.sheet))}
   panel.append(body);el.append(panel)})}
