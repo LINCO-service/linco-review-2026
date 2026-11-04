@@ -2026,16 +2026,27 @@ function reviewCanSee(s){if(!s.restrict)return true;if(isAdmin()||state.mode==="
 const rvNum=v=>/^[-+]?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
 const rvNe=r=>r.filter(x=>String(x).trim()).length;
 /* 把一張工作表拆成區塊：前面的說明文字、表格（含表頭）、後面的※註記 */
-function rvParse(rows){const bl=[];let cur=[];(rows||[]).forEach(r=>{if(rvNe(r))cur.push(r.map(x=>String(x==null?"":x)));else if(cur.length){bl.push(cur);cur=[]}});if(cur.length)bl.push(cur);
-  return bl.map(b=>{let i=0;const texts=[],notes=[];while(i<b.length&&rvNe(b[i])<=2&&!b[i].some(rvNum)){texts.push(b[i].filter(x=>x.trim()).join(" "));i++}
+const RV_S2T="项項计計额額销銷货貨单單号號业業产產设設备備装裝应應报報统統实實际際总總与與为為这這们們发發会會员員价價对對时時间間进進门門点點电電话話东東关關开開车車区區万萬亿億长長认認务務览覽动動态態类類别別户戶资資质質检檢验驗库庫采採购購财財汇匯环環节節达達标標准準场場网網络絡级級线線绩績预預损損营營运運规規划劃厂廠订訂输輸费費净淨润潤数數项項";
+const RV_MAP=(()=>{const m={};for(let i=0;i<RV_S2T.length;i+=2)m[RV_S2T[i]]=RV_S2T[i+1];return m})();
+const rvT=x=>String(x==null?"":x).replace(/[\u4e00-\u9fff]/g,c=>RV_MAP[c]||c).replace(/占比/g,"佔比");
+function rvParse(rows){const bl=[];let cur=[];(rows||[]).forEach(r=>{if(rvNe(r))cur.push(r.map(rvT));else if(cur.length){bl.push(cur);cur=[]}});if(cur.length)bl.push(cur);
+  const out=[];bl.forEach(b=>{let i=0;const texts=[],notes=[];while(i<b.length&&rvNe(b[i])<=2&&!b[i].some(rvNum)){texts.push(b[i].filter(x=>x.trim()).join(" "));i++}
     let j=b.length;while(j>i&&rvNe(b[j-1])<=2&&/^※/.test((b[j-1].find(x=>x.trim())||"").trim()))j--;
     b.slice(j).forEach(r=>notes.push(r.filter(x=>x.trim()).join(" ")));
-    let t=b.slice(i,j);const keep=[];t.forEach(r=>r.forEach((x,ci)=>{if(String(x).trim())keep[ci]=true}));t=t.map(r=>r.filter((x,ci)=>keep[ci]));
-    let head=null;if(t.length>1&&rvNe(t[0])>=3&&!t[0].some(rvNum)&&t[0].every(x=>x.length<=40)){head=t[0];t=t.slice(1)}
-    return {texts:texts.filter(Boolean),notes,head,rows:t}})}
+    const t=b.slice(i,j),nc=Math.max(0,...t.map(r=>r.length)),filled=ci=>t.filter(r=>String(r[ci]||"").trim()).length;
+    /* 依「整欄空白」切段；右側段的資料列明顯較少（例如並排的小表）就拆成另一張表 */
+    const segs=[];let sg=null;for(let ci=0;ci<nc;ci++){if(filled(ci)){if(!sg){sg=[];segs.push(sg)}sg.push(ci)}else sg=null}
+    const rowsOf=cols=>t.filter(r=>cols.some(ci=>String(r[ci]||"").trim())).length;const groups=[];
+    segs.forEach(sg2=>{const g=groups[groups.length-1];if(g&&!(sg2.length>=2&&rowsOf(sg2)<0.8*rowsOf(g)))g.push(...sg2);else groups.push(sg2.slice())});
+    groups.forEach((cols,gi)=>{let rs=t.map(r=>cols.map(ci=>r[ci]||"")).filter(r=>rvNe(r));
+      let head=null;if(rs.length>1&&rvNe(rs[0])>=Math.min(3,cols.length)&&!rs[0].some(rvNum)&&rs[0].every(x=>x.length<=40)){head=rs[0];rs=rs.slice(1)}
+      out.push({texts:gi?[]:texts.filter(Boolean),notes:gi===groups.length-1?notes:[],head,rows:rs})});
+    if(!groups.length)out.push({texts:texts.filter(Boolean),notes,head:null,rows:[]})});
+  return out}
 function rvTableEl(p){if(!p.rows.length&&!p.head)return null;const c0n=p.rows.every(r=>!String(r[0]||"").trim()||rvNum(r[0]));
   const td=(x,ci,th)=>h(th?"th":"td",{class:(rvNum(x)?"n":"")+(ci===0?(c0n?" c0n":" c0"):"")+(String(x).length<=10?" nw":"")},x);
-  return h("div",{class:"rvtw"},h("table",{class:"rvt"},p.head?h("thead",null,h("tr",null,p.head.map((x,ci)=>td(x,ci,true)))):null,
+  const nc=Math.max(p.head?p.head.length:0,...p.rows.map(r=>r.length)),sm=nc<=4;
+  return h("div",{class:"rvtw",style:sm?"width:fit-content;max-width:100%":""},h("table",{class:"rvt",style:sm?"min-width:0":""},p.head?h("thead",null,h("tr",null,p.head.map((x,ci)=>td(x,ci,true)))):null,
     h("tbody",null,p.rows.map(r=>h("tr",{class:/^(合計|合计|小計|前 \d+ 名小計)/.test((r[0]||"").trim())||/合計 銷貨收入|營業收入淨額/.test(r[0]||"")?"tot":""},r.map((x,ci)=>td(x,ci,false)))))))}
 function rvSheetEl(s,first){const w=h("div",{class:"rvs"});if(s.empty)w.append(h("div",{class:"rvempty"},"此表尚未填寫（目前為空白範本），以下為表格格式。"));
   if(s.cut)w.append(h("div",{class:"rvempty"},"此表資料量太大，只保留前面的部分。"));
@@ -2096,7 +2107,7 @@ const rvGroup=nm=>{const m=/^\s*(P[0-3])/i.exec(nm||"");return m?m[1].toUpperCas
 /* 依年度整理成 P0–P3 大分頁，每個大分頁內是像 Excel 的頁簽（頁簽在上方） */
 function reviewTabs(y){const srcs=reviewSources(y),multi=srcs.length>1,T={P0:[],P1:[],P2:[],P3:[]};
   if(y===PLAN_YEAR){T.P1.push({key:"rq:kpi",label:"KPI&DPI 指標檢討",rq:"kpi"});T.P2.push({key:"rq:strat",label:"策略檢討",rq:"strat"},{key:"rq:proj",label:"年度專案檢討",rq:"proj"});T.P3.push({key:"rq:org",label:"組織流程檢討",rq:"org"})}
-  srcs.forEach(src=>src.sheets.forEach((sh,i)=>{if(sh.empty||!reviewCanSee(sh))return;T[rvGroup(sh.name)].push({key:src.k+":"+i,label:sh.name.trim().replace(/^P\d(-\d)?[-\s]*/i,"")+(multi?"（"+src.label+"）":""),sheet:sh,lock:sh.restrict})}));
+  srcs.forEach(src=>src.sheets.forEach((sh,i)=>{if(sh.empty||!reviewCanSee(sh))return;T[rvGroup(sh.name)].push({key:src.k+":"+i,label:rvT(sh.name).trim().replace(/^P\d(-\d)?[-\s]*/i,"")+(multi?"（"+src.label+"）":""),sheet:sh,lock:sh.restrict})}));
   return RV_BIG.filter(([k])=>T[k].length).map(([k,l])=>({k,l,tabs:T[k]}))}
 function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=reviewYears();if(!ys.length){el.append(h("div",{class:"rvempty"},"尚無年度檢討資料"));return}
   if(!ys.includes(RV.y))RV.y=ys.find(v=>v<PLAN_YEAR||rqStarted(v,1))||ys[0];const y=RV.y;
