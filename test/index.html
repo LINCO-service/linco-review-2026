@@ -2018,9 +2018,11 @@ const REVIEW_BUILTIN={2026:{title:"2026 年度計劃檢討報告",period:"NetSui
 const rvDoc=(y,k,i)=>"rv"+y+k+"s"+i+"__X";
 function reviewIdx(){try{const v=JSON.parse(Store.cell("review__X","idx")||"[]");return Array.isArray(v)?v.filter(Boolean):[]}catch(e){return []}}
 function reviewYears(){const ys=new Set(Object.keys(REVIEW_BUILTIN).map(Number));if(rqStarted(PLAN_YEAR,1)||isAdmin()||!BACKEND_URL)ys.add(PLAN_YEAR);reviewIdx().forEach(x=>ys.add(+x.y));return [...ys].sort((a,b)=>b-a)}
-function reviewSources(y){const out=[],b=REVIEW_BUILTIN[y];if(b)b.src.forEach(s=>out.push({k:s.k,label:s.label,builtin:true,sheets:s.sheets}));
+/* 匯入的 P1–P3 範本若沒填（只有表頭與標籤）視為空白 */
+function rvLooksEmpty(nm,rows){if(!/^\s*P[1-3]/i.test(nm||""))return false;let n=0;(rows||[]).slice(4).forEach(r=>r.slice(2).forEach(x=>{const t=String(x||"").trim();if(t&&!/^(目標|實際|％|%|0|月|\d{1,2})$/.test(t))n++}));return n<3}
+function reviewSources(y){const out=[],b=REVIEW_BUILTIN[y],imp=reviewIdx().some(x=>+x.y===+y);if(b&&!imp)b.src.forEach(s=>out.push({k:s.k,label:s.label,builtin:true,sheets:s.sheets}));
   reviewIdx().filter(x=>+x.y===+y).forEach(x=>out.push({k:x.k,label:x.label,at:x.at,sheets:Array.from({length:+x.n||0},(_,i)=>{const c=Store.body(rvDoc(y,x.k,i)).cells;let rows=[];try{rows=JSON.parse(c.rows||"[]")}catch(e){}
-    return {name:c.name||("工作表"+(i+1)),rows,restrict:c.restrict==="1",empty:c.empty==="1",cut:c.cut==="1"}})}));return out}
+    const name=c.name||("工作表"+(i+1));return {name,rows,restrict:c.restrict==="1",empty:c.empty==="1"||rvLooksEmpty(name,rows),cut:c.cut==="1"}})}));return out}
 function reviewSum(y){const v=Store.cell("review__X","sum."+y);return v||((REVIEW_BUILTIN[y]||{}).sum)||""}
 function reviewCanSee(s){if(!s.restrict)return true;if(isAdmin()||state.mode==="host")return true;const me=getMe();return !!me&&(isGM(me)||myDeptCode()==="SALES")}
 const rvNum=v=>/^[-+]?[\d,]+(\.\d+)?%?$/.test(String(v).trim());
@@ -2116,7 +2118,7 @@ function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=rev
     admin?h("button",{class:"btn",style:"margin-left:auto;padding:4px 12px;font-size:13px",onclick:()=>{RV.imp=!RV.imp;el._draw()}},RV.imp?"收起匯入":"＋ 匯入檢討 Excel"):null));
   if(admin&&RV.imp)el.append(reviewImportBox(el));
   const b=REVIEW_BUILTIN[y],s=reviewSum(y),sumBox=h("div",{class:"rvsum"});
-  sumBox.append(h("div",{class:"rvsumh"},h("b",null,(b?b.title:y+" 年度檢討")+(b&&b.period?"（"+b.period+"）":"")),h("span",{style:"flex:1"}),
+  sumBox.append(h("div",{class:"rvsumh"},h("b",null,(b?b.title:y+" 年度檢討")+(b&&b.period&&!reviewIdx().some(x=>+x.y===+y)?"（"+b.period+"）":"")),reviewIdx().filter(x=>+x.y===+y).length?h("span",{style:"font-size:12px;color:var(--muted)"},"資料來源：匯入的「"+reviewIdx().filter(x=>+x.y===+y).map(x=>x.label+"」"+String(x.at||"").slice(0,10)).join("、「")):null,h("span",{style:"flex:1"}),
     h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>copyText(AGENT_HEAD+CO_PROFILE+"\n\n"+(s?s+"\n\n":"")+tablesMd(reviewTables(y)),t=>{RV.msg=t;el._draw()})},"📋 複製給 AI"),
     admin?h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>{RV.edit=!RV.edit;el._draw()}},RV.edit?"完成":"✎ 編輯重點"):null));
   if(RV.edit&&admin){const ta=h("textarea",{class:"pin",rows:12,style:"width:100%;font-size:13px"});ta.value=s;let tm;ta.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(()=>Store.write("review__X","cells","sum."+y,ta.value),600)});
