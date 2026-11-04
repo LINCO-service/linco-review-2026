@@ -1190,6 +1190,7 @@ function fillCount(fid,g){
   if(f.type==="classify"){const xs=Store.items(docId("sw",g)).filter(([k,v])=>(v.text||"").trim());return xs.filter(([k,v])=>v.dim).length+"/"+xs.length}
   if(["sw","list","traits8","board"].includes(f.type))return Store.items(id).length+" 項";
   if(f.type==="roles"){let n=0;if(b.cells.leader)n++;ROLE_MEETINGS.forEach(([m])=>{if(b.cells["rec_"+m])n++;if(b.cells["rep_"+m])n++});return n+"/"+(1+ROLE_MEETINGS.length*2)}
+  if(!f.cols||!(f.rows||f.rowGroups))return "";
   const rows=gridRows(f).length,cols=f.cols.length;let n=0;
   for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if((b.cells["r"+r+"c"+c]||"").trim())n++;
   (f.topFields||[]).forEach(([k])=>{if((b.cells[k]||"").trim())n++});
