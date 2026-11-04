@@ -3735,7 +3735,7 @@ function selfStep2Dialog(g){const id=docId("self10",g);openDialog("步驟二：�
     h("details",{class:"example"},h("summary",null,"參考範例：小磨坊的寫法"),xmfTable()),
     aiPasteBtn("貼上 AI 彙整結果","貼上 AI 的回覆（需含【損益】【總體策略】…等標題）",t=>{const r=parseAI(t);const ks=Object.keys(r);if(!ks.length)return "找不到【損益】【總體策略】等標題";ks.forEach(i=>Store.write(id,"cells","r"+i+"c0",r[i]));setTimeout(()=>$("#rosterDlg").classList.remove("open"),50);return ks.length})))},{static:true});$("#rosterDlg .card").style.maxWidth="880px"}
 function selfQPanel(g,ro){const id=docId("self10",g);
-  return h("details",{class:"example",open:true,style:"border-style:solid"},h("summary",{style:"font-weight:700"},"步驟一：回答引導問題（可請 AI 協助思考）"),
+  return h("details",{class:"example",style:"border-style:solid"},h("summary",{style:"font-weight:700"},"步驟一：回答引導問題（可請 AI 協助思考）"),
     h("p",{style:"font-size:13px;color:var(--muted);margin:6px 0"},"先由組員討論、回答下面的問題；不確定的地方可以複製步驟一的 AI 指令，請 AI 提示思考方向與追問。回答完再進行步驟二。"),
     h("div",{style:"display:grid;gap:8px"},SELF_Q.map(([d,q],i)=>h("label",{class:"pgl"},h("span",null,h("b",null,"【"+d+"】"),q),mrCellIn(id,"q"+i,ro,"本組回答",1)))),
     ro?null:promptBoxDyn("步驟一 AI 指令：協助回答引導問題、提出追問",()=>selfStep1Prompt(g)))}
@@ -4134,7 +4134,7 @@ function deptAiPrompt(code,kind){const d=deptByCode(code),ps=deptProjects(code).
 function deptAiGuide(fid,code){if(!code||!deptByCode(code))return null;const kind0=fid==="dkpi"?"kpi":fid==="dorg"?"org":fid==="dsteps"?"steps":"proj";
   if(!["dproj","dstrat","dkpi","dorg","dsteps"].includes(fid))return null;
   const st=state.aiG=state.aiG||{};if(!st.kind||st.fid!==fid){st.kind=kind0;st.fid=fid}
-  const box=h("details",{class:"aiflow",open:st.open!==false?"":null},h("summary",null,"🤖 用 AI 製作本部門年度計劃",h("span",{style:"font-weight:400;font-size:13px;color:var(--muted);margin-left:8px"},"準備資料 → 選擇項目 → 複製指令 → 貼回結果")));
+  const box=h("details",{class:"aiflow",open:st.open===true?"":null},h("summary",null,"🤖 用 AI 製作本部門年度計劃",h("span",{style:"font-weight:400;font-size:13px;color:var(--muted);margin-left:8px"},"準備資料 → 選擇項目 → 複製指令 → 貼回結果")));
   box.addEventListener("toggle",()=>{st.open=box.open});
   const inner=live(h("div",{style:"display:grid;gap:12px;margin-top:10px"}),el=>{const D=DEPT_AI[st.kind],msg=h("div",{style:"font-size:13px;color:var(--gB);min-height:1.2em"});const say=(t,bad)=>{msg.textContent=t;msg.style.color=bad?"var(--danger)":"var(--gB)"};
     const step=(n,title,...kids)=>h("div",{class:"aistep"},h("div",{class:"aino"},String(n)),h("div",{style:"display:grid;gap:6px;min-width:0"},h("b",null,title),...kids));
