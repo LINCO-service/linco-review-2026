@@ -267,6 +267,7 @@ td.gantt.on{background:#C98F0A}
 .pgrid label.full{grid-column:1/-1}
 .mchip{width:30px;height:26px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:12px;display:inline-flex;align-items:center;justify-content:center;color:var(--ink)}
 .mchip.on{background:#C98F0A;color:#fff;border-color:#C98F0A}
+.calmm th.rowh{background:#C62828!important;color:#fff!important}.calmm td{background:#FDECEA}.mmday{display:flex;flex-direction:column;align-items:flex-start;color:#B71C1C;line-height:1.2;margin:2px 0}.mmday b{font-size:18px;font-weight:800}.mmday small{font-size:11.5px;color:#8E2A2A}
 .calitem{background:var(--mist);border-radius:4px;padding:1px 4px;margin:2px 0;line-height:1.35}
 .slide .light .pcard{background:#fff}
 /* ===== v5 ===== */
@@ -2922,11 +2923,14 @@ function calYear(){const P=allProjects().filter(p=>(p.name||"").trim());const ev
   const mmEv=calEvents().filter(([k])=>/^mm\d{6}$/.test(k));
   return h("div",{class:"tablewrap"},h("table",{class:"sheet plan cal"},h("thead",null,h("tr",null,h("th",null,""),M12.map(m=>h("th",null,m+"月")))),
     h("tbody",null,h("tr",null,h("th",{class:"rowh"},"國定假日"),M12.map(m=>cell(HOLI27.filter(x=>+x[0].slice(5,7)===m).map(x=>+x[0].slice(8)+"日 "+x[1])))),
-      h("tr",null,h("th",{class:"rowh"},"管理月會"),M12.map(m=>cell(mmEv.filter(([k,v])=>+v.date.slice(5,7)===m&&v.date.slice(0,4)==="2027").map(([k,v])=>(+v.date.slice(8))+"日 "+(v.time||"")+(mmSub(k.slice(2))?" "+mmSub(k.slice(2)):""))))),
+      h("tr",{class:"calmm"},h("th",{class:"rowh"},"管理月會"),M12.map(m=>h("td",{style:"vertical-align:top;min-width:90px"},mmEv.filter(([k,v])=>+v.date.slice(5,7)===m&&v.date.slice(0,4)==="2027").map(([k,v])=>h("div",{class:"mmday"},h("b",null,(+v.date.slice(8))+" 日"),mmSub(k.slice(2))?h("small",null,mmSub(k.slice(2))):null))))),
       h("tr",null,h("th",{class:"rowh"},"年度大事"),M12.map(m=>cell(calEvents().filter(([k,v])=>!/^mm\d{6}$/.test(k)&&(v.major||v.dept==="CO")&&inMonth(v,m)).map(([k,v])=>dlab(v)+v.title+(v.dept!=="CO"?"（"+scopeName(v.dept)+"）":""))))),
-      DEPTS.map(d=>h("tr",null,h("th",{class:"rowh"},d.name),M12.map(m=>cell(P.filter(p=>p.dept===d.name&&(p.months||[]).includes(m)).map(p=>"◆ "+p.name).concat(ev.filter(v=>v.dept===d.code&&v.major&&inMonth(v,m)).map(v=>dlab(v)+v.title)))))))))}
+      DEPTS.map(d=>{const ms=calMilestones(d.code);return h("tr",null,h("th",{class:"rowh"},d.name),M12.map(m=>cell(ev.filter(v=>v.dept===d.code&&v.major&&inMonth(v,m)).map(v=>"★ "+dlab(v)+v.title).concat(ms.filter(x=>x.m===m).map(x=>h("span",{title:x.proj},"▸ "+x.t))))))}))))}
+/* 各部門的年度查核點：各月行動計劃中有填「查核點／產出物」的步驟，列在最後一個執行月份 */
+function calMilestones(code){const out=[];const ps=new Map(deptProjects(code).map(([k,v])=>[k,v]));
+  Store.items(stepId(code)).sort(byT).forEach(([k,v])=>{const t=(v.out||"").trim();const ms=v.months||[];if(!t||!ms.length||!ps.has(v.pk))return;out.push({m:Math.max(...ms),t,proj:(ps.get(v.pk).name||"")+"："+(v.step||"")})});return out}
 function buildCal(ro){
-  if(ro)return live(h("div"),el=>el.append(calYear(),h("div",{style:"font-size:12px;color:#5E6B78;margin-top:6px"},"◆ 為部門專案（依專案管理的預訂進度）；國定假日為參考，請以人事行政總處公告為準")));
+  if(ro)return live(h("div"),el=>el.append(calYear(),h("div",{style:"font-size:12px;color:#5E6B78;margin-top:6px"},"★ 為部門年度大事；▸ 為專案查核點（「各月行動計劃」中有填查核點／產出物的步驟，列在最後執行月份）；國定假日為參考，請以人事行政總處公告為準")));
   if(!state.calM)state.calM=1;if(!state.calView)state.calView="month";
   return live(h("div"),el=>{
     {const lb=legacyBanner();if(lb)el.append(lb)}
