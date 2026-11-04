@@ -749,6 +749,14 @@ ul.oc-dd{padding-left:1.2em}
 .aistep{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;background:var(--paper);border-radius:10px;padding:10px 12px}
 .aino{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:700;font-size:13px}
 .aiguide{background:var(--mist);border-radius:10px;padding:10px 12px}
+.rvbig{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.rvbt{border:1px solid var(--line);background:var(--mist);border-radius:10px;padding:9px 16px;font-size:15px;font-weight:600;color:var(--muted);cursor:pointer}
+.rvbt.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rvpanel{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;min-width:0}
+.xtabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);padding-top:2px}
+.xtab{flex:none;border:1px solid var(--line);border-bottom:none;background:var(--mist);color:var(--muted);padding:6px 14px;border-radius:8px 8px 0 0;font-size:13px;white-space:nowrap;cursor:pointer;margin-bottom:-1px}
+.xtab.on{background:var(--paper);color:var(--ink);font-weight:700;box-shadow:inset 0 3px 0 var(--saffron);border-bottom:1px solid var(--paper)}
+.xbody{padding-top:12px;min-width:0;display:grid;gap:8px}
 .rvwrap{display:grid;gap:10px;min-width:0}
 .rvbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .rvchip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
@@ -764,6 +772,7 @@ ul.oc-dd{padding-left:1.2em}
 .rvt th,.rvt td{border-bottom:1px solid var(--line);border-right:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top;white-space:pre-wrap}
 .rvt th{background:var(--mist);font-weight:600;white-space:nowrap}.rvt td.n,.rvt th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .rvt .c0{position:sticky;left:0;background:var(--paper);min-width:9em;max-width:16em;font-weight:500}.rvt th.c0{background:var(--mist)}
+.rvt td.c0n,.rvt th.c0n{width:1%;white-space:nowrap}.rvt .nw{white-space:nowrap}
 .rvt tr.tot td{font-weight:700;background:rgba(201,143,10,.08)}.rvt tr.tot td.c0{background:#f7efdb}
 .aimd p{margin:.3em 0}.aimd h1,.aimd h2,.aimd h3{font-size:1.05em;margin:.6em 0 .3em}.aimd ul,.aimd ol{margin:.3em 0;padding-left:1.3em}
 .aimd table{border-collapse:collapse;width:100%;margin:.4em 0;font-size:.92em;background:#fff}.aimd th,.aimd td{border:1px solid rgba(30,43,58,.2);padding:4px 8px;text-align:left;vertical-align:top}.aimd th{background:rgba(201,143,10,.15)}
@@ -2008,7 +2017,7 @@ const REVIEW_BUILTIN={2026:{title:"2026 年度計劃檢討報告",period:"NetSui
   src:[{k:"co",label:"全公司經營數據",sheets:[]}]}};
 const rvDoc=(y,k,i)=>"rv"+y+k+"s"+i+"__X";
 function reviewIdx(){try{const v=JSON.parse(Store.cell("review__X","idx")||"[]");return Array.isArray(v)?v.filter(Boolean):[]}catch(e){return []}}
-function reviewYears(){const ys=new Set(Object.keys(REVIEW_BUILTIN).map(Number));reviewIdx().forEach(x=>ys.add(+x.y));return [...ys].sort((a,b)=>b-a)}
+function reviewYears(){const ys=new Set(Object.keys(REVIEW_BUILTIN).map(Number));if(rqStarted(PLAN_YEAR,1)||isAdmin()||!BACKEND_URL)ys.add(PLAN_YEAR);reviewIdx().forEach(x=>ys.add(+x.y));return [...ys].sort((a,b)=>b-a)}
 function reviewSources(y){const out=[],b=REVIEW_BUILTIN[y];if(b)b.src.forEach(s=>out.push({k:s.k,label:s.label,builtin:true,sheets:s.sheets}));
   reviewIdx().filter(x=>+x.y===+y).forEach(x=>out.push({k:x.k,label:x.label,at:x.at,sheets:Array.from({length:+x.n||0},(_,i)=>{const c=Store.body(rvDoc(y,x.k,i)).cells;let rows=[];try{rows=JSON.parse(c.rows||"[]")}catch(e){}
     return {name:c.name||("工作表"+(i+1)),rows,restrict:c.restrict==="1",empty:c.empty==="1",cut:c.cut==="1"}})}));return out}
@@ -2024,7 +2033,8 @@ function rvParse(rows){const bl=[];let cur=[];(rows||[]).forEach(r=>{if(rvNe(r))
     let t=b.slice(i,j);const keep=[];t.forEach(r=>r.forEach((x,ci)=>{if(String(x).trim())keep[ci]=true}));t=t.map(r=>r.filter((x,ci)=>keep[ci]));
     let head=null;if(t.length>1&&rvNe(t[0])>=3&&!t[0].some(rvNum)&&t[0].every(x=>x.length<=40)){head=t[0];t=t.slice(1)}
     return {texts:texts.filter(Boolean),notes,head,rows:t}})}
-function rvTableEl(p){if(!p.rows.length&&!p.head)return null;const td=(x,ci,th)=>h(th?"th":"td",{class:(rvNum(x)?"n":"")+(ci===0?" c0":"")},x);
+function rvTableEl(p){if(!p.rows.length&&!p.head)return null;const c0n=p.rows.every(r=>!String(r[0]||"").trim()||rvNum(r[0]));
+  const td=(x,ci,th)=>h(th?"th":"td",{class:(rvNum(x)?"n":"")+(ci===0?(c0n?" c0n":" c0"):"")+(String(x).length<=10?" nw":"")},x);
   return h("div",{class:"rvtw"},h("table",{class:"rvt"},p.head?h("thead",null,h("tr",null,p.head.map((x,ci)=>td(x,ci,true)))):null,
     h("tbody",null,p.rows.map(r=>h("tr",{class:/^(合計|合计|小計|前 \d+ 名小計)/.test((r[0]||"").trim())||/合計 銷貨收入|營業收入淨額/.test(r[0]||"")?"tot":""},r.map((x,ci)=>td(x,ci,false)))))))}
 function rvSheetEl(s,first){const w=h("div",{class:"rvs"});if(s.empty)w.append(h("div",{class:"rvempty"},"此表尚未填寫（目前為空白範本），以下為表格格式。"));
@@ -2032,21 +2042,69 @@ function rvSheetEl(s,first){const w=h("div",{class:"rvs"});if(s.empty)w.append(h
   rvParse(s.rows).forEach((p,bi)=>{p.texts.forEach((t,ti)=>w.append(h(bi===0&&ti===0?"h3":"div",{class:/^※/.test(t)?"rvnote":bi===0&&ti===0?"rvh":"rvsub"},t)));const tb=rvTableEl(p);if(tb)w.append(tb);p.notes.forEach(t=>w.append(h("div",{class:"rvnote"},t)))});
   if(s.empty)w.classList.add("rvdim");return w}
 /* 給 AI／Excel 用：每個區塊一張表 */
-function reviewTables(y,opt){const out=[];reviewSources(y).forEach(src=>src.sheets.forEach(s=>{if(s.empty||s.restrict)return;const ps=rvParse(s.rows);
+function reviewTables(y,opt){const out=y===PLAN_YEAR?rqTables(y):[];reviewSources(y).forEach(src=>src.sheets.forEach(s=>{if(s.empty||s.restrict)return;const ps=rvParse(s.rows);
   let carry=[];ps.forEach((p,bi)=>{if(!p.rows.length){carry=carry.concat(bi===0?p.texts.slice(1):p.texts,p.notes);return}const nc=Math.max(p.head?p.head.length:0,...p.rows.map(r=>r.length));const head=p.head||Array.from({length:nc},(_,i)=>i?"欄"+(i+1):"項目");
     const title=(bi===0?"":(p.texts[0]||"")).replace(/^[一二三四五六七八九十]+、/,"");
     out.push({name:y+" 檢討｜"+(reviewSources(y).length>1?src.label+"｜":"")+s.name.replace(/^\s+/,"")+(title?"｜"+title:""),note:[].concat(carry,bi===0?p.texts:p.texts.slice(1),p.notes).join("；").slice(0,600),head,rows:p.rows});carry=[]})}));return out}
 function reviewAgentMd(){const ys=reviewYears();if(!ys.length)return "";return "# 歷年年度檢討（背景資料）\n\n"+ys.map(y=>{const s=reviewSum(y);return (s?s+"\n\n":"")+tablesMd(reviewTables(y))}).join("\n\n")}
 function reviewCtx(){const ys=reviewYears().slice(0,2);return ys.map(y=>reviewSum(y)).filter(Boolean).join("\n\n")}
-const RV={y:null,src:null,sh:0,edit:false,imp:false,msg:""};
+/* ===== V3.0.9 季度檢討：由年度計劃（KPI、策略、專案）＋各月月會報告自動帶入 ===== */
+const PLAN_YEAR=2027;
+const rqId=(y,q,c)=>"rq"+y+"q"+q+"__"+c;
+const rqYm=(y,m)=>String(y)+pad2(m);
+const RQ_SECS=[["kpi","P1 KPI&DPI 指標檢討"],["strat","P2 策略檢討"],["proj","P2 年度專案檢討"],["org","P3 組織流程檢討"]];
+function rqCanEdit(c){if(!Store.loaded)return false;if(!BACKEND_URL)return true;if(isAdmin())return true;const me=getMe();return !!me&&(isGM(me)||myDeptCode()===c)}
+function rqStarted(y,q){return todayStr()>=y+"-"+pad2(q*3-2)+"-01"}
+function rqMonthTxt(y,ms,c,key){return ms.map(m=>{const t=(Store.cell(mrId(rqYm(y,m),c),key)||"").trim();return t?m+" 月："+t:""}).filter(Boolean).join("\n")}
+function rqKpiRows(y,q,c){const ms=QTR[q-1];return Store.items(docId("dkpi",c)).filter(([k,v])=>(v.name||"").trim()).sort(byT).map(([k,v])=>{const T=m=>v["m"+m]||v.target||"",A=m=>Store.cell(kaId(c),k+".a"+m);
+  return {k,name:v.name,attr:v.attr||"KPI",w:v.w||"",target:v.target||"",ms:ms.map(m=>[T(m),A(m)]),diff:rqMonthTxt(y,ms,c,"p4."+k+".diff"),act:rqMonthTxt(y,ms,c,"p4."+k+".act"),rev:Store.cell(rqId(y,q,c),"k."+k)}})}
+function rqProjRows(y,q,c){const ms=QTR[q-1];return deptProjects(c).filter(([k,v])=>(v.name||"").trim()).map(([k,p],i)=>{
+  const res=ms.map(m=>{const id=mrId(rqYm(y,m),c),C=Store.body(id).cells,r=(C["p3."+k+".res"]||"").trim(),d=(C["p3."+k+".diff"]||"").trim(),l=C["p3."+k+".l"]||"",g=C["p3."+k+".prog"]||"";
+    return r||d||l||g?m+" 月"+(l?"【"+l+"燈】":"")+(g?"進度 "+g+(/%$/.test(g)?"":"%"):"")+(r?"："+r:"")+(d?"；差異："+d:""):""}).filter(Boolean).join("\n");
+  const last=[...ms].reverse().map(m=>Store.cell(mrId(rqYm(y,m),c),"p3."+k+".l")).find(Boolean)||"";
+  return {k,code:projCode(c,i,p),name:p.name,w:p.w||"",ppi:[p.goal,p.kpi?"指標："+p.kpi:""].filter(Boolean).join("\n"),plan:p.plan||"",inQ:(p.months||[]).filter(m=>ms.includes(m)),res,light:last,rev:Store.cell(rqId(y,q,c),"p."+k)}})}
+function rqStratRows(y,q,c){const st=Store.body(docId("strategy","X")).cells,d=deptByCode(c);return (DEPT_UNITS[d.name]||[]).map(i=>({i,unit:STRAT_COLS[i],item:st["r0c"+i]||"",kpi:st["r1c"+i]||"",res:Store.cell(rqId(y,q,c),"s."+i+".res"),rev:Store.cell(rqId(y,q,c),"s."+i+".rev")}))}
+function rqSecEl(y,q,c,sec){const ro=!rqCanEdit(c),id=rqId(y,q,c),ms=QTR[q-1],pre=t=>h("div",{style:"white-space:pre-wrap;font-size:12.5px"},t||h("span",{style:"color:var(--muted)"},"—"));
+  const ed=(key,ph)=>cellArea(id,key,ro,ph);
+  if(sec==="kpi"){const rs=rqKpiRows(y,q,c);if(!rs.length)return h("div",{class:"rvempty"},"年度計劃尚無 KPI／DPI 指標");
+    return h("div",{class:"rvtw"},h("table",{class:"rvt"},h("thead",null,h("tr",null,h("th",{class:"c0",rowspan:2},"管理指標"),h("th",{rowspan:2},"屬性"),h("th",{rowspan:2},"重要度"),h("th",{rowspan:2},"年度目標"),ms.map(m=>h("th",{colspan:2,style:"text-align:center"},m+" 月")),h("th",{rowspan:2},"差異分析（月會）"),h("th",{rowspan:2},"改善對策（月會）"),h("th",{rowspan:2,style:"min-width:200px"},"本季檢討與改善對策")),
+      h("tr",null,ms.map(()=>[h("th",{class:"n"},"目標"),h("th",{class:"n"},"實際")]).flat())),
+      h("tbody",null,rs.map(r=>h("tr",null,h("td",{class:"c0"},r.name),h("td",null,r.attr),h("td",{class:"n"},r.w?r.w+"%":""),h("td",null,r.target),r.ms.map(([t,a])=>[h("td",{class:"n"},t),h("td",{class:"n",style:"font-weight:700"},a)]).flat(),h("td",null,pre(r.diff)),h("td",null,pre(r.act)),h("td",null,ed("k."+r.k,"本季差異分析與改善對策")))))))}
+  if(sec==="proj"){const rs=rqProjRows(y,q,c);if(!rs.length)return h("div",{class:"rvempty"},"年度計劃尚無專案");
+    return h("div",{class:"rvtw"},h("table",{class:"rvt"},h("thead",null,h("tr",null,["專案","重要度","PPI（專案目標）","具體方案","本季預訂月份","實施成果與差異分析（月會）","改善對策"].map((x,i)=>h("th",{class:i?"":"c0",style:i===6?"min-width:200px":""},x)))),
+      h("tbody",null,rs.map(r=>h("tr",null,h("td",{class:"c0"},h("b",null,r.code),h("div",null,r.name),r.light?h("span",{class:"lt",style:"background:"+(LIGHT[r.light]||"#ccc")},r.light):null),h("td",{class:"n"},r.w?r.w+"%":""),h("td",null,pre(r.ppi)),h("td",null,pre(r.plan)),h("td",null,r.inQ.length?r.inQ.join("、")+" 月":"—"),h("td",null,pre(r.res)),h("td",null,ed("p."+r.k,"本季改善對策")))))))}
+  if(sec==="strat"){const st=Store.body(docId("strategy","X")).cells,rs=rqStratRows(y,q,c);
+    return h("div",{style:"display:grid;gap:8px"},h("div",{class:"rvnote"},"公司營運目標："+(st.goal||"—")+"｜策略重點："+(st.focus||"—").replace(/\n/g,"；")),
+      h("div",{class:"rvtw"},h("table",{class:"rvt"},h("thead",null,h("tr",null,["單位","策略項目（專案）","重要 KPI 要求","執行結果","策略檢討"].map((x,i)=>h("th",{class:i?"":"c0",style:i>2?"min-width:200px":""},x)))),
+        h("tbody",null,rs.map(r=>h("tr",null,h("td",{class:"c0"},r.unit),h("td",null,pre(r.item)),h("td",null,pre(r.kpi)),h("td",null,ed("s."+r.i+".res","本季執行結果")),h("td",null,ed("s."+r.i+".rev","策略檢討"))))))))}
+  if(sec==="org")return h("div",{class:"rvtw"},h("table",{class:"rvt"},h("thead",null,h("tr",null,["項目","問題描述","改善對策"].map((x,i)=>h("th",{class:i?"":"c0",style:i?"min-width:260px":""},x)))),
+    h("tbody",null,[["org","組織運作","部門組織、人力、職務執掌"],["flow","流程系統","部門運作流程、系統"]].map(([k,l,s])=>h("tr",null,h("td",{class:"c0"},h("b",null,l),h("div",{class:"rvnote"},s)),h("td",null,ed("o."+k,"問題描述")),h("td",null,ed("o."+k+"2","改善對策")))))))}
+/* 給 AI：季度檢討文字 */
+function rqTables(y){const out=[];[1,2,3,4].filter(q=>rqStarted(y,q)).forEach(q=>{const ms=QTR[q-1],Q="Q"+q;
+  const kr=DEPTS.flatMap(d=>rqKpiRows(y,q,d.code).map(r=>[d.name,r.attr,r.name,r.target,r.ms.map(([t,a],i)=>ms[i]+"月 "+(t||"—")+"／"+(a||"—")).join("；"),[r.diff,r.act,r.rev].filter(Boolean).join("；")]));
+  if(kr.some(r=>/\／[^—]/.test(r[4])||r[5]))out.push({name:y+" "+Q+" KPI 檢討",head:["部門","屬性","指標","年度目標","各月 目標／實際","差異與改善"],rows:kr});
+  const pr=DEPTS.flatMap(d=>rqProjRows(y,q,d.code).map(r=>[d.name,r.code+" "+r.name,r.light,r.res,r.rev]));
+  if(pr.some(r=>r[2]||r[3]||r[4]))out.push({name:y+" "+Q+" 專案檢討",head:["部門","專案","燈號","實施成果與差異","改善對策"],rows:pr});
+  const sr=DEPTS.flatMap(d=>rqStratRows(y,q,d.code).filter(r=>r.res||r.rev).map(r=>[d.name,r.unit,r.item,r.res,r.rev]));
+  if(sr.length)out.push({name:y+" "+Q+" 策略檢討",head:["部門","單位","策略項目","執行結果","策略檢討"],rows:sr});
+  const or=DEPTS.flatMap(d=>{const C=Store.body(rqId(y,q,d.code)).cells;return [["組織運作","org"],["流程系統","flow"]].filter(([l,k])=>C["o."+k]||C["o."+k+"2"]).map(([l,k])=>[d.name,l,C["o."+k]||"",C["o."+k+"2"]||""])});
+  if(or.length)out.push({name:y+" "+Q+" 組織流程檢討",head:["部門","項目","問題描述","改善對策"],rows:or})});return out}
+
+const RV={y:null,big:"",sub:"",edit:false,imp:false,msg:"",q:0,dept:""};
+const RV_BIG=[["P0","P0 經營數據分析"],["P1","P1 KPI&DPI 指標檢討"],["P2","P2 策略與專案檢討"],["P3","P3 組織流程檢討"]];
+const rvGroup=nm=>{const m=/^\s*(P[0-3])/i.exec(nm||"");return m?m[1].toUpperCase():"P0"};
+/* 依年度整理成 P0–P3 大分頁，每個大分頁內是像 Excel 的頁簽（頁簽在上方） */
+function reviewTabs(y){const srcs=reviewSources(y),multi=srcs.length>1,T={P0:[],P1:[],P2:[],P3:[]};
+  if(y===PLAN_YEAR){T.P1.push({key:"rq:kpi",label:"KPI&DPI 指標檢討",rq:"kpi"});T.P2.push({key:"rq:strat",label:"策略檢討",rq:"strat"},{key:"rq:proj",label:"年度專案檢討",rq:"proj"});T.P3.push({key:"rq:org",label:"組織流程檢討",rq:"org"})}
+  srcs.forEach(src=>src.sheets.forEach((sh,i)=>{if(sh.empty||!reviewCanSee(sh))return;T[rvGroup(sh.name)].push({key:src.k+":"+i,label:sh.name.trim().replace(/^P\d(-\d)?[-\s]*/i,"")+(multi?"（"+src.label+"）":""),sheet:sh,lock:sh.restrict})}));
+  return RV_BIG.filter(([k])=>T[k].length).map(([k,l])=>({k,l,tabs:T[k]}))}
 function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=reviewYears();if(!ys.length){el.append(h("div",{class:"rvempty"},"尚無年度檢討資料"));return}
-  if(!ys.includes(RV.y))RV.y=ys[0];const y=RV.y,srcs=reviewSources(y);if(!srcs.some(s=>s.k===RV.src)){RV.src=srcs[0]?srcs[0].k:null;RV.sh=0}
-  const admin=isAdmin()||(state.mode==="host"&&!BACKEND_URL);const chip=(t,on,fn,extra)=>h("button",{class:"rvchip"+(on?" on":""),onclick:fn},t,extra||null);
-  el.append(h("div",{class:"rvbar"},h("b",null,"年度："),ys.map(v=>chip(v+" 年",v===y,()=>{RV.y=v;RV.src=null;RV.sh=0;RV.edit=false;el._draw()})),
+  if(!ys.includes(RV.y))RV.y=ys.find(v=>v<PLAN_YEAR||rqStarted(v,1))||ys[0];const y=RV.y;
+  const admin=isAdmin()||(state.mode==="host"&&!BACKEND_URL);const chip=(t,on,fn)=>h("button",{class:"rvchip"+(on?" on":""),onclick:fn},t);
+  el.append(h("div",{class:"rvbar"},h("b",null,"年度："),ys.map(v=>chip(v+" 年"+(v===PLAN_YEAR&&!rqStarted(v,1)?"（預覽）":""),v===y,()=>{RV.y=v;RV.big="";RV.sub="";RV.edit=false;el._draw()})),
     admin?h("button",{class:"btn",style:"margin-left:auto;padding:4px 12px;font-size:13px",onclick:()=>{RV.imp=!RV.imp;el._draw()}},RV.imp?"收起匯入":"＋ 匯入檢討 Excel"):null));
   if(admin&&RV.imp)el.append(reviewImportBox(el));
-  const b=REVIEW_BUILTIN[y];
-  const sumBox=h("div",{class:"rvsum"});const s=reviewSum(y);
+  const b=REVIEW_BUILTIN[y],s=reviewSum(y),sumBox=h("div",{class:"rvsum"});
   sumBox.append(h("div",{class:"rvsumh"},h("b",null,(b?b.title:y+" 年度檢討")+(b&&b.period?"（"+b.period+"）":"")),h("span",{style:"flex:1"}),
     h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>copyText(AGENT_HEAD+CO_PROFILE+"\n\n"+(s?s+"\n\n":"")+tablesMd(reviewTables(y)),t=>{RV.msg=t;el._draw()})},"📋 複製給 AI"),
     admin?h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>{RV.edit=!RV.edit;el._draw()}},RV.edit?"完成":"✎ 編輯重點"):null));
@@ -2055,15 +2113,22 @@ function buildReview(ro){return live(h("div",{class:"rvwrap"}),el=>{const ys=rev
   else sumBox.append(s?h("div",{class:"rvsumt"},s):h("div",{style:"color:var(--muted);font-size:13px"},"尚未填寫檢討重點"+(admin?"，請按「編輯重點」":"")));
   if(RV.msg)sumBox.append(h("div",{style:"font-size:12.5px;color:var(--gB)"},RV.msg));
   el.append(sumBox);
-  if(srcs.length>1)el.append(h("div",{class:"rvbar"},h("b",null,"來源："),srcs.map(x=>chip(x.label,x.k===RV.src,()=>{RV.src=x.k;RV.sh=0;el._draw()}))));
-  const src=srcs.find(x=>x.k===RV.src);if(!src)return;
-  const vis=src.sheets.map((sh,i)=>[sh,i]).filter(([sh])=>reviewCanSee(sh));if(!vis.some(([,i])=>i===RV.sh))RV.sh=vis.length?vis[0][1]:0;
-  const nav=h("div",{class:"rvnav"},vis.map(([sh,i])=>chip(sh.name.trim(),i===RV.sh,()=>{RV.sh=i;el._draw()},sh.empty?h("small",null," 未填"):sh.restrict?h("small",null," 🔒"):null)));
-  el.append(nav);
-  if(admin&&!src.builtin)el.append(h("div",{style:"font-size:12.5px;color:var(--muted);display:flex;gap:8px;align-items:center"},"匯入於 "+(src.at||"").slice(0,16).replace("T"," "),
-    h("button",{class:"btn",style:"padding:2px 10px;font-size:12px",onclick:()=>{if(!confirm("確定移除「"+src.label+"」這份 "+y+" 年檢討資料？"))return;Store.write("review__X","cells","idx",JSON.stringify(reviewIdx().filter(x=>!(+x.y===+y&&x.k===src.k))));RV.src=null;el._draw()}},"移除這份")));
-  const cur=src.sheets[RV.sh];if(cur&&reviewCanSee(cur)){if(cur.restrict)el.append(h("div",{class:"rvnote"},"🔒 個人業績資料：只有管理員、總經理室與業務部看得到，也不會放進 AI 資料包。"));el.append(rvSheetEl(cur))}
-  else el.append(h("div",{class:"rvempty"},"沒有可檢視的工作表"))})}
+  const groups=reviewTabs(y);if(!groups.length){el.append(h("div",{class:"rvempty"},"這個年度還沒有檢討資料"));return}
+  if(!groups.some(g=>g.k===RV.big))RV.big=groups[0].k;const G=groups.find(g=>g.k===RV.big);
+  el.append(h("div",{class:"rvbig",role:"tablist"},groups.map(g=>h("button",{role:"tab",class:"rvbt"+(g.k===RV.big?" on":""),onclick:()=>{RV.big=g.k;RV.sub="";el._draw()}},g.l))));
+  if(!G.tabs.some(t=>t.key===RV.sub))RV.sub=G.tabs[0].key;const T=G.tabs.find(t=>t.key===RV.sub);
+  const panel=h("div",{class:"rvpanel"});
+  if(G.tabs.some(t=>t.rq))panel.append(rqPicker(y,el));
+  panel.append(h("div",{class:"xtabs",role:"tablist"},G.tabs.map(t=>h("button",{role:"tab",class:"xtab"+(t.key===RV.sub?" on":""),onclick:()=>{RV.sub=t.key;el._draw()}},t.label,t.lock?" 🔒":""))));
+  const body=h("div",{class:"xbody"});
+  if(T.rq)body.append(h("div",{class:"rvnote",style:"margin-bottom:6px"},"指標、策略、專案由 "+y+" 年度計劃帶入；各月目標／實際、差異分析、專案成果由各月管理月會報告帶入。"+(rqCanEdit(RV.dept)?"右側欄位由本部門填寫本季檢討。":"")),rqSecEl(y,RV.q,RV.dept,T.rq));
+  else{if(T.lock)body.append(h("div",{class:"rvnote"},"🔒 個人業績資料：只有管理員、總經理室與業務部看得到，也不會放進 AI 資料包。"));body.append(rvSheetEl(T.sheet))}
+  panel.append(body);el.append(panel)})}
+function rqPicker(y,el){if(!RV.q){let q=1;[1,2,3,4].forEach(x=>{if(rqStarted(y,x))q=x});RV.q=q}if(!RV.dept||!deptByCode(RV.dept))RV.dept=myDeptCode()&&deptByCode(myDeptCode())?myDeptCode():DEPTS[0].code;
+  const chip=(t,on,fn,sub)=>h("button",{class:"rvchip"+(on?" on":""),onclick:fn},t,sub?h("small",null," "+sub):null);
+  return h("div",{style:"display:grid;gap:6px;margin-bottom:10px"},
+    h("div",{class:"rvbar"},h("b",null,"季度："),[1,2,3,4].map(q=>chip("Q"+q+"（"+QTR[q-1][0]+"–"+QTR[q-1][2]+" 月）",q===RV.q,()=>{RV.q=q;el._draw()},!rqStarted(y,q)?"未開始":(todayStr()<y+"-"+pad2(q*3)+"-28"?"進行中":"")))),
+    h("div",{class:"rvbar"},h("b",null,"部門："),DEPTS.map(d=>chip(d.name,d.code===RV.dept,()=>{RV.dept=d.code;el._draw()}))))}
 function reviewImportBox(host){const st={y:String(new Date().getFullYear()),label:"全公司",file:null,busy:false,msg:""};const box=h("div",{class:"rvsum"});
   const draw=()=>{box.innerHTML="";const yi=h("input",{class:"pin",type:"number",value:st.y,style:"width:90px"});yi.addEventListener("input",()=>st.y=yi.value);
     const li=h("input",{class:"pin",value:st.label,placeholder:"例如：全公司、業務部",style:"width:160px"});li.addEventListener("input",()=>st.label=li.value);
@@ -2072,7 +2137,9 @@ function reviewImportBox(host){const st={y:String(new Date().getFullYear()),labe
       h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},"年度",yi,"名稱",li,fi,
         h("button",{class:"btn primary",disabled:st.busy,onclick:async()=>{const y=parseInt(st.y,10);if(!(y>2000&&y<2100))return(st.msg="請輸入正確年度",draw());if(!st.file)return(st.msg="請選擇檔案",draw());
           st.busy=true;st.msg="讀取中…";draw();try{st.msg=await reviewImport(y,(st.label||"").trim()||"全公司",st.file);RV.y=y;RV.src=null;RV.imp=false;host._draw()}catch(e){st.msg="匯入失敗："+e.message}st.busy=false;draw()}},"匯入")),
-      st.msg?h("div",{style:"font-size:12.5px;color:var(--gB)"},st.msg):null)};draw();return box}
+      st.msg?h("div",{style:"font-size:12.5px;color:var(--gB)"},st.msg):null);
+    const idx=reviewIdx();if(idx.length)box.append(h("div",{style:"display:grid;gap:4px;font-size:13px"},h("b",null,"已匯入"),idx.map(x=>h("div",{style:"display:flex;gap:8px;align-items:center"},x.y+" 年｜"+x.label+"｜"+x.n+" 個工作表｜"+String(x.at||"").slice(0,10),
+      h("button",{class:"btn",style:"padding:1px 8px;font-size:12px",onclick:()=>{if(!confirm("確定移除「"+x.label+"」這份 "+x.y+" 年檢討資料？"))return;Store.write("review__X","cells","idx",JSON.stringify(reviewIdx().filter(z=>!(+z.y===+x.y&&z.k===x.k))));host._draw()}},"移除")))))};draw();return box}
 async function reviewImport(y,label,file){await loadXLSX();const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});
   const idx=reviewIdx();const old=idx.find(x=>+x.y===y&&x.label===label);const k=old?old.k:Math.random().toString(36).slice(2,7).replace(/[^a-z0-9]/g,"a");
   const skip=/^(封面|目錄|工作表\d*|Sheet\d*)$/;let n=0;
