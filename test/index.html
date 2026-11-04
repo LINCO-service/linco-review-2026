@@ -960,7 +960,7 @@ const MEETINGS = [
    {t:"未來行程安排說明",roadmap:true}],
   next:{topic:"管理月會＆2027 策略展開",when:"11/4（三）全天"}},
  {id:"m6",no:"年度策略展開",date:"2026-11-04",time:"13:00",theme:"2027 年度策略展開",deptMode:true,
-  tabs:["swotsum","swot_so","swot_wt","orgchart","strategy","dproj","review"],
+  tabs:["swotsum","swot_so","swot_wt","orgchart","strategy","dproj"],
   agenda:[
    {t:"掃碼報到",checkin:true},
    {t:"SO／WT 成果回顧",report:["swot_so","swot_wt"],dur:30},
@@ -969,7 +969,7 @@ const MEETINGS = [
    {t:"各部門發表預計專案",at:"13:00",sub:"專案標題、目標與預期指標；各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
   next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
-  tabs:["orgchart","review","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","cal"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","cal"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"說明兩天行程",twodays:true,dur:5},
@@ -986,7 +986,7 @@ const MEETINGS = [
    {t:"各部門自行討論",sub:"依今天的回饋準備修改",dur:40}],
   next:{topic:"年度計劃工作坊",when:"11/21（六）09:00"}},
  {id:"m8",no:"年度計劃工作坊",date:"2026-11-21",time:"09:00",theme:"Q1 沙盤推演・修改報告・年度總結",deptMode:true,
-  tabs:["orgchart","review","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"各部門討論",sub:"依昨天的回饋整理修改方向",dur:50},
@@ -1707,7 +1707,7 @@ function rtAiPrompt(k,v){const tx=Object.values(v.tx||{}).join("\n\n");const pre
 
 /* ================= V2.1：分頁、列席者簽到、例行會議 ================= */
 function baseURL(){return window.claude?ARTIFACT_URL:(location.origin+location.pathname)}
-const APP_TABS=[["plan","📋","年度計劃"],["monthly","📅","管理月會"],["routine","🗂️","例行會議"]];
+const APP_TABS=[["review","📊","年度檢討"],["plan","📋","年度計劃"],["monthly","📅","管理月會"],["routine","🗂️","例行會議"]];
 const tabOpen=k=>k==="plan"||cfg("tab."+k)!=="hide";
 const adminTabs=()=>isAdmin()&&state.mode==="host";
 const visibleTabs=()=>APP_TABS.filter(([k])=>adminTabs()||tabOpen(k));
@@ -1784,6 +1784,11 @@ function rtDocData(k,v){const at=rtAttend(k,v);const pts=(v.points||[]);
   return {title:(v.series||rtSeriesTitle(k,v)),date:v.date,time:v.time||"",place:v.place||"",present:at.P.join("、")||v.attendees||"",absent:[at.N.join("、")||v.absent||"",at.L.length?"（請假："+at.L.join("、")+"）":""].filter(Boolean).join(" "),recorder:v.by||"",
     track:pts.filter(p=>p.from).map((p,i)=>(i+1)+". "+p.t+"　"+(p.done?"（已完成）":"（追蹤中）")).join("\n"),
     content:pts.filter(p=>!p.from).map((p,i)=>(i+1)+". "+p.t+(p.track?"　【追蹤"+(p.due?"："+rocD(p.due):"")+"】":"")).join("\n")+(v.content?"\n\n"+v.content:""),adhoc:v.adhoc||"",summary:"",next:v.next||"",dept:v.dept}}
+function renderReview(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";
+  const wrap=h("div",{class:host?"wrap":"pwrap"});
+  wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,"年度檢討"),h("div",{class:"dt"},"每年約 9 月進行年度檢討（經營數據、KPI、策略、專案、組織流程），10 月起進入新年度計劃會議；檢討重點會自動帶入年度計劃的 AI 指令")),
+    h("div",{style:"display:flex;gap:8px;align-items:center"},host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),...[adminRow(),monthNav()].filter(Boolean));
+  wrap.append(h("div",{style:"margin-top:12px"},buildReview(true)));root.append(wrap)}
 function renderRoutine(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";const me=getMe();const id="rt__X";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,"例行會議記錄"),h("div",{class:"dt"},"部門會議、產銷協調會、廠務部組長會議、專案會議等")),
@@ -3125,7 +3130,7 @@ function diffList(code){const d=deptDiff(code);if(!d)return h("div",{class:"cell
   if(!d.length)return h("div",{class:"cellro"},"與第一天版本相比沒有修改");
   const col={"新增":"#2E8B6A","修改":"#C98F0A","刪除":"#C0392B"};
   return h("div",{style:"display:grid;gap:6px"},d.map(x=>h("div",{class:"chgrow",style:"border-left:5px solid "+col[x.t]},h("b",{style:"color:"+col[x.t]},"【"+x.t+"】"),h("span",{style:"color:#5E6B78"},x.sec+"｜"),h("b",null,x.name),x.what?h("span",{style:"margin-left:6px;background:#FFF3C4;padding:0 6px;border-radius:4px"},"改了："+x.what.join("、")):null)))}
-function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj","review"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["review","cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
+function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
 
 function buildRivals(g,ro){
   const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
@@ -3643,6 +3648,7 @@ function render(){setTimeout(saveUI,0);if(BACKEND_URL&&!window.claude&&!state.rs
     if(LS("linco-gtok")&&LS("linco-gscope")&&(!gs||gs===LS("linco-gscope"))&&!getMe()){renderGuestView();return}
     if(gs&&gs.startsWith("rt:")&&!(LS("linco-gtok")&&LS("linco-gscope")===gs)){renderGuestEntry(gs);return}
     if(gs&&gs.startsWith("mm")){if(getMe()){state.area="monthly";state.ym=gs.slice(2);history.replaceState(null,"",baseURL())}else if(!LS("linco-gtok")){renderGuestEntry(gs);return}}}
+  if(state.area==="review"&&(getMe()||state.mode==="host"||!BACKEND_URL)){renderReview();return}
   if((state.area==="monthly"||state.area==="routine")&&(getMe()||state.mode==="host"||!BACKEND_URL)){state.area==="monthly"?renderMonthly():renderRoutine();return}state.mode==="host"?renderHost():renderParticipant()}
 /* ===== V3.0.0：年度計劃格式依「2027年度計劃展開_百鮮企業_完整版-v4」調整 ===== */
 const STRAT_ROWS=["策略展開（專案項目）","重要 KPI 指標要求"];
