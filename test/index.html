@@ -1717,7 +1717,7 @@ function rtAiPrompt(k,v){const tx=Object.values(v.tx||{}).join("\n\n");const pre
 /* ================= V2.1：分頁、列席者簽到、例行會議 ================= */
 function baseURL(){return window.claude?ARTIFACT_URL:(location.origin+location.pathname)}
 const APP_TABS=[["review","📊","年度檢討"],["plan","📋","年度計劃"],["monthly","📅","管理月會"],["routine","🗂️","例行會議"]];
-const tabOpen=k=>k==="plan"||cfg("tab."+k)!=="hide";
+const tabOpen=k=>cfg("tab."+k)!=="hide";
 const adminTabs=()=>isAdmin()&&state.mode==="host";
 const visibleTabs=()=>APP_TABS.filter(([k])=>adminTabs()||tabOpen(k));
 const closeOrCal=()=>{if(state.calDlg)openCalDialog();else $("#rosterDlg").classList.remove("open")};
@@ -1726,8 +1726,8 @@ function calBtn(){return getMe()||state.mode==="host"?[h("button",{class:"calbtn
 function monthNav(){const tabs=visibleTabs();if(tabs.length<2){const cb=calBtn();return cb?h("div",{class:"apptabs",style:"justify-content:flex-end;gap:8px"},cb):h("span")}
   return h("div",{class:"apptabs",role:"tablist"},...tabs.map(([k,ic,l])=>h("button",{role:"tab",class:"apptab","aria-selected":String((state.area||"plan")===k),onclick:()=>{state.area=k;render()}},h("span",{class:"ic"},ic),l,adminTabs()&&!tabOpen(k)?h("small",{style:"color:var(--danger);font-weight:400"},"（未開放）"):null)),calBtn())}
 function openTabSettings(){openDialog("分頁開放設定",b=>{
-  b.append(h("p",{style:"grid-column:1/-1;margin:0 0 8px;font-size:14px;color:var(--muted)"},"關閉的分頁只有管理員看得到（會標示「未開放」），其他同仁只會看到年度計劃。只開放年度計劃時，同仁畫面不會顯示分頁列。"),
-    h("div",{style:"grid-column:1/-1;display:grid;gap:10px"},APP_TABS.filter(([k])=>k!=="plan").map(([k,ic,l])=>{const c=h("input",{type:"checkbox"});c.checked=tabOpen(k);c.addEventListener("change",()=>{Store.write(CFG_ID,"cells","tab."+k,c.checked?"":"hide");toast(l+(c.checked?" 已開放":" 已關閉"));setTimeout(render,200)});
+  b.append(h("p",{style:"grid-column:1/-1;margin:0 0 8px;font-size:14px;color:var(--muted)"},"關閉的分頁只有管理員看得到（會標示「未開放」）。同仁打開系統時會進入第一個開放的分頁；只開放一個分頁時，同仁畫面不會顯示分頁列。"),
+    h("div",{style:"grid-column:1/-1;display:grid;gap:10px"},APP_TABS.map(([k,ic,l])=>{const c=h("input",{type:"checkbox"});c.checked=tabOpen(k);c.addEventListener("change",()=>{Store.write(CFG_ID,"cells","tab."+k,c.checked?"":"hide");toast(l+(c.checked?" 已開放":" 已關閉"));setTimeout(render,200)});
       return h("label",{style:"display:flex;gap:10px;align-items:center;font-size:16px"},c,ic+" "+l+"：開放給所有同仁")})))})}
 function leaveDeadlineOk(d,start){const t=Date.parse(d+"T"+(start||"09:00")+":00+08:00");return Date.now()<t-4*3600e3}
 function qrDataURL(text,size){const div=document.createElement("div");try{new QRCode(div,{text,width:size||160,height:size||160})}catch(e){return ""}const c=div.querySelector("canvas");return c?c.toDataURL("image/png"):((div.querySelector("img")||{}).src||"")}
@@ -2104,6 +2104,70 @@ function rqTables(y){const out=[];[1,2,3,4].filter(q=>rqStarted(y,q)).forEach(q=
   if(or.length)out.push({name:y+" "+Q+" 組織流程檢討",head:["部門","項目","問題描述","改善對策"],rows:or})});return out}
 
 const RV={y:null,big:"",sub:"",edit:false,imp:false,msg:"",q:0,dept:""};
+/* ===== V3.0.9 Excel 範本：下載、用 Excel 填好、再匯入 ===== */
+const XL_ID="系統ID（請勿修改）";
+async function xlSave(fname,sheets){await loadLib(()=>window.XLSX,XLSX_SRC);const wb=XLSX.utils.book_new();
+  sheets.forEach(([name,aoa,widths])=>{const ws=XLSX.utils.aoa_to_sheet(aoa);if(widths)ws["!cols"]=widths.map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,name.slice(0,31))});
+  const out=XLSX.write(wb,{bookType:"xlsx",type:"array"});const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));a.download=fname;document.body.append(a);a.click();a.remove()}
+async function xlRead(file){await loadLib(()=>window.XLSX,XLSX_SRC);const wb=XLSX.read(await file.arrayBuffer(),{type:"array"});const o={};
+  wb.SheetNames.forEach(n=>{o[n.trim()]=XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:false,defval:""}).map(r=>r.map(x=>String(x==null?"":x).trim()))});return o}
+/* 依表頭名稱取值：回傳物件陣列 */
+function xlRows(aoa,need){if(!aoa)return [];const hi=aoa.findIndex(r=>need.every(n=>r.includes(n)));if(hi<0)return [];const H=aoa[hi];
+  return aoa.slice(hi+1).filter(r=>r.some(x=>x)).map(r=>{const o={};H.forEach((k,i)=>{if(k)o[k]=r[i]||""});return o})}
+const xlMonths=t=>{const s=new Set();String(t||"").replace(/月/g,"").split(/[,，、\s;；]+/).forEach(p=>{const m=/^(\d{1,2})\s*[-~–至到]\s*(\d{1,2})$/.exec(p);if(m){for(let i=+m[1];i<=+m[2];i++)if(i>=1&&i<=12)s.add(i)}else if(/^\d{1,2}$/.test(p)&&+p>=1&&+p<=12)s.add(+p)});return [...s].sort((a,b)=>a-b)};
+const xlDepts=t=>String(t||"").split(/[,，、\s;；/／]+/).map(x=>x.trim()).filter(x=>DEPTS.some(d=>d.name===x));
+function xlPick(label,accept,onFile){const fi=h("input",{type:"file",accept:accept||".xlsx,.xls",style:"display:none"});fi.addEventListener("change",()=>{const f=fi.files[0];fi.value="";if(f)onFile(f)});
+  return h("label",{class:"btn",style:"padding:4px 12px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center"},label,fi)}
+function xlBar(title,dl,imp,note){const msg=h("span",{style:"font-size:12.5px;color:var(--gB)"});const say=(t,bad)=>{msg.textContent=t;msg.style.color=bad?"var(--danger)":"var(--gB)"};
+  return h("div",{class:"refbox",style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px"},h("b",{style:"font-size:13.5px"},"📗 "+title),
+    h("button",{class:"btn",style:"padding:4px 12px;font-size:13px",onclick:async()=>{try{say("產生中…");await dl();say("✓ 已下載，用 Excel 填好後按「匯入 Excel」")}catch(e){say("下載失敗："+e.message,true)}}},"⬇ 下載 Excel 範本"),
+    imp?xlPick("⬆ 匯入 Excel",null,async f=>{try{say("讀取中…");say(await imp(f))}catch(e){say("匯入失敗："+e.message,true)}}):null,
+    note?h("span",{style:"font-size:12px;color:var(--muted);flex-basis:100%"},note):null,msg)}
+/* ---- 年度計劃（部門）：專案管理、各月行動計劃、KPI 指標 ---- */
+const PX_P=["專案編號","專案名稱","課組","權重（%）","專案目標","預期指標（KPI）","具體行動計劃","執行月份","預算費用（NTD）","主責人員","跨部門配合",XL_ID];
+const PX_S=["專案名稱","行動步驟","查核點／產出物","執行月份","權責人員",XL_ID];
+const PX_K=()=>["屬性","指標名稱","重要度（%）",(PLAN_YEAR-1)+" 基期",PLAN_YEAR+" 全年目標"].concat(M12.map(m=>m+"月")).concat([XL_ID]);
+async function planXlDownload(code){const d=deptByCode(code),ps=deptProjects(code).filter(([k,v])=>(v.name||"").trim());
+  const P=[PX_P].concat(ps.map(([k,p],i)=>[projCode(code,i,p),p.name,p.unit||"",p.w||"",p.goal||"",p.kpi||"",p.plan||"",(p.months||[]).join(","),p.budget||"",p.lead||"",(p.partners||[]).join("、"),k]));
+  if(!ps.length)P.push(["","（範例）連鎖餐飲拓展專案",deptUnitNames(code)[0]||"","20","新增連鎖餐飲客戶 10 家","營收 2,000 萬","1. 名單盤點\n2. 試吃會","1-3,6","200000","王小明","研發技術部、品質部",""]);
+  const S=[PX_S];ps.forEach(([k,p])=>projSteps(code,k).forEach(([sk,v])=>S.push([p.name,v.step||"",v.out||"",(v.months||[]).join(","),v.who||"",sk])));
+  if(S.length===1)S.push(["（填專案名稱，需與「專案管理」相同）","名單盤點","完成目標客戶名單 50 家","1-2","王小明",""]);
+  const K=[PX_K()].concat(Store.items(docId("dkpi",code)).filter(([k,v])=>(v.name||"").trim()).sort(byT).map(([k,v])=>[v.attr||"KPI",v.name,v.w||"",v.last||"",v.target||""].concat(M12.map(m=>v["m"+m]||"")).concat([k])));
+  const help=[["欄位","說明"],["系統ID","系統用來對應原本的資料，請勿修改。新增的列留空即可"],["執行月份","填 1-12 的數字，可用逗號或區間，例如「1,2,3」或「1-3,6」"],["跨部門配合","填部門名稱，多個用頓號分隔，例如「研發技術部、品質部」"],["各月行動計劃","「專案名稱」需與「專案管理」中的名稱相同，才會掛到該專案下"],["屬性","KPI 或 DPI"],["刪除","匯入只會新增或更新，不會刪除；要刪除請在系統中操作"],["範例列","標示（範例）的列不會匯入"]];
+  await xlSave(d.name+"_"+PLAN_YEAR+"年度計劃.xlsx",[["專案管理",P,[10,24,12,8,30,24,36,12,12,10,18,14]],["各月行動計劃",S,[24,30,30,12,12,14]],["KPI指標",K,[8,24,10,10,12].concat(M12.map(()=>8)).concat([14])],["填寫說明",help,[14,70]]])}
+async function planXlImport(code,file){const X=await xlRead(file),pid=docId("dproj",code),sid=stepId(code),kid=docId("dkpi",code);let np=0,up=0,ns=0,nk=0;const ex=t=>/（範例）|^（填/.test(t||"");
+  const P=xlRows(X["專案管理"],["專案名稱","專案目標"]);let t=Date.now();
+  P.forEach(r=>{const name=(r["專案名稱"]||"").trim();if(!name||ex(name))return;const id=r[XL_ID],old=id&&Store.body(pid).items[id];
+    const v={name,unit:r["課組"]||"",w:r["權重（%）"]||"",goal:r["專案目標"]||"",kpi:r["預期指標（KPI）"]||"",plan:r["具體行動計劃"]||"",months:xlMonths(r["執行月份"]),budget:r["預算費用（NTD）"]||"",lead:r["主責人員"]||"",partners:xlDepts(r["跨部門配合"])};
+    if(r["專案編號"])v.code=r["專案編號"];
+    if(old){Store.write(pid,"items",id,Object.assign({},old,v));up++}else{Store.write(pid,"items",uid(),Object.assign(v,{by:getMe()||"",t:t++}));np++}});
+  const byName=n=>{const x=Store.items(pid).find(([k,v])=>(v.name||"").trim()===n.trim());return x?x[0]:null};
+  xlRows(X["各月行動計劃"],["專案名稱","行動步驟"]).forEach(r=>{const step=(r["行動步驟"]||"").trim();if(!step||ex(r["專案名稱"]))return;const id=r[XL_ID],old=id&&Store.body(sid).items[id];
+    const v={step,out:r["查核點／產出物"]||"",months:xlMonths(r["執行月份"]),who:r["權責人員"]||""};
+    if(old){Store.write(sid,"items",id,Object.assign({},old,v));up++}else{const pk=byName(r["專案名稱"]||"");if(!pk)return;Store.write(sid,"items",uid(),Object.assign(v,{pk,t:t++}));ns++}});
+  xlRows(X["KPI指標"],["指標名稱"]).forEach(r=>{const name=(r["指標名稱"]||"").trim();if(!name)return;const id=r[XL_ID],old=id&&Store.body(kid).items[id];
+    const v={attr:/DPI/i.test(r["屬性"])?"DPI":"KPI",name,w:r["重要度（%）"]||"",last:r[(PLAN_YEAR-1)+" 基期"]||"",target:r[PLAN_YEAR+" 全年目標"]||""};M12.forEach(m=>v["m"+m]=r[m+"月"]||"");
+    if(old){Store.write(kid,"items",id,Object.assign({},old,v));up++}else{Store.write(kid,"items",uid(),Object.assign(v,{t:t++}));nk++}});
+  return "✓ 匯入完成：新增專案 "+np+"、步驟 "+ns+"、KPI "+nk+"，更新 "+up+" 筆"}
+function planXlBar(code){return xlBar(deptByCode(code).name+" 年度計劃 Excel",()=>planXlDownload(code),f=>planXlImport(code,f),"一份 Excel 含「專案管理」「各月行動計劃」「KPI 指標」三個工作表，已帶入目前資料；填好後匯入會新增或更新，不會刪除。")}
+/* ---- 季度檢討（部門＋季度） ---- */
+async function rqXlDownload(y,q,c){const d=deptByCode(c),ms=QTR[q-1];
+  const K=[["管理指標","屬性","年度目標"].concat(ms.flatMap(m=>[m+"月目標",m+"月實際"])).concat(["差異分析（月會）","本季檢討與改善對策",XL_ID])].concat(rqKpiRows(y,q,c).map(r=>[r.name,r.attr,r.target].concat(r.ms.flat()).concat([r.diff,r.rev,r.k])));
+  const P=[["專案","PPI（專案目標）","實施成果與差異分析（月會）","改善對策",XL_ID]].concat(rqProjRows(y,q,c).map(r=>[r.code+" "+r.name,r.ppi,r.res,r.rev,r.k]));
+  const S=[["單位","策略項目（專案）","重要 KPI 要求","執行結果","策略檢討",XL_ID]].concat(rqStratRows(y,q,c).map(r=>[r.unit,r.item,r.kpi,r.res,r.rev,String(r.i)]));
+  const C=Store.body(rqId(y,q,c)).cells,O=[["項目","問題描述","改善對策",XL_ID],["組織運作",C["o.org"]||"",C["o.org2"]||"","org"],["流程系統",C["o.flow"]||"",C["o.flow2"]||"","flow"]];
+  await xlSave(d.name+"_"+y+"Q"+q+"_季度檢討.xlsx",[["P1 KPI檢討",K,[22,8,12].concat(ms.flatMap(()=>[10,10])).concat([30,36,14])],["P2 專案檢討",P,[28,30,40,36,14]],["P2 策略檢討",S,[12,30,24,36,36,10]],["P3 組織流程",O,[12,40,40,10]],
+    ["填寫說明",[["說明"],["只需要填寫「本季檢討與改善對策」「改善對策」「執行結果」「策略檢討」「問題描述」等欄位，其他欄位由系統帶入，修改了也不會匯入。"],["系統ID 請勿修改。"]],[80]]])}
+async function rqXlImport(y,q,c,file){const X=await xlRead(file),id=rqId(y,q,c);let n=0;const w=(k,v)=>{v=v||"";if(v!==(Store.cell(id,k)||"")){Store.write(id,"cells",k,v);n++}};
+  xlRows(X["P1 KPI檢討"],["管理指標",XL_ID]).forEach(r=>{if(r[XL_ID])w("k."+r[XL_ID],r["本季檢討與改善對策"])});
+  xlRows(X["P2 專案檢討"],["專案",XL_ID]).forEach(r=>{if(r[XL_ID])w("p."+r[XL_ID],r["改善對策"])});
+  xlRows(X["P2 策略檢討"],["單位",XL_ID]).forEach(r=>{if(/^\d+$/.test(r[XL_ID])){w("s."+r[XL_ID]+".res",r["執行結果"]);w("s."+r[XL_ID]+".rev",r["策略檢討"])}});
+  xlRows(X["P3 組織流程"],["項目",XL_ID]).forEach(r=>{if(/^(org|flow)$/.test(r[XL_ID])){w("o."+r[XL_ID],r["問題描述"]);w("o."+r[XL_ID]+"2",r["改善對策"])}});
+  return "✓ 已匯入，更新 "+n+" 個欄位"}
+/* ---- 年度檢討表範本（管理員匯入用，格式同 2026） ---- */
+async function reviewTplDownload(){const b=REVIEW_BUILTIN[2026];const sh=b.src[0].sheets.filter(s=>!s.restrict).map(s=>[s.name.trim(),s.rows.map((r,ri)=>r.map(x=>ri>2&&rvNum(x)?"":rvT(x))),null]);
+  await xlSave("年度檢討表範本.xlsx",sh)}
+
 const RV_BIG=[["P0","P0 經營數據分析"],["P1","P1 KPI&DPI 指標檢討"],["P2","P2 策略與專案檢討"],["P3","P3 組織流程檢討"]];
 const rvGroup=nm=>{const m=/^\s*(P[0-3])/i.exec(nm||"");return m?m[1].toUpperCase():"P0"};
 /* 依年度整理成 P0–P3 大分頁，每個大分頁內是像 Excel 的頁簽（頁簽在上方） */
@@ -2141,12 +2205,13 @@ function rqPicker(y,el){if(!RV.q){let q=1;[1,2,3,4].forEach(x=>{if(rqStarted(y,x
   const chip=(t,on,fn,sub)=>h("button",{class:"rvchip"+(on?" on":""),onclick:fn},t,sub?h("small",null," "+sub):null);
   return h("div",{style:"display:grid;gap:6px;margin-bottom:10px"},
     h("div",{class:"rvbar"},h("b",null,"季度："),[1,2,3,4].map(q=>chip("Q"+q+"（"+QTR[q-1][0]+"–"+QTR[q-1][2]+" 月）",q===RV.q,()=>{RV.q=q;el._draw()},!rqStarted(y,q)?"未開始":(todayStr()<y+"-"+pad2(q*3)+"-28"?"進行中":"")))),
-    h("div",{class:"rvbar"},h("b",null,"部門："),DEPTS.map(d=>chip(d.name,d.code===RV.dept,()=>{RV.dept=d.code;el._draw()}))))}
+    h("div",{class:"rvbar"},h("b",null,"部門："),DEPTS.map(d=>chip(d.name,d.code===RV.dept,()=>{RV.dept=d.code;el._draw()}))),
+    xlBar(deptByCode(RV.dept).name+" "+y+" Q"+RV.q+" 季度檢討 Excel",()=>rqXlDownload(y,RV.q,RV.dept),rqCanEdit(RV.dept)?(f=>rqXlImport(y,RV.q,RV.dept,f).then(m=>{el._draw();return m})):null,"Excel 已帶入本季的指標、專案、月會資料；填好檢討欄位後匯入即可。"))}
 function reviewImportBox(host){const st={y:String(new Date().getFullYear()),label:"全公司",file:null,busy:false,msg:""};const box=h("div",{class:"rvsum"});
   const draw=()=>{box.innerHTML="";const yi=h("input",{class:"pin",type:"number",value:st.y,style:"width:90px"});yi.addEventListener("input",()=>st.y=yi.value);
     const li=h("input",{class:"pin",value:st.label,placeholder:"例如：全公司、業務部",style:"width:160px"});li.addEventListener("input",()=>st.label=li.value);
     const fi=h("input",{type:"file",accept:".xlsx,.xls"});fi.addEventListener("change",()=>st.file=fi.files[0]||null);
-    box.append(h("b",null,"匯入年度檢討 Excel"),h("div",{style:"font-size:12.5px;color:var(--muted)"},"格式同「2026部門檢討表」：每個工作表會變成一頁，大家只能檢視。同一年可以匯入多份（例如全公司數據＋各部門檢討表），重複匯入同一年、同一名稱會覆蓋舊的。名稱含「業務別」的工作表只有管理員、總經理室與業務部看得到。"),
+    box.append(h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},h("b",null,"匯入年度檢討 Excel"),h("button",{class:"btn",style:"padding:3px 10px;font-size:12.5px",onclick:()=>reviewTplDownload().catch(e=>{st.msg="下載失敗："+e.message;draw()})},"⬇ 下載檢討表範本")),h("div",{style:"font-size:12.5px;color:var(--muted)"},"格式同「2026部門檢討表」：每個工作表會變成一頁，大家只能檢視。同一年可以匯入多份（例如全公司數據＋各部門檢討表），重複匯入同一年、同一名稱會覆蓋舊的。名稱含「業務別」的工作表只有管理員、總經理室與業務部看得到。"),
       h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},"年度",yi,"名稱",li,fi,
         h("button",{class:"btn primary",disabled:st.busy,onclick:async()=>{const y=parseInt(st.y,10);if(!(y>2000&&y<2100))return(st.msg="請輸入正確年度",draw());if(!st.file)return(st.msg="請選擇檔案",draw());
           st.busy=true;st.msg="讀取中…";draw();try{st.msg=await reviewImport(y,(st.label||"").trim()||"全公司",st.file);RV.y=y;RV.src=null;RV.imp=false;host._draw()}catch(e){st.msg="匯入失敗："+e.message}st.busy=false;draw()}},"匯入")),
@@ -2180,6 +2245,7 @@ function buildForm(fid,g,ro,opts){
   if(f.type==="p1")return buildP1(g,ro);
   if(f.type==="p2")return buildP2(g,ro);
   if(f.type==="dstrat")return buildDStrat(g,ro);
+  if(["dproj","dsteps","dkpi"].includes(f.type)&&!ro&&DEPT_CODES.includes(g)&&!(opts&&opts.noXl))return h("div",null,planXlBar(g),buildForm(fid,g,ro,Object.assign({},opts||{},{noXl:true})));
   if(f.type==="dproj")return buildDProj(g,ro);
   if(f.type==="dkpi")return buildDKpi(g,ro);
   if(f.type==="dsteps")return buildDSteps(g,ro);
@@ -3724,7 +3790,7 @@ function examplesFor(fid){
 /* ================= 主持人頁 ================= */
 function statusEl(){return h("span",{class:"status "+Store.statusKind},h("i"),h("span",null,Store.statusText||"連線中…"))}
 function render(){setTimeout(saveUI,0);if(BACKEND_URL&&!window.claude&&!state.rsvpDone){const rp=rsvpParams();if(rp){state.rsvpDone=true;startRsvp(rp);return}}
-  if(state.area&&state.area!=="plan"&&!adminTabs()&&!tabOpen(state.area))state.area="plan";if(BACKEND_URL&&!window.claude){const gs=guestScope();
+  if(!adminTabs()&&!tabOpen(state.area||"plan")){const vt=visibleTabs();state.area=vt.length?vt[0][0]:"plan"}if(BACKEND_URL&&!window.claude){const gs=guestScope();
     if(LS("linco-gtok")&&LS("linco-gscope")&&(!gs||gs===LS("linco-gscope"))&&!getMe()){renderGuestView();return}
     if(gs&&gs.startsWith("rt:")&&!(LS("linco-gtok")&&LS("linco-gscope")===gs)){renderGuestEntry(gs);return}
     if(gs&&gs.startsWith("mm")){if(getMe()){state.area="monthly";state.ym=gs.slice(2);history.replaceState(null,"",baseURL())}else if(!LS("linco-gtok")){renderGuestEntry(gs);return}}}
