@@ -1,5 +1,5 @@
 /**
- * 百鮮年度計劃暨會議管理工作台 V3.0.9 — Google Apps Script 資料後端（個人帳號版）
+ * 百鮮年度計劃暨會議管理工作台 V3.1.0 — Google Apps Script 資料後端（個人帳號版）
  * V3.0.0：年度計劃格式改版（策略展開 12 欄、專案各月行動計劃 dstep）
  * V2.9.3：NotebookLM 匯出改存到指定資料夾（NLM_FOLDER_ID），舊檔自動搬入
  * V2.9.0：三組彙整同步到 Google 試算表（action=nlmsheet）；AI 回覆長度上限提高

@@ -1,5 +1,5 @@
 /**
- * 百鮮年度計劃暨會議管理工作台 V3.0.0 — Google Apps Script 資料後端（個人帳號版）
+ * 百鮮年度計劃暨會議管理工作台 V3.1.0 — Google Apps Script 資料後端（個人帳號版）
  * V3.0.0：年度計劃格式改版（策略展開 12 欄、專案各月行動計劃 dstep）
  * V2.9.3：NotebookLM 匯出改存到指定資料夾（NLM_FOLDER_ID），舊檔自動搬入
  * V2.9.0：三組彙整同步到 Google 試算表（action=nlmsheet）；AI 回覆長度上限提高
@@ -172,7 +172,7 @@ function can_(who, w, U, docs) {
     if ((((docs['mm' + prefix.slice(2) + '__X'] || {}).cells) || {}).closed === '1') return false;
   }
   const ANNUAL_OPEN = ['attn', 'rt', 'rta', 'cal', 'kact', 'dproj', 'dstep'];                       // 年度計劃關閉後仍可編輯的資料
-  if (cfg['plan.closed'] === '1' && !/^m[mr]\d{6}$/.test(prefix) && ANNUAL_OPEN.indexOf(prefix) < 0) return false;
+  if (cfg['plan.closed'] === '1' && !/^m[mr]\d{6}$/.test(prefix) && !/^rq\d{4}q\d$/.test(prefix) && ANNUAL_OPEN.indexOf(prefix) < 0) return false;   // V3.0.9：季度檢討（rqYYYYqN__部門）年度計劃關閉後仍可填
   if (prefix === 'snap') return false;                                               // 第一天版本：只有主持人
   if (DEPT_CODES.indexOf(suffix) >= 0) return myDept === 'GM' || myDept === suffix;    // 部門資料（含月會報告）：自己部門
   if (prefix === 'cal') return !cells.length && items.every(k => { const v = w.patch.items[k], old = cur[k];
