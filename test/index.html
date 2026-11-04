@@ -1275,7 +1275,7 @@ function authLost(reason){state.authMsg=(reason||"登入已失效")+"（"+new Da
 function logout(){["linco-tok","linco-me","linco-uid","linco-role"].forEach(k=>LS(k,""));Store.server={};Store.roster=null;state.mode="participant";LS("linco-mode","participant");render()}
 const setMe=n=>{LS("linco-me",n);if(!n)LS("linco-tok","")};
 function setMode(m){
-  if(m==="host"&&BACKEND_URL&&!window.claude&&!isAdmin()){toast(getMe()?"需要管理員權限才能進入主持人畫面":"請先登入");return}
+  if(m==="host"&&BACKEND_URL&&!window.claude&&!isAdmin()&&!isViewer()){toast(getMe()?"需要管理員權限才能進入主持人畫面":"請先登入");return}
   if(m==="host"&&!BACKEND_URL&&HOST_HASH&&!window.claude&&!hostOK()){hostLogin();return}
   state.mode=m;try{localStorage.setItem("linco-mode",m)}catch(e){}render();window.scrollTo(0,0)}
 async function verifyKey(k){
@@ -1286,7 +1286,7 @@ async function verifyKey(k){
   if(j.docs){verifyKey.err="Apps Script 還是舊版程式，請用「管理部署作業 → 編輯 → 新版本」重新部署";return false}
   verifyKey.err=j.ok?"":"密碼不正確（請確認與 Code.gs 第 7 行 HOST_KEY 完全相同，且已重新部署新版本）";return !!j.ok}
 async function sha256hex(t){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-function hostOK(){try{if(BACKEND_URL&&!window.claude)return localStorage.getItem("linco-role")==="管理員"&&!!localStorage.getItem("linco-tok");return localStorage.getItem("linco-host")===HOST_HASH}catch(e){return false}}
+function hostOK(){try{if(BACKEND_URL&&!window.claude)return ["管理員","檢視"].includes(localStorage.getItem("linco-role"))&&!!localStorage.getItem("linco-tok");return localStorage.getItem("linco-host")===HOST_HASH}catch(e){return false}}
 function loginForm(){
   const id=h("input",{class:"pin",placeholder:"工號，例如 A021",autocomplete:"username",style:"font-size:18px;padding:10px","aria-label":"工號"});id.value=LS("linco-uid");
   const pw=h("input",{class:"pin",type:"password",placeholder:"密碼（預設為生日月日 4 碼）",autocomplete:"current-password",style:"font-size:18px;padding:10px","aria-label":"密碼"});
@@ -1626,7 +1626,7 @@ function renderMonthly(){const root=$("#app");root.innerHTML="";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   const ms=yearSel();
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,mmTitle(ym),mmSub(ym)?h("span",{class:"mmsub"},mmSub(ym)):null),h("div",{class:"dt"},(mmCell(ym,"date")?fmtDate(mmCell(ym,"date"))+"　"+(mmCell(ym,"time")||"14:00"):"日期未定")+"｜主持人："+(mmCell(ym,"host")||"未定")+(cohostsOf(ym).length?"（協同："+cohostsOf(ym).join("、")+"）":"")+"｜記錄人："+(mmCell(ym,"recorder")||"未定"))),
-    h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},yearSel(),canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
+    h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},yearSel(),canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):((isAdmin()||isViewer())?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
   if(!host&&me&&mmCell(ym,"date")&&mp.date>=todayStr())wrap.append(live(h("div",{class:"meCard",style:"display:block"}),el=>attCard(el,mp,mp.date,me,groupOf(me))));
   wrap.append(monthTimeline(ym));
   if(!canHostTools(ym))leaveAlerts(ym).forEach(t=>wrap.append(h("div",{class:"refbox",style:"border-color:var(--danger);color:var(--danger)"},"⚠ "+t)));
@@ -1798,12 +1798,12 @@ function rtDocData(k,v){const at=rtAttend(k,v);const pts=(v.points||[]);
 function renderReview(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,"年度檢討"),h("div",{class:"dt"},"每年約 9 月進行年度檢討（經營數據、KPI、策略、專案、組織流程），10 月起進入新年度計劃會議；檢討重點會自動帶入年度計劃的 AI 指令")),
-    h("div",{style:"display:flex;gap:8px;align-items:center"},host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),...[adminRow(),monthNav()].filter(Boolean));
+    h("div",{style:"display:flex;gap:8px;align-items:center"},host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):((isAdmin()||isViewer())?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),...[adminRow(),monthNav()].filter(Boolean));
   wrap.append(h("div",{style:"margin-top:12px"},buildReview(true)));root.append(wrap)}
 function renderRoutine(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";const me=getMe();const id="rt__X";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,"例行會議記錄"),h("div",{class:"dt"},"部門會議、產銷協調會、廠務部組長會議、專案會議等")),
-    h("div",{style:"display:flex;gap:8px;align-items:center"},yearSel(),host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(isAdmin()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
+    h("div",{style:"display:flex;gap:8px;align-items:center"},yearSel(),host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):((isAdmin()||isViewer())?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
   const fType=h("select",null,h("option",{value:""},"全部類型"),RT_TYPES.map(t=>h("option",{value:t},t)));fType.value=state.rtType||"";fType.addEventListener("change",()=>{state.rtType=fType.value;render()});
   const fDept=h("select",null,h("option",{value:""},"全部部門"),DEPT_LIST.map(d=>h("option",{value:d},d)));fDept.value=state.rtDept||"";fDept.addEventListener("change",()=>{state.rtDept=fDept.value;render()});
   wrap.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0"},fType,fDept,h("span",{style:"flex:1"}),me?h("button",{class:"btn primary",onclick:()=>rtDialog()},"＋ 新增會議"):null));
@@ -3460,7 +3460,7 @@ const AI_RUN={};
 function mdBlock(t){const d=h("div",{class:"aimd"});d.innerHTML=mdToHtml(String(t||"")).replace(/^[\s\S]*?<body[^>]*>/,"").replace(/<\/body>[\s\S]*$/,"");d.querySelectorAll("table").forEach(x=>{x.removeAttribute("border");x.removeAttribute("cellpadding");x.removeAttribute("style")});return d}
 const AI_ERR={},AI_TRIED={};
 function aiAutoBox(key,getPrompt,opts){opts=opts||{};const okf=t=>opts.valid?opts.valid(t):!aiBad(t);
-  return live(h("div",{style:"display:grid;gap:8px"}),el=>{const raw=Store.cell("swotai__X",key),res=okf(raw)?raw:"",host=state.mode==="host"&&!!BACKEND_URL;
+  return live(h("div",{style:"display:grid;gap:8px"}),el=>{const raw=Store.cell("swotai__X",key),res=okf(raw)?raw:"",host=state.mode==="host"&&!!BACKEND_URL&&!isViewer();
   const run=async()=>{if(AI_RUN[key])return;AI_RUN[key]=1;AI_ERR[key]="";el._draw();
     try{const j=await backendPost({action:"ai",prompt:getPrompt()});if(!okf(j.text))AI_ERR[key]="AI 回覆的格式不對，請再按一次「重新產生」";else{Store.write("swotai__X","cells",key,j.text);toast("AI 已完成")}}
     catch(e){AI_ERR[key]="AI 失敗："+e.message}finally{AI_RUN[key]=0;el._draw()}};
@@ -4250,8 +4250,9 @@ function mdToHtml(md){const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,
     if(/^\d+\. /.test(l)){const xs=[];while(i<ls.length&&/^\d+\. /.test(ls[i])){let t=inl(ls[i].replace(/^\d+\. /,""));i++;while(i<ls.length&&/^ {3}\S/.test(ls[i])){t+="<br>"+inl(ls[i].trim());i++}xs.push("<li>"+t+"</li>")}out.push("<ol>"+xs.join("")+"</ol>");continue}
     if(l.trim())out.push("<p>"+inl(l)+"</p>");i++}
   return '<html><head><meta charset="utf-8"></head><body style="font-family:Arial">'+out.join("\n")+"</body></html>"}
-function adminBar(exportBtn,noMode){return h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn||h("button",{class:"btn",onclick:exportCSV},"匯出 CSV"),noMode?null:h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",style:planClosed()?"color:var(--danger)":"",onclick:e=>{if(!planClosed()&&!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="關閉後只能檢視，確定？";return}Store.write(CFG_ID,"cells","plan.closed",planClosed()?"":"1");toast(planClosed()?"年度計劃已關閉":"年度計劃已重新開放");setTimeout(render,300)}},planClosed()?"🔓 重新開放年度計劃":"🔒 關閉年度計劃"),h("button",{class:"btn",onclick:openPeople},"人員管理"),BACKEND_URL?h("button",{class:"btn",onclick:openAuditLog},"操作記錄"):null,h("button",{class:"btn",onclick:openDataHub},"資料匯出與 AI"),h("button",{class:"btn",onclick:openTabSettings},"分頁開放"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"))}
-function adminRow(){return state.mode==="host"&&(isAdmin()||!BACKEND_URL)?h("div",{class:"adminrow"},h("span",{class:"adminlab"},"🛠 管理"),adminBar(null,true)):null}
+function adminBar(exportBtn,noMode){if(isViewer())return h("div",{class:"top-actions"},statusEl(),h("span",{style:"font-size:13px;font-weight:700;color:var(--muted);align-self:center"},"👀 測試帳號：主持人畫面僅供檢視"),noMode?null:h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"));
+  return h("div",{class:"top-actions"},statusEl(),h("button",{class:"btn",onclick:openRoster},"分組名單"),h("button",{class:"btn",onclick:openAttSummary},"出缺席總表"),h("button",{class:"btn",onclick:openSettings},"會議設定"),exportBtn||h("button",{class:"btn",onclick:exportCSV},"匯出 CSV"),noMode?null:h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"),h("button",{class:"btn",style:planClosed()?"color:var(--danger)":"",onclick:e=>{if(!planClosed()&&!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="關閉後只能檢視，確定？";return}Store.write(CFG_ID,"cells","plan.closed",planClosed()?"":"1");toast(planClosed()?"年度計劃已關閉":"年度計劃已重新開放");setTimeout(render,300)}},planClosed()?"🔓 重新開放年度計劃":"🔒 關閉年度計劃"),h("button",{class:"btn",onclick:openPeople},"人員管理"),BACKEND_URL?h("button",{class:"btn",onclick:openAuditLog},"操作記錄"):null,h("button",{class:"btn",onclick:openDataHub},"資料匯出與 AI"),h("button",{class:"btn",onclick:openTabSettings},"分頁開放"),h("button",{class:"btn",onclick:()=>{logout()}},"登出"))}
+function adminRow(){return state.mode==="host"&&(isAdmin()||isViewer()||!BACKEND_URL)?h("div",{class:"adminrow"},h("span",{class:"adminlab"},"🛠 管理"),adminBar(null,true)):null}
 function renderHost(){
   const root=$("#app");root.innerHTML="";
   const m=MEETINGS.find(x=>x.id===state.meeting);
@@ -4294,9 +4295,9 @@ function renderHostForms(m){
   area.append(h("div",{class:"formhead"},h("div",null,h("h3",null,f.title),h("p",null,f.desc)),gsel));
   if(state.group!=="X")area.append(h("div",{style:"display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px"},
     h("p",{class:"members",style:"margin:0"},h("b",null,gInfo(state.group).name+"成員："),gInfo(state.group).members.map(x=>x[0]).join("、")),
-    h("button",{class:"btn",style:"padding:3px 12px;font-size:13px;"+(locked?"":"background:#FDECEA;border-color:var(--danger);color:var(--danger)"),onclick:()=>{state.hostEdit=!state.hostEdit;renderHostForms(m)}},locked?"🔒 各組內容唯讀中（點此解鎖編輯）":"🔓 編輯中：修改的是 "+gInfo(state.group).name+"（點此鎖定）")));
-  const aih=f.scope==="dept"?aiHelpFor(state.form,state.group):(locked?null:aiHelpGroup(state.form,state.group));
-  area.append(...(locked?[]:examplesFor(state.form)),...(aih?[aih]:[]),buildForm(state.form,state.group,locked));
+    isViewer()?h("span",{style:"font-size:13px;color:var(--muted)"},"👀 唯讀"):h("button",{class:"btn",style:"padding:3px 12px;font-size:13px;"+(locked?"":"background:#FDECEA;border-color:var(--danger);color:var(--danger)"),onclick:()=>{state.hostEdit=!state.hostEdit;renderHostForms(m)}},locked?"🔒 各組內容唯讀中（點此解鎖編輯）":"🔓 編輯中：修改的是 "+gInfo(state.group).name+"（點此鎖定）")));
+  const aih=isViewer()?null:f.scope==="dept"?aiHelpFor(state.form,state.group):(locked?null:aiHelpGroup(state.form,state.group));
+  area.append(...(locked||isViewer()?[]:examplesFor(state.form)),...(aih?[aih]:[]),buildForm(state.form,state.group,locked));
 }
 
 /* ================= 與會者頁 ================= */
