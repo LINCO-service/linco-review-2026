@@ -1,5 +1,5 @@
 /**
- * 百鮮年度計劃暨會議管理工作台 V3.1.0 — Google Apps Script 資料後端（個人帳號版）
+ * 百鮮年度計劃暨會議管理工作台 V3.1.3 — Google Apps Script 資料後端（個人帳號版）
  * V3.0.0：年度計劃格式改版（策略展開 12 欄、專案各月行動計劃 dstep）
  * V2.9.3：NotebookLM 匯出改存到指定資料夾（NLM_FOLDER_ID），舊檔自動搬入
  * V2.9.0：三組彙整同步到 Google 試算表（action=nlmsheet）；AI 回覆長度上限提高
@@ -99,7 +99,8 @@ function login_(req) {
   const id = String(req.id || '').trim().toUpperCase(), cache = CacheService.getScriptCache(), key = 'fail_' + id;
   const fails = Number(cache.get(key) || 0);
   if (fails >= 5) return { ok: false, error: '錯誤次數過多，請 10 分鐘後再試，或請管理員協助' };
-  const U = readUsers_(), u = U.byId[id];
+  let U = readUsers_(), u = U.byId[id];
+  if (!u && id === VIEWER_ID) { ensureViewer_(); U = readUsers_(); u = U.byId[id]; }                // V3.1.3：唯讀測試帳號自動建立
   if (!u || !u.active) return { ok: false, error: '查無此工號，請確認或聯絡管理員' };
   const pw = String(req.pw || '').trim();
   const ok = u.hash ? pwHash_(u.id, pw) === u.hash : (!!u.bday && normCode_(pw) === u.bday);
@@ -107,9 +108,17 @@ function login_(req) {
   cache.remove(key);
   return { ok: true, token: makeToken_(u), user: publicUser_(u), mustChange: !u.hash };
 }
+/** V3.1.3：唯讀測試帳號（角色「檢視」，只能看不能改，不需改密碼） */
+const VIEWER_ID = 'TEST', VIEWER_PW = '000000';
+function ensureViewer_() {
+  const lock = LockService.getScriptLock(); lock.waitLock(20000);
+  try { if (readUsers_().byId[VIEWER_ID]) return; const sh = users_();
+    sh.appendRow([VIEWER_ID, '測試帳號', '', '', '', '檢視', '', '是', '', pwHash_(VIEWER_ID, VIEWER_PW), 1, '']); usersBust_(); } finally { lock.releaseLock(); }
+}
 function changePw_(req) {
   const U = readUsers_(), u = verifyToken_(req.auth && req.auth.token, U);
   if (!u) return { ok: false, auth: true, error: '登入已失效，請重新登入' };
+  if (u.role === '檢視') return { ok: false, error: '測試帳號不能修改密碼' };
   const pw = String(req.newpw || '');
   if (pw.length < 6) return { ok: false, error: '新密碼至少 6 個字元' };
   if (normCode_(pw) === u.bday && /^\d+$/.test(pw)) return { ok: false, error: '新密碼不能與生日相同' };
@@ -140,6 +149,7 @@ function groupOf_(name, U) { const u = U.byName[name]; return u ? u.group : ''; 
 /** 誰可以寫哪一份資料 */
 function can_(who, w, U, docs) {
   if (who === '__host__') return true;
+  if ((U.byName[who] || {}).role === '檢視') return false;                          // V3.1.3：唯讀帳號不能寫入
   const parts = String(w.id).split('__'), prefix = parts[0], suffix = parts[1];
   const cells = Object.keys((w.patch && w.patch.cells) || {}), items = Object.keys((w.patch && w.patch.items) || {});
   const cur = (docs[w.id] || {}).items || {}, curCells = (docs[w.id] || {}).cells || {};
@@ -667,6 +677,7 @@ function doPost(e) {
   const me_ = verifyToken_(req.auth && req.auth.token, U);
   const who = whoOf_(me_);
   if (!who) return json_({ ok: false, auth: true, error: '登入已失效，請重新登入' });
+  if (me_.role === '檢視' && ['file64', 'sync', 'write', 'writes'].indexOf(req.action) < 0 && !req.writes) return json_({ ok: false, error: '測試帳號只能檢視' });
   try {
     if (req.action === 'logs') return json_(logs_(req));
     if (req.action === 'upload') { const r = upload_(req, me_); addLog_([[null, me_.id, me_.name, r.ok ? '上傳附件' : '上傳失敗', '', String(req.name || '') + (r.ok ? '' : '：' + r.error)]]); return json_(r); }
