@@ -3910,11 +3910,13 @@ function render(){setTimeout(saveUI,0);if(BACKEND_URL&&!window.claude&&!state.rs
 const STRAT_ROWS=["策略展開（專案項目）","重要 KPI 指標要求"];
 const DEPT_ABBR={SALES:"業務",FAC:"廠務",RD:"研發",QA:"品質",ADM:"管理"};
 /* 策略展開欄位由 11 欄改為 12 欄（新增行銷設計組），舊資料一次性搬移（主持人開啟時） */
-function stratMigrate(){if(!Store.loaded||!(state.mode==="host"||isAdmin()))return;const id=docId("strategy","X");if(Store.cell(id,"colv")==="3")return;
+let STRAT_MIG=false;
+function stratMigrate(){if(STRAT_MIG||!Store.loaded||!(state.mode==="host"||isAdmin()))return;STRAT_MIG=true;try{stratMigrate0()}finally{STRAT_MIG=false}}
+function stratMigrate0(){const id=docId("strategy","X");if(Store.cell(id,"colv")==="3")return;
   const C=Store.body(id).cells,cv=Store.cell(id,"colv");if(cv==="3")return;
   if(cv!=="2")[0,1].forEach(ri=>{for(let c=10;c>=2;c--){const v=C["r"+ri+"c"+c];C["r"+ri+"c"+(c+1)]=v||""}C["r"+ri+"c2"]=""});
   [0,1].forEach(ri=>{const a=C["r"+ri+"c9"]||"",b=C["r"+ri+"c10"]||"";C["r"+ri+"c9"]=b;C["r"+ri+"c10"]=a});   /* 管理部欄位順序改為 採購課、財會課、人資課 */
-  [0,1].forEach(ri=>{for(let c=2;c<=11;c++)Store.write(id,"cells","r"+ri+"c"+c,C["r"+ri+"c"+c]||"")});Store.write(id,"cells","colv","3")}
+  const W={};[0,1].forEach(ri=>{for(let c=2;c<=11;c++)W["r"+ri+"c"+c]=C["r"+ri+"c"+c]||""});Store.write(id,"cells","colv","3");Object.keys(W).forEach(k=>Store.write(id,"cells",k,W[k]))}   /* V3.1.4：先記版本、防重入，避免畫面重繪時無限迴圈 */
 const projCode=(code,i,v)=>(v&&v.code)||(DEPT_ABBR[code]+"-"+String(i+1).padStart(2,"0"));
 const deptUnitNames=code=>DEPT_UNITS[deptByCode(code).name].map(u=>STRAT_COLS[u]);
 function buildDStrat(code,ro){stratMigrate();const d=deptByCode(code),id=docId("strategy","X"),units=DEPT_UNITS[d.name];
