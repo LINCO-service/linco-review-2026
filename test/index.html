@@ -896,6 +896,7 @@ const FORMS = {
   dstrat:{title:"本部門策略展開",short:"策略展開",type:"dstrat",scope:"dept",desc:"填寫本部門在全公司策略展開表中的「策略展開（專案）」與「KPI 指標」；簡報會匯整成全公司策略展開。"},
   dproj:{title:"2027 年度專案管理表",short:"專案管理",type:"dproj",scope:"dept",desc:"各部門責任專案：專案代號、部門別、權重、專案目標（KPI）、具體行動計劃（Action Plans & SOP）、1–12 月推進時程、預算費用、主責人員與跨部門配合。"},
   dsteps:{title:"專案各月行動計劃展開",short:"各月行動計劃",type:"dsteps",scope:"dept",desc:"把每個專案的具體行動計劃逐項展開為步驟，填查核點／產出物、1–12 月執行進度與權責人員。"},
+  stgt:{title:"2027 個別業務目標",short:"個別業務目標",type:"stgt",scope:"dept",depts:["SALES"],desc:"每位業務的 2027 各月目標（保底／挑戰）、第一季／年中／前三季／年度累計，並對照 2026 營業額算成長率；2027 起填實績自動算達成率。"},
   dkpi:{title:"重要管理指標 KPI & DPI 管理表",short:"KPI 指標",type:"dkpi",scope:"dept",desc:"KPI＝公司列管結果指標（合計 70%），DPI＝部門過程與診斷指標（合計 30%）；填 2026 基期、2027 全年目標與 1–12 月目標。"},
   tows:{title:"全公司 SWOT 分析與 TOWS 策略專案矩陣",short:"SWOT／TOWS",type:"tows",scope:"company",desc:"依內部能力七大面向、外部 PESTC 與競爭者比較，整理全公司 SWOT，並展開 SO／WO／ST／WT 的 2027 落地專案與對策。"},
   dorg:{title:"組織執掌與人力",short:"組織與人力",type:"dorg",scope:"dept",desc:"上半部為本部門的職務執掌（職責、詳細描述、KPI，只能編輯自己部門）；下半部填各崗位的現有人數、2027 編制，年度人力計劃會自動匯整。"},
@@ -978,7 +979,7 @@ const MEETINGS = [
    {t:"各部門發表預計專案",at:"13:00",sub:"專案標題、目標與預期指標；各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
   next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
-  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","cal"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","stgt","dorg","dfb","cal"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"說明兩天行程",twodays:true,dur:5},
@@ -995,7 +996,7 @@ const MEETINGS = [
    {t:"各部門自行討論",sub:"依今天的回饋準備修改",dur:40}],
   next:{topic:"年度計劃工作坊",when:"11/21（六）09:00"}},
  {id:"m8",no:"年度計劃工作坊",date:"2026-11-21",time:"09:00",theme:"Q1 沙盤推演・修改報告・年度總結",deptMode:true,
-  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","stgt","dorg","dfb","ops","xproj","hrsum","cal","feedback"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"各部門討論",sub:"依昨天的回饋整理修改方向",dur:50},
@@ -2175,6 +2176,56 @@ async function planXlImport(code,file){const X=await xlRead(file),pid=docId("dpr
       if(old){Store.write(oid,"items",id,Object.assign({},old,v));up++}else if(v.title.trim()){Store.write(oid,"items",uid(),Object.assign(v,{t:t++}));np++}})}
   if(!got.length)throw new Error("檔案裡沒有可對應的工作表（工作表名稱請勿修改）");
   return "✓ 已匯入："+got.join("、")+"｜新增 "+(np+ns+nk)+" 筆、更新 "+up+" 筆"+(nx>0?"；有 "+nx+" 個步驟找不到對應的專案名稱，未匯入":"")+dmsg}
+/* ===== V3.1.4 個別業務目標（業務部）：各月目標、季／半年／前三季／年度累計、2026 對照與達成率 ===== */
+const STGT_CUM={Q1:[1,2,3],H1:[1,2,3,4,5,6],Q3:[1,2,3,4,5,6,7,8,9],Y:[1,2,3,4,5,6,7,8,9,10,11,12]};
+const STGT_CL={Q1:"第一季累計",H1:"年中累計",Q3:"前三季累計",Y:"年度總計"};
+const STGT_COLS=[1,2,3,"Q1",4,5,6,"H1",7,8,9,"Q3",10,11,12,"Y"];
+const STGT_ID=()=>docId("stgt","SALES");
+const STGT_XL=()=>["課別","業務別","項目"].concat(M12.map(m=>m+"月")).concat([XL_ID]);
+const STGT_ITEMS=[["t","2027 保底目標"],["x","2027 挑戰目標"],["a","2026 營業額"],["r","2027 實績"]];
+function stgtReps(){try{const v=JSON.parse(Store.cell(STGT_ID(),"reps")||"[]");return Array.isArray(v)?v:[]}catch(e){return []}}
+const stgtV=(keys,f,ms)=>{const id=STGT_ID();return keys.reduce((s,k)=>s+ms.reduce((t,m)=>t+num(Store.cell(id,k+"."+f+m)),0),0)};
+const stgtG=(t,a)=>a&&t?((t/a-1)*100).toFixed(1)+"%":"—";
+const stgtP=(r,t)=>r&&t?(r/t*100).toFixed(1)+"%":"—";
+function buildStgt(code,ro){const id=STGT_ID();
+  return live(h("div",{style:"display:grid;gap:10px;min-width:0"}),el=>{const reps=stgtReps(),calc=calcBox(el);const mode=state.stgtMode==="x"?"x":"t";
+    const hasR=reps.some(r=>M12.some(m=>num(Store.cell(id,r.k+".r"+m))));const showR=state.stgtR==null?hasR:state.stgtR;
+    const tb=(on,l,fn)=>h("button",{class:"formtab","aria-selected":String(on),onclick:fn},l);
+    el.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center"},h("b",null,"目標："),tb(mode==="t","保底目標",()=>{state.stgtMode="t";el._draw()}),tb(mode==="x","挑戰目標",()=>{state.stgtMode="x";el._draw()}),
+      h("label",{style:"margin-left:12px;font-size:13px;display:inline-flex;gap:4px;align-items:center;cursor:pointer"},(()=>{const c=h("input",{type:"checkbox"});c.checked=showR;c.addEventListener("change",()=>{state.stgtR=c.checked;el._draw()});return c})(),"顯示 2027 實績與達成率")));
+    if(!reps.length){el.append(h("div",{class:"rvempty"},"尚未建立個別業務目標。請用上方「📗 個別業務目標 Excel」匯入，或按「＋ 新增業務」。"))}
+    const T=mode,TL=mode==="x"?"2027 挑戰目標":"2027 保底目標";
+    const items=[[T,TL,true],["a","2026 營業額",true],["g","成長率（目標 ÷ 2026 − 1）"]].concat(showR?[["r","2027 實績",true],["p","達成率（實績 ÷ 目標）"]]:[]);
+    const val=(keys,f,c)=>stgtV(keys,f,typeof c==="number"?[c]:STGT_CUM[c]);
+    const cellFor=(keys,f,c,edit)=>{const cum=typeof c!=="number";const st=cum?"background:#FDF3E1;font-weight:700":"";
+      if(f==="g")return h("td",{class:"qt",style:st},calc(()=>stgtG(val(keys,T,c),val(keys,"a",c))));
+      if(f==="p")return h("td",{class:"qt",style:st},calc(()=>stgtP(val(keys,"r",c),val(keys,T,c))));
+      if(edit&&!cum)return h("td",null,numIn(id,keys[0]+"."+f+c,ro,"88px"));
+      return h("td",{class:"qt",style:st},calc(()=>fmtN(val(keys,f,c))))};
+    const tbody=h("tbody");
+    const block=(unitLab,nameLab,keys,edit,cls,rk)=>items.forEach(([f,l,ed],i)=>tbody.append(h("tr",{class:(cls||"")+(f==="g"||f==="p"?" cum":"")},
+      i===0?h("th",{class:"rowh",rowspan:items.length},unitLab):null,i===0?h("th",{class:"rowh",rowspan:items.length},nameLab,(edit&&!ro&&rk)?h("div",null,h("button",{class:"linkbtn",style:"font-size:11.5px",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="確定刪除？";return}Store.write(id,"cells","reps",JSON.stringify(stgtReps().filter(x=>x.k!==rk)))}},"刪除")):null):null,
+      h("th",{class:"rowh",style:"white-space:nowrap"},l),STGT_COLS.map(c=>cellFor(keys,f,c,edit&&ed)))));
+    const all=reps.map(r=>r.k);if(reps.length)block("全公司（業務部）","總計",all,false,"tot");
+    const units=[...new Set(reps.map(r=>r.unit||"未分課"))];
+    units.forEach(u=>{const us=reps.filter(r=>(r.unit||"未分課")===u);if(us.length>1)block(u,"小計",us.map(r=>r.k),false,"tot");us.forEach(r=>block(u,r.name,[r.k],true,"",r.k))});
+    if(reps.length)el.append(h("div",{class:"tablewrap"},h("table",{class:"sheet plan"},h("thead",null,h("tr",null,h("th",null,"課別"),h("th",null,"業務別"),h("th",null,"項目"),STGT_COLS.map(c=>h("th",{style:typeof c==="number"?"":"background:#C98F0A;color:#fff"},typeof c==="number"?c+"月":STGT_CL[c])))),tbody)));
+    if(!ro)el.append(h("div",{style:"display:flex;gap:8px;flex-wrap:wrap;align-items:center"},h("button",{class:"add",onclick:()=>{const unit=prompt("課別（例：業務一課（傳統盤））","");if(unit==null)return;const name=prompt("業務別（姓名或轄區）","");if(!name)return;
+      Store.write(id,"cells","reps",JSON.stringify(stgtReps().concat([{k:"r"+Date.now().toString(36),unit:unit.trim(),name:name.trim()}])))}},"＋ 新增業務")));
+    el.append(h("div",{style:"font-size:12px;color:var(--muted)"},"金額單位：元（未稅）。累計欄（橘底）自動加總；成長率＝目標 ÷ 2026 營業額 − 1；達成率＝2027 實績 ÷ 目標。2026 營業額與年度檢討同期（2025/9–2026/8 對應到各月）。"))})}
+async function stgtXlDownload(){const id=STGT_ID(),reps=stgtReps(),rows=[STGT_XL()];
+  reps.forEach(r=>STGT_ITEMS.forEach(([f,l])=>rows.push([r.unit||"",r.name||"",l].concat(M12.map(m=>Store.cell(id,r.k+"."+f+m)||"")).concat([r.k]))));
+  if(!reps.length)rows.push(["業務一課（傳統盤）","（範例）王小明","2027 保底目標"].concat(M12.map(()=>"1000000")).concat([""]));
+  await xlSave("業務部_2027個別業務目標.xlsx",[["個別業務目標",rows,[18,22,14].concat(M12.map(()=>12)).concat([12])],["填寫說明",[["說明"],["每位業務 4 列：2027 保底目標、2027 挑戰目標、2026 營業額、2027 實績（「項目」欄文字請勿修改）"],["只要填各月金額（元，未稅）；季、年中、前三季、年度累計與成長率、達成率由系統自動計算"],["系統ID 請勿修改；新增業務時系統ID 留空，系統會依「課別＋業務別」建立"],["匯入只會新增或更新，不會刪除；要刪除業務請在系統中操作"]],[90]]])}
+async function stgtXlImport(file){const X=await xlRead(file);const id=STGT_ID();const rs=xlRows(X["個別業務目標"],["課別","業務別","項目"]);if(!rs.length)throw new Error("找不到「個別業務目標」工作表或表頭");
+  const reps=stgtReps();let n=0,nr=0;const fmap={};STGT_ITEMS.forEach(([f,l])=>fmap[l]=f);
+  rs.forEach(r=>{const name=(r["業務別"]||"").trim();if(!name||/（範例）/.test(name))return;const f=fmap[(r["項目"]||"").trim()];if(!f)return;
+    let rep=reps.find(x=>x.k===r[XL_ID])||reps.find(x=>x.name===name&&(x.unit||"")===(r["課別"]||"").trim());
+    if(!rep){rep={k:"r"+Date.now().toString(36)+reps.length,unit:(r["課別"]||"").trim(),name};reps.push(rep);nr++}else{rep.unit=(r["課別"]||rep.unit||"").trim();rep.name=name}
+    M12.forEach(m=>{const v=String(r[m+"月"]||"").replace(/[^\d.\-]/g,"");if(v!==(Store.cell(id,rep.k+"."+f+m)||"")){Store.write(id,"cells",rep.k+"."+f+m,v);n++}})});
+  Store.write(id,"cells","reps",JSON.stringify(reps));return "✓ 已匯入：新增業務 "+nr+" 位，更新 "+n+" 個月份數字"}
+function stgtMd(){const reps=stgtReps();if(!reps.length)return "";const V=(k,f,c)=>stgtV([k],f,STGT_CUM[c]);
+  return "## 業務部 2027 個別業務目標\n\n"+mdTable(["課別","業務別","2026 營業額","2027 保底目標","保底成長率","2027 挑戰目標","第一季累計","年中累計","前三季累計"],reps.map(r=>[r.unit,r.name,fmtN(V(r.k,"a","Y")),fmtN(V(r.k,"t","Y")),stgtG(V(r.k,"t","Y"),V(r.k,"a","Y")),fmtN(V(r.k,"x","Y")),fmtN(V(r.k,"t","Q1")),fmtN(V(r.k,"t","H1")),fmtN(V(r.k,"t","Q3"))]))}
 /* 部門年度計劃 → AI 製作可編輯簡報的指令 */
 function deptSlidePrompt(code){const d=deptByCode(code);
   return "你是百鮮企業的簡報設計師兼資料核對員。請根據下方「"+d.name+" 2027 年度計劃資料」，製作「"+d.name+" 2027 年度計劃報告」投影片。\n\n"+
@@ -2186,7 +2237,7 @@ function deptSlidePrompt(code){const d=deptByCode(code);
   "5. 最後一頁放「資料核對表」：列出簡報中每一個數字與它在原始資料中的出處，方便人工核對。\n\n"+
   "【建議頁面結構，約 10–15 頁】\n1. 封面：部門名稱、2027 年度計劃報告、報告人【待確認】\n2. 公司營運目標與策略重點（摘要）\n3. 部門組織與職務執掌\n4. 部門策略展開：策略項目 × 重要 KPI 要求\n5. 年度專案總覽：專案、權重、目標、執行月份\n6～N. 每個專案一頁：目標、預期指標、具體行動、執行月份、預算、主責、跨部門配合\nN+1. 各月行動計劃（依步驟與月份的甘特圖）\nN+2. KPI／DPI 指標與月目標\nN+3. 人力配置與 "+PLAN_YEAR+" 編制\nN+4. 預算彙總\nN+5. 需要公司／跨部門協助事項（資料沒有就寫【待確認】）\n最後. 資料核對表\n\n"+
   "【設計】百鮮企業色系：深藍 #1E2B3A、金色 #C98F0A、白底；字型用微軟正黑體；每頁一個重點，內文字級 18pt 以上；表格太長請分頁，不要把字縮小。\n\n"+
-  CO_PROFILE+"\n\n# "+d.name+" 2027 年度計劃資料\n\n"+tablesMd(aggDept([code]))+((typeof reviewCtx==="function"&&reviewCtx())?"\n\n# 參考：年度檢討重點\n\n"+reviewCtx():"")}
+  CO_PROFILE+"\n\n# "+d.name+" 2027 年度計劃資料\n\n"+tablesMd(aggDept([code]))+(code==="SALES"&&stgtMd()?"\n\n"+stgtMd():"")+((typeof reviewCtx==="function"&&reviewCtx())?"\n\n# 參考：年度檢討重點\n\n"+reviewCtx():"")}
 function planXlBar(code){const sel=new Set(PXS.map(x=>x[0]));
   const chk=PXS.map(([k,l])=>{const c=h("input",{type:"checkbox"});c.checked=true;c.addEventListener("change",()=>{c.checked?sel.add(k):sel.delete(k)});return h("label",{style:"font-size:12.5px;display:inline-flex;gap:3px;align-items:center;cursor:pointer"},c,l)});
   const bar=xlBar(deptByCode(code).name+" 年度計劃 Excel",()=>{if(!sel.size)throw new Error("請至少勾選一個表格");return planXlDownload(code,[...sel])},f=>planXlImport(code,f),"勾選要下載的表格（已帶入目前資料）；用 Excel 填好後按「匯入 Excel」，會依工作表名稱對應回系統的表格，只會新增或更新，不會刪除。");
@@ -2301,6 +2352,7 @@ function buildForm(fid,g,ro,opts){
   if(["dstrat","dproj","dsteps","dkpi","dorg"].includes(f.type)&&!ro&&DEPT_CODES.includes(g)&&!(opts&&opts.noXl))return h("div",null,planXlBar(g),buildForm(fid,g,ro,Object.assign({},opts||{},{noXl:true})));
   if(f.type==="dproj")return buildDProj(g,ro);
   if(f.type==="dkpi")return buildDKpi(g,ro);
+  if(f.type==="stgt")return h("div",null,xlBar("個別業務目標 Excel",stgtXlDownload,ro?null:stgtXlImport,"Excel 每位業務 4 列（保底、挑戰、2026 營業額、2027 實績）× 1–12 月；匯入後累計與成長率自動計算。"),buildStgt(g,ro));
   if(f.type==="dsteps")return buildDSteps(g,ro);
   if(f.type==="tows")return buildTows(ro);
   if(f.type==="dorg")return buildDOrg(g,ro);
@@ -3329,7 +3381,7 @@ function diffList(code){const d=deptDiff(code);if(!d)return h("div",{class:"cell
   if(!d.length)return h("div",{class:"cellro"},"與第一天版本相比沒有修改");
   const col={"新增":"#2E8B6A","修改":"#C98F0A","刪除":"#C0392B"};
   return h("div",{style:"display:grid;gap:6px"},d.map(x=>h("div",{class:"chgrow",style:"border-left:5px solid "+col[x.t]},h("b",{style:"color:"+col[x.t]},"【"+x.t+"】"),h("span",{style:"color:#5E6B78"},x.sec+"｜"),h("b",null,x.name),x.what?h("span",{style:"margin-left:6px;background:#FFF3C4;padding:0 6px;border-radius:4px"},"改了："+x.what.join("、")):null)))}
-function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
+function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(code==="SALES"?["stgt"]:[]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
 
 function buildRivals(g,ro){
   const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
