@@ -2220,7 +2220,7 @@ async function stgtXlDownload(){const id=STGT_ID(),reps=stgtReps(),rows=[STGT_XL
 async function stgtXlImport(file){const X=await xlRead(file);const id=STGT_ID();const rs=xlRows(X["個別業務目標"],["課別","業務別","項目"]);if(!rs.length)throw new Error("找不到「個別業務目標」工作表或表頭");
   const reps=stgtReps();let n=0,nr=0;const fmap={};STGT_ITEMS.forEach(([f,l])=>fmap[l]=f);
   rs.forEach(r=>{const name=(r["業務別"]||"").trim();if(!name||/（範例）/.test(name))return;const f=fmap[(r["項目"]||"").trim()];if(!f)return;
-    let rep=reps.find(x=>x.k===r[XL_ID])||reps.find(x=>x.name===name&&(x.unit||"")===(r["課別"]||"").trim());
+    const base=n=>String(n||"").split("（")[0].trim();let rep=reps.find(x=>x.k===r[XL_ID])||reps.find(x=>x.name===name&&(x.unit||"")===(r["課別"]||"").trim())||reps.find(x=>base(x.name)===base(name)&&(x.unit||"")===(r["課別"]||"").trim());
     if(!rep){rep={k:"r"+Date.now().toString(36)+reps.length,unit:(r["課別"]||"").trim(),name};reps.push(rep);nr++}else{rep.unit=(r["課別"]||rep.unit||"").trim();rep.name=name}
     M12.forEach(m=>{const v=String(r[m+"月"]||"").replace(/[^\d.\-]/g,"");if(v!==(Store.cell(id,rep.k+"."+f+m)||"")){Store.write(id,"cells",rep.k+"."+f+m,v);n++}})});
   Store.write(id,"cells","reps",JSON.stringify(reps));return "✓ 已匯入：新增業務 "+nr+" 位，更新 "+n+" 個月份數字"}
