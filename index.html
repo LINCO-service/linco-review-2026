@@ -1450,7 +1450,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.2.2";
+const VERSION="V3.2.2a";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -2324,10 +2324,21 @@ function buildStgt(code,ro){const id=STGT_ID();
     if(!ro)el.append(h("div",{style:"display:flex;gap:8px;flex-wrap:wrap;align-items:center"},h("button",{class:"add",onclick:()=>{const unit=prompt("課別（例：業務一課（傳統盤））","");if(unit==null)return;const name=prompt("業務別（姓名或轄區）","");if(!name)return;
       Store.write(id,"cells","reps",JSON.stringify(stgtReps().concat([{k:"r"+Date.now().toString(36),unit:unit.trim(),name:name.trim()}])))}},"＋ 新增業務")));
     el.append(h("div",{style:"font-size:12px;color:var(--muted)"},"金額單位：元（含稅：國內 × 1.05、外銷零稅率；目標取到萬元）。深藍列＝全公司總計、淺藍列＝各課小計、白底＝個別業務；累計欄（橘底）自動加總；成長率＝目標 ÷ 2026 營業額 − 1；達成率＝2027 實績 ÷ 目標。2026 營業額與年度檢討同期（2025/9–2026/8 對應到各月）。"))})}
-async function stgtXlDownload(){const id=STGT_ID(),reps=stgtReps(),rows=[STGT_XL()];
-  reps.forEach(r=>STGT_ITEMS.forEach(([f,l])=>rows.push([r.unit||"",r.name||"",l].concat(M12.map(m=>Store.cell(id,r.k+"."+f+m)||"")).concat([r.k]))));
-  if(!reps.length)rows.push(["業務一課（傳統盤）","（範例）王小明","2027 保底目標"].concat(M12.map(()=>"1000000")).concat([""]));
-  await xlSave("業務部_2027個別業務目標.xlsx",[["個別業務目標",rows,[18,22,14].concat(M12.map(()=>12)).concat([12])],["填寫說明",[["說明"],["每位業務 4 列：2027 保底目標、2027 挑戰目標、2026 營業額、2027 實績（「項目」欄文字請勿修改）"],["只要填各月金額（元，含稅）；季、年中、前三季、年度累計與成長率、達成率由系統自動計算"],["系統ID 請勿修改；新增業務時系統ID 留空，系統會依「課別＋業務別」建立"],["匯入只會新增或更新，不會刪除；要刪除業務請在系統中操作"]],[90]]])}
+/* 2026 年度檢討「業務別月營業額」：每位業務 1–12 月營業額 */
+function rv26Rep(){const out=[];reviewSources(PLAN_YEAR-1).forEach(src=>(src.sheets||[]).forEach(sh=>{if(!/業務別.*月營業額/.test(sh.name||""))return;const rows=sh.rows||[];
+  const hi=rows.findIndex(r=>(r||[]).some(x=>String(x??"").trim()==="姓名"));if(hi<0)return;const H=rows[hi].map(x=>String(x??"").trim());const ni=H.indexOf("姓名"),ui=H.indexOf("課別");const mi={};H.forEach((x,i)=>{const m=/^(\d{1,2})月/.exec(x);if(m&&mi[+m[1]]==null)mi[+m[1]]=i});
+  for(const r of rows.slice(hi+1)){if(!r||!r.some(x=>String(x??"").trim()))break;const name=String(r[ni]??"").trim();if(!name||/合計|小計/.test(name))continue;const v={};M12.forEach(m=>{if(mi[m]!=null)v[m]=String(r[mi[m]]??"").replace(/[^\d.\-]/g,"")});if(!out.some(o=>o.name===name))out.push({name,unit:ui>=0?String(r[ui]??"").trim():"",v})}}));return out}
+const stgtBase=n=>String(n||"").split("（")[0].split("(")[0].trim();
+const rv26Find=(L,rep)=>L.find(o=>o.name===rep.name)||L.find(o=>stgtBase(o.name)===stgtBase(rep.name));
+function stgtFill26(){const L=rv26Rep();if(!L.length){toast("2026 年度檢討裡找不到「業務別月營業額」工作表");return}const id=STGT_ID(),reps=stgtReps();let nr=0,nu=0;
+  L.forEach(o=>{let rep=reps.find(r=>r.name===o.name)||reps.find(r=>stgtBase(r.name)===stgtBase(o.name));if(!rep){rep={k:"r"+Date.now().toString(36)+reps.length,unit:o.unit,name:o.name};reps.push(rep);nr++}
+    M12.forEach(m=>{const v=o.v[m]||"";if(v!==(Store.cell(id,rep.k+".a"+m)||"")){Store.write(id,"cells",rep.k+".a"+m,v);nu++}})});
+  if(nr)Store.write(id,"cells","reps",JSON.stringify(reps));toast("已從 2026 年度檢討帶入 "+L.length+" 位業務的 2026 營業額"+(nr?"（新增 "+nr+" 位）":"")+"，更新 "+nu+" 個月份")}
+async function stgtXlDownload(){const id=STGT_ID(),reps=stgtReps(),rows=[STGT_XL()];const L=rv26Rep();
+  reps.forEach(r=>{const o=rv26Find(L,r);STGT_ITEMS.forEach(([f,l])=>rows.push([r.unit||"",r.name||"",l].concat(M12.map(m=>Store.cell(id,r.k+"."+f+m)||(f==="a"&&o?o.v[m]||"":""))).concat([r.k])))});
+  if(!reps.length&&L.length)L.forEach(o=>STGT_ITEMS.forEach(([f,l])=>rows.push([o.unit,o.name,l].concat(M12.map(m=>f==="a"?o.v[m]||"":"")).concat([""]))));
+  if(!reps.length&&!L.length)rows.push(["業務一課（傳統盤）","（範例）王小明","2027 保底目標"].concat(M12.map(()=>"1000000")).concat([""]));
+  await xlSave("業務部_2027個別業務目標.xlsx",[["個別業務目標",rows,[18,22,14].concat(M12.map(()=>12)).concat([12])],["填寫說明",[["說明"],["每位業務 4 列：2027 保底目標、2027 挑戰目標、2026 營業額、2027 實績（「項目」欄文字請勿修改）"],["只要填各月金額（元，含稅）；季、年中、前三季、年度累計與成長率、達成率由系統自動計算"],["「2026 營業額」若系統還沒填，下載時會自動帶入 2026 年度檢討「業務別月營業額」的數字（1–10 月為 2026 年、11–12 月為 2025 年）"],["系統ID 請勿修改；新增業務時系統ID 留空，系統會依「課別＋業務別」建立"],["匯入只會新增或更新，不會刪除；要刪除業務請在系統中操作"]],[90]]])}
 async function stgtXlImport(file){const X=await xlRead(file);const id=STGT_ID();const rs=xlRows(X["個別業務目標"],["課別","業務別","項目"]);if(!rs.length)throw new Error("找不到「個別業務目標」工作表或表頭");
   const reps=stgtReps();let n=0,nr=0;const fmap={};STGT_ITEMS.forEach(([f,l])=>fmap[l]=f);
   rs.forEach(r=>{const name=(r["業務別"]||"").trim();if(!name||/（範例）/.test(name))return;const f=fmap[(r["項目"]||"").trim()];if(!f)return;
@@ -2472,7 +2483,7 @@ function buildForm(fid,g,ro,opts){
   if(["dstrat","dproj","dsteps","dkpi","dorg","p1","p2"].includes(f.type)&&!ro&&DEPT_CODES.includes(g)&&!(opts&&opts.noXl))return h("div",null,planXlBar(g),buildForm(fid,g,ro,Object.assign({},opts||{},{noXl:true})));
   if(f.type==="dproj")return buildDProj(g,ro);
   if(f.type==="dkpi")return buildDKpi(g,ro);
-  if(f.type==="stgt")return h("div",null,xlBar("個別業務目標 Excel",stgtXlDownload,ro?null:stgtXlImport,"Excel 每位業務 4 列（保底、挑戰、2026 營業額、2027 實績）× 1–12 月；匯入後累計與成長率自動計算。"),buildStgt(g,ro));
+  if(f.type==="stgt")return h("div",null,xlBar("個別業務目標 Excel",stgtXlDownload,ro?null:stgtXlImport,"Excel 每位業務 4 列（保底、挑戰、2026 營業額、2027 實績）× 1–12 月；下載時 2026 營業額會自動帶入年度檢討的數字。"),ro?null:h("div",{style:"margin:-4px 0 8px"},h("button",{class:"btn",style:"padding:4px 12px;font-size:13px",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="會覆蓋目前的 2026 營業額，再按一次確定";return}stgtFill26();e.target.dataset.c="";e.target.textContent="📥 從 2026 年度檢討帶入 2026 營業額"}},"📥 從 2026 年度檢討帶入 2026 營業額")),buildStgt(g,ro));
   if(f.type==="dsteps")return buildDSteps(g,ro);
   if(f.type==="tows")return buildTows(ro);
   if(f.type==="dorg")return buildDOrg(g,ro);
