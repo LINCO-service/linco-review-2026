@@ -1039,7 +1039,7 @@ const MEETINGS = [
    {t:"各部門發表預計專案",at:"13:00",sub:"專案標題、目標與預期指標；各部門 10 分鐘報告＋5 分鐘 Q&A",deptplan:true,dur:75}],
   next:{topic:"年度計劃工作坊",when:"11/20（五）09:00"}},
  {id:"m7",no:"年度計劃工作坊",date:"2026-11-20",time:"09:00",theme:"各部門 2027 年度計劃報告",deptMode:true,
-  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","stgt","dorg","dfb","cal"],
+  tabs:["orgchart","swotsum","tows","strategy","p1","p2","dproj","dsteps","dkpi","stgt","dorg","dfb","cal","feedback"],
   agenda:[
    {t:"掃碼報到・集合",checkin:true,dur:10},
    {t:"說明兩天行程",twodays:true,dur:5},
@@ -1453,7 +1453,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.2.5";
+const VERSION="V3.2.6";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -3549,7 +3549,7 @@ function diffList(code){const d=deptDiff(code);if(!d)return h("div",{class:"cell
   if(!d.length)return h("div",{class:"cellro"},"與第一天版本相比沒有修改");
   const col={"新增":"#2E8B6A","修改":"#C98F0A","刪除":"#C0392B"};
   return h("div",{style:"display:grid;gap:6px"},d.map(x=>h("div",{class:"chgrow",style:"border-left:5px solid "+col[x.t]},h("b",{style:"color:"+col[x.t]},"【"+x.t+"】"),h("span",{style:"color:#5E6B78"},x.sec+"｜"),h("b",null,x.name),x.what?h("span",{style:"margin-left:6px;background:#FFF3C4;padding:0 6px;border-radius:4px"},"改了："+x.what.join("、")):null)))}
-function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(code==="SALES"?["stgt"]:[]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&m.id==="m8"&&fbOpen()?["feedback"]:[])}
+function deptFormsFor(code){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));if(m&&m.id==="m6")return ["swotsum","orgchart","dproj"];return ["orgchart","dorg"].concat(code==="SALES"?["p1"]:code==="FAC"?["p2"]:[]).concat(["swotsum","dstrat","dproj","dsteps","dkpi"]).concat(code==="SALES"?["stgt"]:[]).concat(m&&m.id==="m8"?["ops"]:[]).concat(["cal","dfb"]).concat(m&&["m7","m8"].includes(m.id)&&fbOpen()?["feedback"]:[])}
 
 function buildRivals(g,ro){
   const id=docId("rivals",g);const wrap=h("div",{style:"display:grid;gap:16px"});
@@ -4682,7 +4682,7 @@ function renderParticipant(){
     if(m.deptMode){dcode=(isGM(me)||V)?(state.pDept||"SALES"):myDeptCode();
       if(isGM(me)||V){const ds=h("select",{"aria-label":"選擇部門"},DEPTS.map(d=>h("option",{value:d.code},d.name)));ds.value=dcode;ds.addEventListener("change",()=>{state.pDept=ds.value;state.pForm=null;render()});
         wrap.append(h("div",{style:"display:flex;gap:8px;align-items:center;margin-bottom:10px;font-weight:700"},V?"測試帳號：選擇要檢視的部門":"總經理室：檢視／協助部門",ds))}}
-    const forms=m.deptMode?(dcode?deptFormsFor(dcode):(m.id==="m8"&&fbOpen()?["feedback"]:[])):(m.pforms||[]);
+    const forms=m.deptMode?(dcode?deptFormsFor(dcode):(["m7","m8"].includes(m.id)&&fbOpen()?["feedback"]:[])):(m.pforms||[]);
     if(!state.pForm||!forms.includes(state.pForm))state.pForm=forms[0];
     if(forms.length>1)wrap.append(h("div",{class:"formtabs",role:"tablist"},forms.map(f=>h("button",{class:"formtab",role:"tab","aria-selected":String(f===state.pForm),onclick:()=>{state.pForm=f;state.selTag=null;render()}},FORMS[f].short))));
     const f=FORMS[state.pForm];
