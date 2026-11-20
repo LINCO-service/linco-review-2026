@@ -1453,7 +1453,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.2.7";
+const VERSION="V3.2.8";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -2811,6 +2811,7 @@ function buildFeedback(ro){
   if(state.mode==="host"&&!ro)return h("div",null,h("div",{style:"margin-bottom:12px;display:grid;gap:8px"},releaseBtn("release.fb","工作坊回饋問卷"),releaseBtn("release.selfeval","員工年度工作自評表（未開放時 11/21 "+SELFEVAL_OPEN+" 自動開放）")),fbStats());
   if(ro)return fbStats();
   const me=getMe();if(!me)return h("div",{class:"empty"},"請先點選你的名字");
+  if(fbLocked()){const o=Store.body(fbId).items[me]||{};const done=o.t&&!fbMiss(o).length;return h("div",{class:"empty",style:"text-align:left;line-height:1.8"},h("b",null,"🔒 會議已結束，工作坊回饋問卷已截止，無法再填寫或修改。"),h("div",null,done?"✓ 你的問卷已送出，謝謝你的回饋！":"你這次沒有完成問卷。"))}
   const cur=()=>Object.assign({},Store.body(fbId).items[me]||{});
   const save=(k,v)=>{const o=cur();o[k]=v;o.t=Date.now();Store.write(fbId,"items",me,o)};
   return live(h("div",{style:"display:grid;gap:14px"}),el=>{const o=cur();
@@ -3322,6 +3323,8 @@ function projGantt(code,fix,keys){const o=fix?snapOf(code):null;const ps=deptPro
       if(!ss.length)return [h("tr",{class:cls},...head,h("td",{class:ch("plan"),style:"font-size:.85em;white-space:pre-wrap;line-height:1.45"},tidyTx(p.plan)),PM.map(m=>h("td",{class:(m===0?"y0 ":"")+((p.months||[]).includes(m)?"gantt on":"gantt")+(ch("months")?" chgm":"")})),...tail)];
       return ss.map((sv,si)=>h("tr",{class:si===0?cls:""},...(si===0?head:[]),h("td",{class:ch("plan"),style:"font-size:.85em;line-height:1.4"},(si+1)+". "+(sv.step||"")),PM.map(m=>h("td",{class:(m===0?"y0 ":"")+((sv.months||[]).includes(m)?"gantt on":"gantt")})),...(si===0?tail:[])))}))))}
 function fbOpen(){return !!cfg("release.fb")}
+/* 會議結束後問卷截止：以目前所在的會議（11/20 或 11/21）是否已按「結束會議」判斷 */
+function fbLocked(){const m=MEETINGS.find(x=>x.id===(state.pMeeting||currentMeeting().id));return !!(m&&cfg("ended."+m.id)==="1")}
 function selfevalOpen(){const m8=MEETINGS.find(x=>x.id==="m8");if(cfg("release.selfeval"))return true;const t=todayStr();return m8&&(t>m8.date||(t===m8.date&&nowMin()>=hm2min(SELFEVAL_OPEN)))}
 function releaseBtn(key,label){return live(h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"}),el=>{const on=!!cfg(key);
   el.append(h("span",{style:"font-weight:700;color:"+(on?"var(--gB)":"var(--muted)")},(on?"✅ 已開放":"⏸ 尚未開放")+"："+label),h("button",{class:"btn"+(on?"":" primary"),style:"padding:4px 12px",onclick:()=>Store.write(CFG_ID,"cells",key,on?"":new Date().toISOString())},on?"關閉":"開放給同仁"))})}
