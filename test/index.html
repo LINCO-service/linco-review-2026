@@ -903,8 +903,8 @@ const FB_Q = [
   {k:"best",t:"對我最有收穫的環節（依序點選前 3 名）",type:"rank",max:3,sec:"內容與安排",opts:["內部能力分析","競爭者分析","外部環境趨勢","SWOT／策略展開","各部門年度計劃報告","共事特質與代表人物"]},
   {k:"time",t:"整體時間安排",type:"single",opts:["太趕","剛好","太長"],sec:"內容與安排"},
   {k:"again",t:"明年的年度檢討與計劃工作坊，我會更積極投入、主動提出想法",type:"scale",sec:"內容與安排"},
-  {k:"gain",t:"這次最大的收穫或啟發是什麼？",type:"text",req:true,sec:"想法與建議"},
-  {k:"improve",t:"明年的年度檢討／工作坊，你建議可以怎麼改進？（選填）",type:"text",sec:"想法與建議"},
+  {k:"gain",t:"這次最大的收穫或啟發是什麼？",type:"text",sec:"想法與建議"},
+  {k:"improve",t:"明年的年度檢討／工作坊，你建議可以怎麼改進？",type:"text",sec:"想法與建議"},
   {k:"commit",t:"2027 年，我願意承諾的一個具體行動（30 字內）",type:"text",max:30,sec:"想法與建議"},
   {k:"msg",t:"對 2027 年的目標與策略，想對團隊說的一句話（20 字內，會以文字雲顯示在大螢幕，不顯示姓名）",type:"text",max:20,short:true,sec:"想法與建議"}];
 function deptOf(name){const p=ALL_PEOPLE.find(x=>x[0]===name);return p?p[1]:""}
@@ -932,7 +932,7 @@ const FORMS = {
     desc:"第二階段：把上一階段列出的優勢、劣勢，拖到對應的七大面向（手機：先點項目，再點面向）。放錯了可以再拖到別的面向，或拖回上方。"},
   self10:{title:"百鮮的競爭力分析",short:"百鮮競爭力",type:"grid",desc:"用與競爭者相同的十個構面，先把百鮮自己看清楚。",rows:COMP10,cols:["百鮮企業有限公司"],example:"xmf"},
   pick:{title:"競爭者選擇",short:"競爭者選擇",type:"grid",desc:"Who is 競爭者？各組列出 3 個競爭者：傳統盤、專案代工、未來目標各一。",rows:["傳統盤","專案代工","未來目標"],cols:["競爭者名稱","選擇理由"]},
-  feedback:{title:"工作坊回饋",short:"工作坊回饋",type:"feedback",scope:"company",desc:"約 6 分鐘，共 15 題（第 12 題必填）。統計結果不會顯示姓名，請放心填寫。"},
+  feedback:{title:"工作坊回饋",short:"工作坊回饋",type:"feedback",scope:"company",desc:"約 6 分鐘，共 15 題，每題都要作答，填完按最下方「送出」。統計結果不會顯示姓名，請放心填寫。"},
   gdeck:{title:"本組報告簡報",short:"本組簡報",type:"gdeck",desc:"依本組 10/12 填好的競爭者資料自動產生的報告簡報。可以預覽、點「修改此頁」回到表格修改；想做更細的排版，可下載成 PPT 編輯後再上傳，主持人報告時就會播放上傳的版本。"},
   rivals:{title:"競爭者基本資料",short:"競爭者基本資料",type:"rivals",desc:"依「競爭者選擇」的三家公司，填入工商登記資料與公司網址，並可上傳附件（型錄、報導、截圖）。按「AI 自動帶入基本資料」即可依公司名稱查出工商登記資料，也可複製 AI 查詢提示，請 ChatGPT／Gemini／Claude 幫忙整理。"},
   compare:{title:"競爭者分析（三家）",short:"競爭者分析",type:"compare3",example:"xmf",desc:"傳統盤、專案代工、未來目標三家競爭者各一頁：填入對方十個構面的資料，右邊會帶出本組「百鮮競爭力分析」的內容，逐項判斷百鮮較強、相當或較弱。可上傳照片與附件，報告時會自動做成每家公司的簡報頁。"},
@@ -1453,7 +1453,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.2.4";
+const VERSION="V3.2.5";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -2785,7 +2785,8 @@ function buildGdeck(g,ro){
 function goEdit(form,sl){state.cmpSlot=sl;if(state.mode==="host"){state.form=form;renderHostForms(MEETINGS.find(x=>x.id===state.meeting))}else{state.pForm=form;render()}
   setTimeout(()=>{const t=[...document.querySelectorAll("#app h4")].find(x=>x.textContent.startsWith(RIVAL_SLOTS.find(r=>r[0]===sl)[1]));(t||document.querySelector("#app .formhead")||document.body).scrollIntoView({behavior:"smooth",block:"start"})},80)}
 const fbId="fb__X";
-function fbAll(){return Store.items(fbId).filter(([k,v])=>v&&v.t)}
+function fbMiss(o){return FB_Q.map((q,i)=>[q,i]).filter(([q])=>{const x=(o||{})[q.k];if(q.type==="rank")return !Array.isArray(x)||x.length<Math.min(q.max||1,q.opts.length);if(q.type==="multi")return !Array.isArray(x)||!x.length;if(q.type==="scale")return !(x>=1);return !String(x??"").trim()}).map(([q,i])=>i+1)}
+function fbAll(){return Store.items(fbId).filter(([k,v])=>v&&v.t&&!fbMiss(v).length)}
 function fbStats(){
   return live(h("div"),el=>{const ents=fbAll(),all=ents.map(x=>x[1]),n=all.length;
     if(state.mode==="host"&&n&&!Deck.isOpen)el.append(h("button",{class:"btn",style:"float:right;color:var(--danger);padding:3px 10px;font-size:13px",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="確定清除全部 "+n+" 份回饋？再按一次";return}ents.forEach(([k])=>Store.write(fbId,"items",k,null));toast("已清除回饋")}},"🗑 清除全部回饋（測試資料）"));
@@ -2805,6 +2806,7 @@ function fbStats(){
       else{const ts=all.map(a=>(a[q.k]||"").trim()).filter(Boolean).sort();box.append(ts.length?h("ul",{style:"margin:0;padding-left:20px;font-size:14px"},ts.map(t=>h("li",{style:"margin:3px 0"},t))):h("div",{style:"color:var(--muted);font-size:14px"},"尚無"))}
       grid.append(box)})});
 }
+const FB_TRY={};
 function buildFeedback(ro){
   if(state.mode==="host"&&!ro)return h("div",null,h("div",{style:"margin-bottom:12px;display:grid;gap:8px"},releaseBtn("release.fb","工作坊回饋問卷"),releaseBtn("release.selfeval","員工年度工作自評表（未開放時 11/21 "+SELFEVAL_OPEN+" 自動開放）")),fbStats());
   if(ro)return fbStats();
@@ -2813,20 +2815,21 @@ function buildFeedback(ro){
   const save=(k,v)=>{const o=cur();o[k]=v;o.t=Date.now();Store.write(fbId,"items",me,o)};
   return live(h("div",{style:"display:grid;gap:14px"}),el=>{const o=cur();
     let sec="";FB_Q.forEach((q,qi)=>{if(q.sec!==sec){sec=q.sec;el.append(h("div",{style:"font-family:var(--serif);font-weight:900;color:var(--saffron);margin-top:6px"},sec))}
-      const box=h("div",{style:"border:1px solid var(--line);border-radius:12px;padding:12px 14px"},h("div",{style:"font-weight:700;margin-bottom:8px"},(qi+1)+". "+q.t,q.req?h("span",{style:"color:var(--danger);font-size:12px;margin-left:6px"},"＊必填"):null));
+      const box=h("div",{"data-q":qi+1,style:"border:1px solid var(--line);border-radius:12px;padding:12px 14px"},h("div",{style:"font-weight:700;margin-bottom:8px"},(qi+1)+". "+q.t));
       if(q.type==="scale")box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},SCALE.map((l,i)=>h("button",{class:"btn",style:o[q.k]===i+1?"background:var(--ink);color:var(--paper);border-color:var(--ink)":"",onclick:()=>save(q.k,i+1)},(i+1)+" "+l))));
       else if(q.type==="single")box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},q.opts.map(x=>h("button",{class:"btn",style:o[q.k]===x?"background:var(--ink);color:var(--paper);border-color:var(--ink)":"",onclick:()=>save(q.k,x)},x))));
       else if(q.type==="rank"){const r=o[q.k]||[];box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},q.opts.map(x=>{const pos=r.indexOf(x);
           return h("button",{class:"btn",style:pos>=0?"background:var(--ink);color:var(--paper);border-color:var(--ink)":(r.length>=q.max?"opacity:.45":""),onclick:()=>{const a=(cur()[q.k]||[]).slice();const i=a.indexOf(x);if(i>=0)a.splice(i,1);else if(a.length<q.max)a.push(x);else{toast("最多選 "+q.max+" 項，先取消一項再選");return}save(q.k,a)}},pos>=0?h("b",{style:"color:#E9B43A;margin-right:4px"},"第"+(pos+1)+"名"):null,x)})),
           h("div",{style:"font-size:12px;color:var(--muted);margin-top:6px"},r.length?"目前排序："+r.map((x,i)=>(i+1)+"."+x).join("　")+"（再點一次可取消）":"依序點選，第一個點的就是第 1 名"))}
       else if(q.type==="multi")box.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:6px"},q.opts.map(x=>{const on=(o[q.k]||[]).includes(x);return h("button",{class:"btn",style:on?"background:var(--ink);color:var(--paper);border-color:var(--ink)":"",onclick:()=>{const a=(cur()[q.k]||[]).slice();const i=a.indexOf(x);i>=0?a.splice(i,1):a.push(x);save(q.k,a)}},(on?"✓ ":"")+x)})));
-      else{const ta=h(q.short?"input":"textarea",{rows:q.max?2:3,maxlength:q.max||null,style:"width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--field)",placeholder:q.short?"例如：一起把品質做到最好！":"請寫下你的想法"});ta.value=o[q.k]||"";
+      else{const ta=h(q.short?"input":"textarea",{"data-fk":q.k,rows:q.max?2:3,maxlength:q.max||null,style:"width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--field)",placeholder:q.short?"例如：一起把品質做到最好！":"請寫下你的想法"});ta.value=o[q.k]||"";
         if(q.max){const c=h("div",{style:"font-size:12px;color:var(--muted);text-align:right"},(ta.value.length)+"／"+q.max);ta.addEventListener("input",()=>c.textContent=ta.value.length+"／"+q.max);setTimeout(()=>box.append(c),0)}let tm;ta.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(()=>save(q.k,ta.value),500)});box.append(ta)}
       el.append(box)});
-    const miss=FB_Q.map((q,i)=>[q,i]).filter(([q])=>q.req&&!String(o[q.k]||"").trim()).map(([q,i])=>"第 "+(i+1)+" 題");
-    if(miss.length)el.append(h("div",{style:"font-size:14px;color:var(--danger);font-weight:700"},"⚠ "+miss.join("、")+"為必填，請記得填寫"));
-    el.append(
-      h("div",{style:"font-size:14px;color:"+(o.t?"var(--gB)":"var(--muted)")},o.t?"✓ 已自動儲存，可以隨時修改":"點選後會自動儲存"));
+    const miss=fbMiss(o);const tried=!!FB_TRY[me];
+    if(tried&&miss.length){el.querySelectorAll(":scope>div[data-q]").forEach(b=>{if(miss.includes(+b.dataset.q))b.style.borderColor="var(--danger)"});
+      el.append(h("div",{style:"font-size:14px;color:var(--danger);font-weight:700"},"⚠ 還有第 "+miss.join("、")+" 題沒有填，全部填完才能送出"))}
+    el.append(h("button",{class:"btn",style:"padding:10px 18px;font-size:16px;font-weight:700;background:var(--ink);color:var(--paper);border-color:var(--ink);justify-self:start",onclick:()=>{el.querySelectorAll("[data-fk]").forEach(t=>{if((cur()[t.dataset.fk]||"")!==t.value)save(t.dataset.fk,t.value)});const m=fbMiss(cur());if(m.length){FB_TRY[me]=1;toast("還有第 "+m.join("、")+" 題沒有填，無法送出");refreshLive();setTimeout(()=>{const b=document.querySelector('#app div[data-q="'+m[0]+'"]');b&&b.scrollIntoView({behavior:"smooth",block:"center"})},60);return}const x=cur();x.done=Date.now();Store.write(fbId,"items",me,x);FB_TRY[me]=0;toast("✓ 已送出，謝謝你的回饋！")}},o.done&&!miss.length?"重新送出":"送出"),
+      h("div",{style:"font-size:14px;color:"+(o.done&&!miss.length?"var(--gB)":"var(--muted)")},o.done&&!miss.length?"✓ 已送出；如需修改，改完再按一次「重新送出」":"作答會自動暫存；全部填完後請按「送出」"));
   });
 }
 /* ================= 2027 年度計劃（部門表單） ================= */
