@@ -1453,7 +1453,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.2.6";
+const VERSION="V3.2.7";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -5078,7 +5078,7 @@ const Deck={
       el.querySelectorAll("[data-live]").forEach(x=>{if(!x.contains(a)&&!(x.parentElement&&x.parentElement.closest("[data-live]")))x._draw()});return;
     }
     if(s.k==="topic"&&FORMS[s.f].type!=="board")return;
-    const box=$("#repBox");const st=box?box.scrollTop:0;const es=el.scrollTop;this.show();const nb=$("#repBox");if(nb)nb.scrollTop=st;el.scrollTop=es;
+    const box=$("#repBox");const st=box?box.scrollTop:0,sl=box?box.scrollLeft:0;const es=el.scrollTop;const ws=[...el.querySelectorAll(".tablewrap")].map(w=>[w.scrollLeft,w.scrollTop]);this.show();const nb=$("#repBox");if(nb){nb.scrollTop=st;nb.scrollLeft=sl}el.scrollTop=es;const nw=el.querySelectorAll(".tablewrap");ws.forEach(([l,t],i)=>{if(nw[i]){nw[i].scrollLeft=l;nw[i].scrollTop=t}});
   },
   stopTimer(){if(this.timer){clearInterval(this.timer);this.timer=null}},
   label(s){const L={checkin:"掃碼報到",cover:"封面",flow:"會議流程",road:"整體時程",members:"分組名單",xmf:"範例：小磨坊",roles:"角色分工",next:"下次議題",selfeval:"員工自評表",fbqr:"工作坊回饋",fbstats:"回饋統計",fbcloud:"想對團隊說的話",tcloud:"共事特質文字雲",swotplan:"AI 擬定策略",goalfocus:"營運目標與策略重點",stratall:"全公司策略展開",snap:"第一天總結",gfile:"上傳的簡報",sum:""};
