@@ -1458,7 +1458,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.4.0";
+const VERSION="V3.4.1";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -1589,12 +1589,12 @@ function buildMrSec(ym,c,sec,ro){ro=ro||(monthClosed(ym)&&!hostPriv());const id=
     if(sec==="p4"){const ks=Store.items(docId("dkpi",c)).filter(([k,v])=>(v.name||"").trim()).sort(byT);
       if(!ks.length){el.append(h("div",{class:"cellro",style:"color:var(--muted)"},"年度計劃尚無 KPI／DPI（在年度計劃「KPI 指標」建立後會自動帶入）"));return}
       ks.forEach(([k,v])=>{const A=mm=>Store.cell(kaId(c),k+".a"+mm),Lr=mm=>Store.cell(kaId(c),k+".l"+mm),T=mm=>v["m"+mm]||v.target||"";
-        const rowIn=(pref,lab)=>h("tr",null,h("th",{class:"rowh"},lab),M12.map(mm=>h("td",{class:"qt"+(mm===m?" cur":"")},ro?Store.cell(kaId(c),k+"."+pref+mm):numIn(kaId(c),k+"."+pref+mm,false,"56px"))));
+        const rowIn=(pref,lab)=>h("tr",null,h("th",{class:"rowh"},lab),M12.map(mm=>h("td",{class:"qt"+(mm===m?" cur":"")},ro?Store.cell(kaId(c),k+"."+pref+mm):numIn(kaId(c),k+"."+pref+mm,false,"96px"))));
         el.append(h("div",{class:"pcard",style:"margin-bottom:10px"},h("div",{style:"display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"},h("b",null,(v.attr||"")+"｜"+v.name),h("span",{style:"font-size:12px;color:var(--muted)"},"2027 目標："+(v.target||"—")+(v.def?"｜"+v.def:""))),
-          h("div",{style:"display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:12px;align-items:start;margin-top:6px"},
+          h("div",{style:"display:grid;gap:10px;margin-top:6px"},
             h("div",{class:"tablewrap"},h("table",{class:"sheet plan"},h("thead",null,h("tr",null,h("th",null,""),M12.map(mm=>h("th",{style:"text-align:center"+(mm===m?";background:var(--saffron-soft)":"")},mm+"月")))),
               h("tbody",null,h("tr",null,h("th",{class:"rowh"},"目標"),M12.map(mm=>h("td",{class:"qt"},T(mm)))),rowIn("l","去年"),rowIn("a","今年")))),
-            kpiChart(M12.map(T),M12.map(Lr),M12.map(A))),
+            h("div",{style:"max-width:640px;width:100%"},kpiChart(M12.map(T),M12.map(Lr),M12.map(A)))),
           h("div",{class:"pgrid"},h("label",{class:"full"},"本月差異說明",mrCellIn(id,"p4."+k+".diff",ro,"",1)),h("label",{class:"full"},"改善對策",mrCellIn(id,"p4."+k+".act",ro,"",1)))))})}
     if(sec==="p6"){const rows=Store.items(id).filter(([k,v])=>v.kind==="p6").sort(byT);
       rows.forEach(([k,v])=>el.append(h("div",{class:"pcard",style:"margin-bottom:10px"},h("div",{style:"display:flex;justify-content:space-between;gap:8px"},h("b",null,"專案立案書"),h("span",null,(!ro&&!v.added)?h("button",{class:"btn",style:"padding:2px 10px;font-size:12px",onclick:()=>{if(!(v.name||"").trim()){toast("請先填專案名稱");return}const pk=uid();Store.write(docId("dproj",c),"items",pk,{name:v.name,goal:v.goal||"",kpi:"",plan:v.plan||"",months:[],budget:v.budget||"",partners:[],owner:deptByCode(c).name,t:Date.now()});Store.write(id,"items",k,Object.assign({},v,{added:pk}));toast("已加入年度專案，之後會出現在專案追蹤")}},"核准後加入年度專案"):(v.added?h("small",{style:"color:var(--gB)"},"✓ 已加入年度專案"):null),delBtn(id,k,ro))),
