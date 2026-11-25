@@ -1458,7 +1458,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.4.1";
+const VERSION="V3.4.2";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -1734,7 +1734,7 @@ function renderMonthly(){const root=$("#app");root.innerHTML="";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   const ms=yearSel();
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,mmTitle(ym),mmSub(ym)?h("span",{class:"mmsub"},mmSub(ym)):null),h("div",{class:"dt"},(mmCell(ym,"date")?fmtDate(mmCell(ym,"date"))+"　"+(mmCell(ym,"time")||"14:00"):"日期未定")+"｜主持人："+(mmCell(ym,"host")||"未定")+(cohostsOf(ym).length?"（協同："+cohostsOf(ym).join("、")+"）":"")+"｜記錄人："+(mmCell(ym,"recorder")||"未定"))),
-    h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},yearSel(),canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(canHostMode()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
+    h("div",{style:"display:flex;gap:8px;align-items:center;flex-wrap:wrap"},yearSel(),canHostTools(ym)?h("button",{class:"btn primary",onclick:()=>Deck.openMonth(ym)},"▶ 開始月會簡報"):null,host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(canHostMode()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),...[adminRow(),monthNav()].filter(Boolean));
   if(!host&&me&&mmCell(ym,"date")&&mp.date>=todayStr())wrap.append(live(h("div",{class:"meCard",style:"display:block"}),el=>attCard(el,mp,mp.date,me,groupOf(me))));
   wrap.append(monthTimeline(ym));
   if(mmPaused(ym))wrap.append(h("div",{class:"refbox",style:"border-color:#C98F0A;font-weight:700"},"【暫停】"+mmTitle(ym)+"暫停一次，不開會。"+((isAdmin()||hostPriv())?"（要恢復請到「主持人工具」→「全年主持／記錄安排」取消暫停）":"")));
@@ -1749,7 +1749,8 @@ function renderMonthly(){const root=$("#app");root.innerHTML="";
   if(state.mtab==="report"){let c=(host||isGM(me))?(state.mDept||myc||"SALES"):myc;
     if(host||isGM(me)){const ds=h("select",null,DEPTS.map(d=>h("option",{value:d.code},d.name)));ds.value=c;ds.addEventListener("change",()=>{state.mDept=ds.value;render()});wrap.append(h("div",{style:"display:flex;gap:8px;align-items:center;margin:10px 0;font-weight:700"},"部門：",ds))}
     if(!state.msec)state.msec="p1";
-    wrap.append(h("div",{style:"display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;margin:10px 0;color:#fff;font-weight:700;background:"+deptByCode(c).color},"✎ "+deptByCode(c).name+"｜"+ymLabel(ym)+"月會報告"),
+    wrap.append(h("div",{style:"display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;margin:10px 0;color:#fff;font-weight:700;background:"+deptByCode(c).color},h("span",{style:"flex:1"},"✎ "+deptByCode(c).name+"｜"+ymLabel(ym)+"月會報告"),
+        h("button",{class:"btn",style:"padding:4px 12px;font-size:13px;background:#fff;color:var(--ink,#1F2A36)",title:"用簡報模式看本部門 P1–P6（從目前這頁開始）",onclick:()=>{Deck.openCustom(MR_SECS.map(([k])=>({k:"mrsec",c,sec:k,ym})));Deck.i=Math.max(0,MR_SECS.findIndex(x=>x[0]===state.msec));Deck.show()}},"▶ 預覽簡報")),
       h("div",{class:"formtabs"},MR_SECS.map(([k,l])=>h("button",{class:"formtab","aria-selected":String(state.msec===k),onclick:()=>{state.msec=k;render()}},l))),
       buildMrSec(ym,c,state.msec,!(host?state.hostEdit!==false:true)&&false))}
   if(state.mtab==="minutes"){wrap.append(h("p",{style:"font-size:13px;color:var(--muted)"},canRecord(ym)?"你是本月的主持人／記錄人，可以編輯會議記錄。":"會議記錄由本月記錄人填寫。"),buildMinutes(ym))}
@@ -1913,7 +1914,7 @@ function renderReview(){const root=$("#app");root.innerHTML="";const host=state.
 function renderRoutine(){const root=$("#app");root.innerHTML="";const host=state.mode==="host";const me=getMe();const id="rt__X";
   const wrap=h("div",{class:host?"wrap":"pwrap"});
   wrap.append(h("div",{class:"phead"},h("div",null,h("div",{class:"org"},"百鮮年度計劃暨會議管理工作台　"+VERSION),h("h1",null,"例行會議記錄"),h("div",{class:"dt"},"部門會議、產銷協調會、廠務部組長會議、專案會議等")),
-    h("div",{style:"display:flex;gap:8px;align-items:center"},yearSel(),host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(canHostMode()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),adminRow(),monthNav());
+    h("div",{style:"display:flex;gap:8px;align-items:center"},yearSel(),host?h("button",{class:"btn",onclick:()=>setMode("participant")},"與會者畫面"):(canHostMode()?h("button",{class:"btn",onclick:()=>setMode("host")},"主持人畫面"):null))),...[adminRow(),monthNav()].filter(Boolean));
   const fType=h("select",null,h("option",{value:""},"全部類型"),RT_TYPES.map(t=>h("option",{value:t},t)));fType.value=state.rtType||"";fType.addEventListener("change",()=>{state.rtType=fType.value;render()});
   const fDept=h("select",null,h("option",{value:""},"全部部門"),DEPT_LIST.map(d=>h("option",{value:d},d)));fDept.value=state.rtDept||"";fDept.addEventListener("change",()=>{state.rtDept=fDept.value;render()});
   wrap.append(h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0"},fType,fDept,h("span",{style:"flex:1"}),me?h("button",{class:"btn primary",onclick:()=>rtDialog()},"＋ 新增會議"):null));
