@@ -1,5 +1,5 @@
 /**
- * 百鮮年度計劃暨會議管理工作台 V3.4.2 — Google Apps Script 資料後端（個人帳號版）
+ * 百鮮年度計劃暨會議管理工作台 V3.4.3 — Google Apps Script 資料後端（個人帳號版）
  * V3.0.0：年度計劃格式改版（策略展開 12 欄、專案各月行動計劃 dstep）
  * V2.9.3：NotebookLM 匯出改存到指定資料夾（NLM_FOLDER_ID），舊檔自動搬入
  * V2.9.0：三組彙整同步到 Google 試算表（action=nlmsheet）；AI 回覆長度上限提高
@@ -674,6 +674,30 @@ function cachedDocs_() {
     if (n <= 80) { parts.docs_n = String(n); cache.putAll(parts, 5); } } catch (e) {}
   return docs;
 }
+/** V3.4.3：測試區專用——把正式區的全部資料（docs）複製到測試區；先備份測試區原資料。帳號（users）與 NotebookLM 連結不複製 */
+const PROD_URL = 'https://script.google.com/macros/s/AKfycbzpEhE4EZfIx_n2vvXbCNjxgEIx1IDUQjeemJNbjPBBzktsI1fwcb9AhiyWSrhBo2Wm/exec';
+function copyProd_(req) {
+  if (!isTestEnv_()) return { ok: false, error: '只能在測試區使用' };
+  const U = readUsers_(); if (!adminUser_(req, U)) return { ok: false, error: '需要管理員權限' };
+  const tk = String(req.prodTk || ''); if (!tk) return { ok: false, error: '請先在同一個瀏覽器登入正式版（管理員）' };
+  let j; try { const res = UrlFetchApp.fetch(PROD_URL + '?tk=' + encodeURIComponent(tk), { muteHttpExceptions: true, followRedirects: true }); j = JSON.parse(res.getContentText()); }
+  catch (e) { return { ok: false, error: '讀取正式區失敗：' + e.message }; }
+  if (!j || !j.ok) return { ok: false, error: '正式區登入已過期，請重新登入正式版後再試（' + ((j && j.error) || '') + '）' };
+  if (!j.me || j.me.role !== '管理員') return { ok: false, error: '需要用正式版的管理員帳號登入，才能複製全部資料' };
+  const lock = LockService.getScriptLock(); lock.waitLock(30000);
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet(), sh = sheet_();
+    const bk = sh.copyTo(ss); bk.setName('docs_備份_' + Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyyMMdd_HHmmss'));
+    const keepTest = {}; const cur = readAll_().docs; Object.keys(cur).forEach(id => { if (/^nlm__/.test(id)) keepTest[id] = cur[id]; });
+    const docs = j.docs || {}, rows = [];
+    Object.keys(docs).forEach(id => { if (/^nlm__/.test(id)) return; const d = docs[id] || {}; rows.push([id, JSON.stringify(d), d.updatedAt || new Date().toISOString()]); });
+    Object.keys(keepTest).forEach(id => { const d = keepTest[id]; rows.push([id, JSON.stringify(d), d.updatedAt || '']); });
+    sh.clearContents(); sh.getRange(1, 1, 1, 3).setValues([['id', 'json', 'updatedAt']]);
+    if (rows.length) sh.getRange(2, 1, rows.length, 3).setValues(rows);
+    docsBust_();
+    return { ok: true, n: rows.length, backup: bk.getName() };
+  } finally { lock.releaseLock(); }
+}
 function docsBust_() { try { CacheService.getScriptCache().remove('docs_n'); } catch (e) {} }
 
 function doPost(e) {
@@ -696,6 +720,7 @@ function doPost(e) {
   if (me_.role === '檢視' && ['file64', 'sync', 'write', 'writes'].indexOf(req.action) < 0 && !req.writes) return json_({ ok: false, error: '測試帳號只能檢視' });
   try {
     if (req.action === 'logs') return json_(logs_(req));
+    if (req.action === 'copyprod') { const r = copyProd_(req); addLog_([[null, me_.id, me_.name, r.ok ? '從正式區複製資料' : '從正式區複製資料（失敗）', '', r.ok ? (r.n + ' 筆') : r.error]]); return json_(r); }
     if (req.action === 'upload') { const r = upload_(req, me_); addLog_([[null, me_.id, me_.name, r.ok ? '上傳附件' : '上傳失敗', '', String(req.name || '') + (r.ok ? '' : '：' + r.error)]]); return json_(r); }
     if (req.action === 'parse') return json_(parse_(req));
     if (req.action === 'lookup') return json_(lookup_(req));

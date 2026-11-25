@@ -1458,7 +1458,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.4.2";
+const VERSION="V3.4.3";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -4449,6 +4449,12 @@ function openDataHub(){const admin=isAdmin()&&!!BACKEND_URL;const st={sel:{},bus
         catch(e){st.log[x.key]={text:"失敗："+e.message,bad:true}}draw()}
       st.busy=false;draw();toast("同步完成")}},st.busy?"同步中…":"☁ 同步選取的檔案");
     const fu={url:NLM_FOLDER_URL};const nbIn=h("input",{class:"pin",placeholder:"貼上 NotebookLM 筆記本的分享連結",style:"flex:1 1 280px"});nbIn.value=nb&&nb.url||"";
+    if(admin&&/\/test\//.test(location.pathname)){const cm=h("span",{style:"font-size:13px;color:var(--muted)"});
+      const cb=h("button",{class:"btn",onclick:async()=>{let tk="";try{tk=localStorage["linco-tok"]||sessionStorage["linco-tok"]||""}catch(e){}
+        if(!tk){cm.textContent="請先在同一個瀏覽器開正式版，用管理員帳號登入，再回來按一次";return}
+        if(!cb.dataset.c){cb.dataset.c="1";cb.textContent="會覆蓋測試區現有資料（會先備份），確定？";return}
+        cb.disabled=true;cm.textContent="複製中，約 10–60 秒…";try{const j=await backendPost({action:"copyprod",prodTk:tk});cm.textContent="✓ 已複製 "+j.n+" 筆資料（原測試資料備份在「"+j.backup+"」工作表），3 秒後重新整理";setTimeout(()=>location.reload(),3000)}catch(e){cm.textContent=e.message;cb.disabled=false;delete cb.dataset.c;cb.textContent="🔁 從正式區複製資料"}}},"🔁 從正式區複製資料");
+      body.append(card("🔁 從正式區複製資料（測試區專用）",h("div",{style:"font-size:13px;color:var(--muted)"},"把正式區目前所有年度檢討、年度計劃、月會、回饋等資料複製到測試區，方便在測試區用真實資料測試。帳號密碼與 NotebookLM 連結不會複製；測試區原本的資料會先備份。需要先在同一個瀏覽器登入正式版（管理員）。"),h("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap"},cb,cm)))}
     body.append(card("☁ 同步到 NotebookLM（管理員）",h("div",{style:"font-size:13px;color:var(--muted)"},"同步後會在「NotebookLM 資料夾」建立 Google 試算表與文件（同仁要求存取時，請到雲端硬碟核准）；之後再同步，連結不變，NotebookLM 會自動更新。"),
       cbox,...lists,h("div",{style:"display:flex;flex-wrap:wrap;gap:10px;align-items:center"},go,fu&&fu.url?h("a",{href:fu.url,target:"_blank",rel:"noopener"},"開啟雲端硬碟資料夾"):null,st.err?h("span",{style:"color:var(--danger)"},st.err):null),
       h("div",{style:"display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-top:1px solid var(--line);padding-top:8px"},h("span",{style:"font-size:13px"},"分享給同仁的筆記本："),nbIn,h("button",{class:"btn",style:"padding:4px 12px;font-size:13px",onclick:()=>{const u=nbIn.value.trim();if(u&&!/^https:\/\/notebooklm\.google\.com\//.test(u)){toast("請貼上 notebooklm.google.com 的連結");return}Store.write(NLM_ID,"cells","nb",u?JSON.stringify({url:u}):"");toast(u?"已儲存，同仁在 AI 使用方式會看到連結":"已清除")}},"儲存")),
