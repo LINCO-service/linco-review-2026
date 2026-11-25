@@ -1,5 +1,5 @@
 /**
- * 百鮮年度計劃暨會議管理工作台 V3.3.3 — Google Apps Script 資料後端（個人帳號版）
+ * 百鮮年度計劃暨會議管理工作台 V3.4.0 — Google Apps Script 資料後端（個人帳號版）
  * V3.0.0：年度計劃格式改版（策略展開 12 欄、專案各月行動計劃 dstep）
  * V2.9.3：NotebookLM 匯出改存到指定資料夾（NLM_FOLDER_ID），舊檔自動搬入
  * V2.9.0：三組彙整同步到 Google 試算表（action=nlmsheet）；AI 回覆長度上限提高
@@ -92,7 +92,7 @@ function verifyToken_(tok, U) {
   if (!u || !u.active || Number(exp) < Date.now() || Number(ver) !== u.ver) return null;
   return u;
 }
-/** 回傳身分：管理員視同主持人（'__host__'），其他人回傳姓名 */
+/** 回傳身分：系統管理員（'__host__'）有全部權限；角色「主持人」只能主持會議（見 can_），其他人回傳姓名 */
 function whoOf_(u) { return u ? (u.role === '管理員' ? '__host__' : u.name) : null; }
 function publicUser_(u) { return { id: u.id, name: u.name, dept: u.dept, unit: u.unit, title: u.title, role: u.role, group: u.group, active: u.active, lineBound: !!u.line }; }
 function login_(req) {
@@ -165,6 +165,13 @@ function can_(who, w, U, docs) {
   if (prefix === 'traits' && suffix === 'X') return !cells.length && items.every(own);  // 共事特質：自己送出的
   if (prefix === 'rt' && suffix === 'X') return !cells.length && items.every(own);   // 例行會議：只有上傳者本人（管理員另可）
   const cfg = (docs['config__X'] || {}).cells || {};
+  if (me.role === '主持人') {                                                       // V3.4：主持人只能主持（開放／結束／第一天版本／分組），不能改內容
+    if (prefix === 'config' && suffix === 'X') return !items.length && cells.every(k => /^(release\.|ended\.)/.test(k) || k === 'snap.at' || k === 'ops.period');
+    if (prefix === 'snap' || ((prefix === 'draw' || prefix === 'swotai') && suffix === 'X')) return true;
+    if (prefix === 'traits' && suffix === 'X' && cells.length && cells.every(k => k === 'locked') && !items.length) return true;
+    if (/^mm\d{6}$/.test(prefix) && suffix === 'X' && curCells.closed !== '1' && !items.length
+        && cells.every(k => ['date', 'time', 'place', 'mins', 'order', 'flowOk', 'closed', 'to', 'subtitle'].indexOf(k) >= 0)) return true;
+  }
   if (/^mm\d{6}$/.test(prefix) && suffix === 'X') {                                 // 月會：主持人管流程、記錄人寫記錄
     if (curCells.closed === '1') return false;                                       // 會議已關閉
     const META = ['host', 'recorder', 'cohosts', 'date', 'time', 'place', 'mins', 'order', 'flowOk', 'closed', 'hostDept', 'recDept', 'to', 'subtitle'];
