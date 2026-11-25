@@ -1453,7 +1453,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.3.2";
+const VERSION="V3.3.3";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -1658,11 +1658,13 @@ function buildMinutes(ym,ro){const id=mmId(ym);ro=ro||!canRecord(ym);
   return h("div",null,top,fin)}
 
 /* 全年主持／記錄安排：一頁調整 12 個月（暫停、日期、輪值部門、主持人、記錄人） */
+/* 改輪值部門時，主持人／記錄人若不是該部門的人就清掉 */
+function mmSetDept(ym,key,val){Store.write(mmId(ym),"cells",key,val);const pk=key==="hostDept"?"host":"recorder";const p=mmRaw(ym,pk);if(p&&val&&deptOf(p)!==val)Store.write(mmId(ym),"cells",pk,"")}
 function mmRotate(){const L=ymList().filter(y=>!mmPaused(y));const DN=DEPTS.map(d=>d.name);let st=DN.indexOf(mmCell(L[0]||"","hostDept"));if(st<0)st=0;
   L.forEach((y,i)=>{Store.write(mmId(y),"cells","hostDept",DN[(st+i)%DN.length]);if(mmRaw(y,"recDept"))Store.write(mmId(y),"cells","recDept","")});
   ymList().filter(mmPaused).forEach(y=>{["hostDept","recDept","host","recorder"].forEach(k=>{if(mmCell(y,k))Store.write(mmId(y),"cells",k,"")})});toast("已依部門順序重排（跳過暫停月份）")}
 function mmYearPlan(){openDialog(curYear()+" 年管理月會：全年主持／記錄安排",b=>b.append(live(h("div"),el=>{
-  const DN=DEPT_LIST;const sel=(y,key,opts,dis)=>{const x=h("select",{class:"pin",style:"min-width:96px"},h("option",{value:""},"—"),opts.map(o=>h("option",{value:o},o)));x.value=mmCell(y,key)||"";if(!mmRaw(y,key)&&mmCell(y,key)){x.style.fontStyle="italic";x.style.color="var(--muted)";x.title="自動帶入：下一次開會的主持"}x.disabled=!!dis;x.addEventListener("change",()=>Store.write(mmId(y),"cells",key,x.value));return x};
+  const DN=DEPT_LIST;const sel=(y,key,opts,dis)=>{const x=h("select",{class:"pin",style:"min-width:96px"},h("option",{value:""},"—"),opts.map(o=>h("option",{value:o},o)));x.value=mmCell(y,key)||"";if(!mmRaw(y,key)&&mmCell(y,key)){x.style.fontStyle="italic";x.style.color="var(--muted)";x.title="自動帶入：下一次開會的主持"}x.disabled=!!dis;x.addEventListener("change",()=>key==="hostDept"||key==="recDept"?mmSetDept(y,key,x.value):Store.write(mmId(y),"cells",key,x.value));return x};
   const din=(y,key,type)=>{const x=h("input",{class:"pin",type,style:type==="date"?"width:140px":"width:96px"});x.value=mmCell(y,key)||"";x.disabled=monthClosed(y);x.addEventListener("change",()=>Store.write(mmId(y),"cells",key,x.value));return x};
   const people=d=>ALL_PEOPLE.filter(p=>!d||p[1]===d).map(p=>p[0]);
   el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:8px"},"勾選「暫停」的月份不開會：管理月會分頁與行事曆會標示「本月暫停」，輪替時也會跳過。記錄部門／記錄人預設為「下一次開會的主持部門／主持人」（斜體＝自動帶入），也可以手動改；改回「—」就恢復預設。"),
@@ -1672,9 +1674,9 @@ function mmYearPlan(){openDialog(curYear()+" 年管理月會：全年主持／�
           h("td",null,sel(y,"hostDept",DN,p||cl)),h("td",null,sel(y,"recDept",DN,p||cl)),h("td",null,sel(y,"host",people(mmCell(y,"hostDept")),p||cl)),h("td",null,sel(y,"recorder",people(mmCell(y,"recDept")),p||cl)))})))),
     h("div",{style:"display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"},h("button",{class:"btn",onclick:e=>{if(!e.target.dataset.c){e.target.dataset.c="1";e.target.textContent="會從第一個開會月份的主持部門開始，依部門順序重排並跳過暫停月份，確定？";return}mmRotate()}},"🔄 依部門順序重排輪值（跳過暫停）")))})),{wide:true})}
 function assignSettings(ym){const id=mmId(ym);
-  const dsel=(key,label)=>{const x=h("select",{class:"pin"},h("option",{value:""},"—"),DEPT_LIST.map(d=>h("option",{value:d},d)));x.value=mmCell(ym,key);x.addEventListener("change",()=>Store.write(id,"cells",key,x.value));return h("label",{class:"pgl"},label,x)};
+  const dsel=(key,label)=>{const x=h("select",{class:"pin"},h("option",{value:""},"—"),DEPT_LIST.map(d=>h("option",{value:d},d)));x.value=mmCell(ym,key);x.addEventListener("change",()=>mmSetDept(ym,key,x.value));return h("label",{class:"pgl"},label,x)};
   const co=new Set(cohostsOf(ym));const cobox=h("div",{style:"display:flex;flex-wrap:wrap;gap:4px"},ALL_PEOPLE.map(([n])=>h("button",{class:"mchip"+(co.has(n)?" on":""),style:"width:auto;padding:0 8px",onclick:()=>{co.has(n)?co.delete(n):co.add(n);Store.write(id,"cells","cohosts",[...co].join(","))}},n)));
-  return h("div",null,h("div",{class:"pgrid"},dsel("hostDept","輪值主持部門"),dsel("recDept","輪值記錄部門"),h("label",{class:"pgl"},"主持人（可由輪值部門自行決定）",personSel(ym,"host","",true)),h("label",{class:"pgl"},"記錄人（可由輪值部門自行決定）",personSel(ym,"recorder","",true))),
+  return h("div",null,h("div",{class:"pgrid"},dsel("hostDept","輪值主持部門"),dsel("recDept","輪值記錄部門"),h("label",{class:"pgl"},"主持人（限輪值主持部門的人）",personSel(ym,"host",mmCell(ym,"hostDept")||"",true)),h("label",{class:"pgl"},"記錄人（限輪值記錄部門的人）",personSel(ym,"recorder",mmCell(ym,"recDept")||"",true))),
     h("details",{style:"margin-top:6px"},h("summary",{style:"cursor:pointer;font-size:13px"},"協同主持人（選填，"+(co.size?[...co].join("、"):"未設定")+"）"),cobox),
     h("button",{class:"btn primary",style:"margin:8px 0 12px",onclick:mmYearPlan},"📅 全年主持／記錄安排（一頁調整 12 個月、設定暫停）"))}
 function monthSettings(ym){const id=mmId(ym),ro=monthClosed(ym);
