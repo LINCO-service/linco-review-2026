@@ -1453,7 +1453,7 @@ function previewImport(rows){const d=peopleDiff(rows);openDialog("確認匯入",
   b.append(h("div",{style:"grid-column:1/-1;margin-top:10px;display:flex;gap:8px;align-items:center"},go,d.err.length?h("span",{style:"color:var(--danger);font-size:13px"},"請先修正上面的問題再匯入"):null,(!d.add.length&&!d.chg.length&&!d.err.length)?h("span",{style:"font-size:13px;color:var(--muted)"},"沒有任何異動"):null))})}
 
 /* ================= 文件產生：會議通知單／會議記錄（PDF、圖檔） ================= */
-const VERSION="V3.3.1";
+const VERSION="V3.3.2";
 const COLH={get(k){try{return JSON.parse(localStorage.getItem("colhide:"+k)||"[]")}catch(e){return []}},set(k,v){try{localStorage.setItem("colhide:"+k,JSON.stringify(v))}catch(e){}}};
 function tblGrid(t){const occ=[],cells=[];[...t.rows].forEach((tr,ri)=>{occ[ri]=occ[ri]||[];let c=0;[...tr.cells].forEach(td=>{while(occ[ri][c])c++;const cs=+(td.dataset.cs0||td.colSpan||1),rs=td.rowSpan||1;if(!td.dataset.cs0)td.dataset.cs0=cs;
     for(let r=0;r<rs;r++){occ[ri+r]=occ[ri+r]||[];for(let k=0;k<cs;k++)occ[ri+r][c+k]=1}cells.push({td,c0:c,span:cs,ri});c+=cs})});return cells}
@@ -1522,7 +1522,13 @@ const prevYm=ym=>{let y=+ym.slice(0,4),m=+ym.slice(4)-1;if(m<1){m=12;y--}return 
 const mmId=ym=>"mm"+ym+"__X",mrId=(ym,c)=>"mr"+ym+"__"+c,kaId=c=>"kact__"+c;
 function curYm(){const t=todayStr().replace(/-/g,"");const ym=t.slice(0,6);return ymList().includes(ym)?ym:ymList()[0]}
 const MM_DEFAULT={"202612":{date:"2026-12-04",time:"09:00"}};
-function mmCell(ym,k){const v=Store.cell(mmId(ym),k);return v||((MM_DEFAULT[ym]||{})[k]||v)}
+function mmRaw(ym,k){const v=Store.cell(mmId(ym),k);return v||((MM_DEFAULT[ym]||{})[k]||v)}
+/* 下一次開會的月份（跳過暫停，最多往後找 12 個月） */
+function mmNext(ym){let y=+ym.slice(0,4),m=+ym.slice(4);for(let i=0;i<12;i++){m++;if(m>12){m=1;y++}const n=String(y)+pad2(m);if(mmRaw(n,"paused")!=="1")return n}return ""}
+/* 本次記錄預設＝下一次主持（部門與人員）；有手動指定就以指定為準 */
+function mmCell(ym,k){const v=mmRaw(ym,k);if(v||(k!=="recDept"&&k!=="recorder")||mmRaw(ym,"paused")==="1")return v;const n=mmNext(ym);if(!n)return v;
+  if(k==="recDept")return mmRaw(n,"hostDept")||v;
+  const rd=mmCell(ym,"recDept"),nh=mmRaw(n,"host");return nh&&(!rd||rd===mmRaw(n,"hostDept"))?nh:v}
 function deptOrder(ym){const o=(mmCell(ym,"order")||"").split(",").filter(c=>deptByCode(c));return o.length===DEPTS.length?o:DEPTS.map(d=>d.code)}
 const monthClosed=ym=>mmCell(ym,"closed")==="1";
 const mmPaused=ym=>mmCell(ym,"paused")==="1";
@@ -1653,13 +1659,13 @@ function buildMinutes(ym,ro){const id=mmId(ym);ro=ro||!canRecord(ym);
 
 /* 全年主持／記錄安排：一頁調整 12 個月（暫停、日期、輪值部門、主持人、記錄人） */
 function mmRotate(){const L=ymList().filter(y=>!mmPaused(y));const DN=DEPTS.map(d=>d.name);let st=DN.indexOf(mmCell(L[0]||"","hostDept"));if(st<0)st=0;
-  L.forEach((y,i)=>{Store.write(mmId(y),"cells","hostDept",DN[(st+i)%DN.length]);Store.write(mmId(y),"cells","recDept",DN[(st+i+1)%DN.length])});
+  L.forEach((y,i)=>{Store.write(mmId(y),"cells","hostDept",DN[(st+i)%DN.length]);if(mmRaw(y,"recDept"))Store.write(mmId(y),"cells","recDept","")});
   ymList().filter(mmPaused).forEach(y=>{["hostDept","recDept","host","recorder"].forEach(k=>{if(mmCell(y,k))Store.write(mmId(y),"cells",k,"")})});toast("已依部門順序重排（跳過暫停月份）")}
 function mmYearPlan(){openDialog(curYear()+" 年管理月會：全年主持／記錄安排",b=>b.append(live(h("div"),el=>{
-  const DN=DEPT_LIST;const sel=(y,key,opts,dis)=>{const x=h("select",{class:"pin",style:"min-width:96px"},h("option",{value:""},"—"),opts.map(o=>h("option",{value:o},o)));x.value=mmCell(y,key)||"";x.disabled=!!dis;x.addEventListener("change",()=>Store.write(mmId(y),"cells",key,x.value));return x};
+  const DN=DEPT_LIST;const sel=(y,key,opts,dis)=>{const x=h("select",{class:"pin",style:"min-width:96px"},h("option",{value:""},"—"),opts.map(o=>h("option",{value:o},o)));x.value=mmCell(y,key)||"";if(!mmRaw(y,key)&&mmCell(y,key)){x.style.fontStyle="italic";x.style.color="var(--muted)";x.title="自動帶入：下一次開會的主持"}x.disabled=!!dis;x.addEventListener("change",()=>Store.write(mmId(y),"cells",key,x.value));return x};
   const din=(y,key,type)=>{const x=h("input",{class:"pin",type,style:type==="date"?"width:140px":"width:96px"});x.value=mmCell(y,key)||"";x.disabled=monthClosed(y);x.addEventListener("change",()=>Store.write(mmId(y),"cells",key,x.value));return x};
   const people=d=>ALL_PEOPLE.filter(p=>!d||p[1]===d).map(p=>p[0]);
-  el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:8px"},"勾選「暫停」的月份不開會：管理月會分頁與行事曆會標示「本月暫停」，輪替時也會跳過。主持人／記錄人可留白，由輪值部門自行決定。"),
+  el.append(h("div",{style:"font-size:13px;color:var(--muted);margin-bottom:8px"},"勾選「暫停」的月份不開會：管理月會分頁與行事曆會標示「本月暫停」，輪替時也會跳過。記錄部門／記錄人預設為「下一次開會的主持部門／主持人」（斜體＝自動帶入），也可以手動改；改回「—」就恢復預設。"),
     h("div",{class:"tablewrap"},h("table",{class:"sheet"},h("thead",null,h("tr",null,["月份","暫停","日期","時間","輪值主持部門","輪值記錄部門","主持人","記錄人"].map(t=>h("th",null,t)))),
       h("tbody",null,ymList().map(y=>{const p=mmPaused(y),cl=monthClosed(y);const ck=h("input",{type:"checkbox"});ck.checked=p;ck.disabled=cl;ck.addEventListener("change",()=>Store.write(mmId(y),"cells","paused",ck.checked?"1":""));
         return h("tr",{style:p?"background:#F4F1EA;color:var(--muted)":""},h("th",{class:"rowh"},(+y.slice(4))+" 月"+(cl?" 🔒":"")),h("td",{style:"text-align:center"},ck),h("td",null,din(y,"date","date")),h("td",null,din(y,"time","time")),
